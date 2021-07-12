@@ -116,7 +116,7 @@ User
                 if (e != null) {
                     // TODO: better error handling
                     showLoginState(R.string.login_failed);
-                    Log.e(TAG, "Issue with login", e);
+                    Log.e(TAG, "Issue with login", e);R
                     return;
                 }
 
