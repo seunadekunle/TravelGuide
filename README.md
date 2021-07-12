@@ -84,14 +84,14 @@ https://www.figma.com/file/EqXxfgaRjDbAISd6Vfr885/TravelGuide-Wireframe?node-id=
 ### Digital Prototype
 <iframe style="border: 1px solid rgba(0, 0, 0, 0.1);" width="800" height="450" src="https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Fproto%2FEqXxfgaRjDbAISd6Vfr885%2FTravelGuide-Wireframe%3Fpage-id%3D0%253A1%26node-id%3D20%253A76%26viewport%3D1147%252C350%252C0.9509857892990112%26scaling%3Dscale-down" allowfullscreen></iframe>
 
-## Schema 
+## Schema
 ### Models
 Guide
 | Property | Type     | Description |
 | -------- | -------- | --------    |
 | author     | Pointer to User     | Guide author |
 | location     | Parse GeoPoint     | Guide location |
-| text     | String  | text that user adds (required) |
+| text     | String  | text that user adds |
 | photo     | ParseFile  | image that user adds (optional)|
 | audio     | ParseFile  | audio that user adds (optional)|
 | video     | ParseFile  | video that user adds (optional)|
@@ -104,6 +104,7 @@ User
 | -------- | -------- | --------    |
 | username     | String   | username of user |
 | password     | String   | password of user |
+| avatar     | ParseFile   | profile image of user (optional) |
 
 ### Networking
 * Login screen
@@ -118,7 +119,7 @@ User
                     Log.e(TAG, "Issue with login", e);
                     return;
                 }
-                
+
                 Log.e(TAG, "Login success", e);
             }
         });
