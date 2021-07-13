@@ -1,21 +1,26 @@
-package com.example.travelguide;
+package com.example.travelguide.activities;
 
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.example.travelguide.R;
 import com.example.travelguide.databinding.ActivityMapsBinding;
 import com.example.travelguide.fragments.ComposeFragment;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -26,10 +31,16 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.widget.Autocomplete;
+import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
+    public static final int AUTOCOMPLETE_REQUEST_CODE = 1;
     private static final String TAG = MapsActivity.class.getSimpleName();
 
     // Ui elements
@@ -74,10 +85,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             cameraPosition = savedInstanceState.getParcelable(KEY_CAMERA_POSITION);
         }
 
-        if (savedInstanceState == null) {
-            composeFragment = ComposeFragment.newInstance("test", "text");
-        }
-
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -85,7 +92,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         addGuide = binding.addGuide;
         fragmentsFrameId = R.id.fragmentsFrame;
         fragmentManager = getSupportFragmentManager();
-
 
         setWindowDimen();
 
@@ -100,20 +106,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mapFragment.getMapAsync(this);
         }
 
+        // creates new instance of Compose Fragment
+        composeFragment = new ComposeFragment();
+
         // add button on click listener
         addGuide.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                Log.i(TAG, "button clicked");
                 // Begin the transaction
                 FragmentTransaction ft = fragmentManager.beginTransaction();
 
-                // add fragment to containter
+                // add fragment to container
                 if (!composeFragment.isAdded())
                     ft.add(fragmentsFrameId, composeFragment);
 
+                // add transaction to backstack
                 ft.addToBackStack("Compose");
+
                 // show fragment
                 ft.show(composeFragment);
 
@@ -122,6 +132,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 hideAddBtn();
             }
         });
+
+        // Initialize Places SDK
+        Places.initialize(getApplicationContext(), getResources().getString(R.string.google_maps_key));
+
+        // Create a new PlacesClient instance
+        PlacesClient placesClient = Places.createClient(this);
     }
 
     // gets the dimensions of the screen the app is loading at
@@ -239,6 +255,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 LatLng currentLocation = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
 //                                map.addMarker(new MarkerOptions().position(currentLocation).title(getString(R.string.current_location)));
                                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, DEFAULT_ZOOM));
+
+                                // sends current location data to compose fragment
+                                composeFragment.setLocation(new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()));
                             }
                         } else {
                             Log.e(TAG, "Exception: %s", task.getException());
@@ -295,5 +314,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void showAddBtn() {
         addGuide.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+
+        if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
+
+            if (resultCode == RESULT_OK) {
+
+                Place place = Autocomplete.getPlaceFromIntent(data);
+                composeFragment.setLocation(place);
+            }
+            else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
+
+                Status status = Autocomplete.getStatusFromIntent(data);
+                Log.i(TAG, status.getStatusMessage());
+            }
+            else if (resultCode == RESULT_CANCELED) {
+
+                // tell the user they didn't select a location
+                Toast.makeText(this, getString(R.string.location_not_selected), Toast.LENGTH_SHORT).show();
+            }
+            return;
+        }
+
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }

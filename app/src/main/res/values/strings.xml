@@ -1,10 +1,11 @@
 <resources>
     <string name="app_name">TravelGuide</string>
     <string name="current_location">Current Location</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="new_guide">New Guide</string>
-    <string name="add_location">Add location</string>
+    <string name="location_not_selected">You didn\'t select a location</string>
+    <string name="add_guide">Add Guide</string>
+    <string name="add_text">Add text</string>
+    <string name="add_location">Add Location</string>
 </resources>

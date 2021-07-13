@@ -13,29 +13,83 @@
         android:layout_margin="@dimen/compose_margin"
         android:orientation="vertical">
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-black"
-            android:text="@string/new_guide"
-            android:textColor="@color/black"
-            android:textSize="30dp" />
+            android:layout_marginTop="65dp"
+            android:orientation="vertical">
 
-        <Button
-            android:id="@+id/getLocation"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:text="@string/add_location"
-            android:layout_marginTop="65dp"/>
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/add_location" />
 
-        <EditText
-            android:id="@+id/editTextTextMultiLine"
+            <Button
+                android:id="@+id/locationBtn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/add_location" />
+        </LinearLayout>
+
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ems="10"
-            android:gravity="start|top"
-            android:inputType="textMultiLine"
-            android:layout_marginTop="45dp"/>
+            android:layout_marginTop="45dp"
+            android:orientation="vertical">
+
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/add_text" />
+
+            <EditText
+                android:id="@+id/etText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:gravity="start|top"
+                android:inputType="textMultiLine" />
+        </LinearLayout>
+
+        <!--        <LinearLayout-->
+        <!--            android:layout_width="match_parent"-->
+        <!--            android:layout_height="match_parent"-->
+        <!--            android:layout_marginTop="45dp"-->
+        <!--            android:orientation="vertical">-->
+
+
+        <!--            <TextView-->
+        <!--                android:id="@+id/textView4"-->
+        <!--                android:layout_width="match_parent"-->
+        <!--                android:layout_height="wrap_content"-->
+        <!--                android:text="Add photo" />-->
+
+        <!--            <Button-->
+        <!--                android:id="@+id/photoBtn"-->
+        <!--                android:layout_width="match_parent"-->
+        <!--                android:layout_height="wrap_content"-->
+        <!--                android:text="@string/add_location" />-->
+        <!--        </LinearLayout>-->
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="bottom"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/add_guide" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
