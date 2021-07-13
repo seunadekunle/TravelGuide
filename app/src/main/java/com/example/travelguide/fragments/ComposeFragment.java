@@ -3,7 +3,6 @@ package com.example.travelguide.fragments;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
-import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -50,6 +49,7 @@ public class ComposeFragment extends Fragment {
 
     private EditText etText;
     private Button locationBtn;
+    private Button addBtn;
 
     public ComposeFragment() {
         // Required empty public constructor
@@ -91,7 +91,9 @@ public class ComposeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         locationBtn = view.findViewById(R.id.locationBtn);
+        addBtn = view.findViewById(R.id.addBtn);
         etText = view.findViewById(R.id.etText);
+
 
         // gets location info from coordinates and sets button text
         List<Address> likelyNames = new ArrayList<>();
@@ -116,6 +118,12 @@ public class ComposeFragment extends Fragment {
                         .build(getContext());
                 // ensure that the request code is the one defined in MapsActivity
                 getActivity().startActivityForResult(intent, MapsActivity.AUTOCOMPLETE_REQUEST_CODE);
+            }
+        });
+
+        addBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
             }
         });
 
@@ -145,6 +153,4 @@ public class ComposeFragment extends Fragment {
     private void setButtonText(String newText) {
         locationBtn.setText(newText);
     }
-
-
 }
