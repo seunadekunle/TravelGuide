@@ -2,39 +2,47 @@ package com.example.travelguide;
 
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Window;
-import android.view.WindowManager;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.example.travelguide.databinding.ActivityMapsBinding;
+import com.example.travelguide.fragments.ComposeFragment;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
+    private static final String TAG = MapsActivity.class.getSimpleName();
+
+    // Ui elements
     private GoogleMap map;
     private ActivityMapsBinding binding;
+    private int fragmentsFrameId;
+    private FloatingActionButton addGuide;
+    private FragmentManager fragmentManager;
+    private ComposeFragment composeFragment;
 
-    private static final String TAG = MapsActivity.class.getSimpleName();
     // The entry point to the Fused Location Provider.
     private FusedLocationProviderClient fusedLocationProviderClient;
+    private CameraPosition cameraPosition;
 
     // A default location (Sydney, Australia) and default zoom to use when location permission is
     // not granted.
@@ -47,39 +55,84 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // location retrieved by the Fused Location Provider.
     private Location lastKnownLocation;
 
+    // variables for the window height and width
     private int height = 0;
     private int width = 0;
+
+    // Keys for storing activity state.
+    // [START maps_current_place_state_keys]
+    private static final String KEY_CAMERA_POSITION = "camera_position";
+    private static final String KEY_LOCATION = "location";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Retrieve location and camera position from saved instance state.
+        if (savedInstanceState != null) {
+            lastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION);
+            cameraPosition = savedInstanceState.getParcelable(KEY_CAMERA_POSITION);
+        }
+
+        if (savedInstanceState == null) {
+            composeFragment = ComposeFragment.newInstance("test", "text");
+        }
+
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // gets the dimensions of the screen the app is loading at
-        setDimen();
+        // bind ui element to variable
+        addGuide = binding.addGuide;
+        fragmentsFrameId = R.id.fragmentsFrame;
+        fragmentManager = getSupportFragmentManager();
+
+
+        setWindowDimen();
 
         // Construct a FusedLocationProviderClient.
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+        SupportMapFragment mapFragment = (SupportMapFragment) fragmentManager.findFragmentById(R.id.map);
 
         // if the fragment is available call onMapReady function
         if (mapFragment != null) {
             mapFragment.getMapAsync(this);
         }
+
+        // add button on click listener
+        addGuide.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Log.i(TAG, "button clicked");
+                // Begin the transaction
+                FragmentTransaction ft = fragmentManager.beginTransaction();
+
+                // add fragment to containter
+                if (!composeFragment.isAdded())
+                    ft.add(fragmentsFrameId, composeFragment);
+
+                ft.addToBackStack("Compose");
+                // show fragment
+                ft.show(composeFragment);
+
+                // Complete the changes added above
+                ft.commit();
+                hideAddBtn();
+            }
+        });
     }
 
-    private void setDimen() {
+    // gets the dimensions of the screen the app is loading at
+    private void setWindowDimen() {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         this.getDisplay().getRealMetrics(displayMetrics);
 
         height = displayMetrics.heightPixels;
         width = displayMetrics.widthPixels;
     }
+
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -89,7 +142,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         map = googleMap;
 
         // sets padding to change position of map controls
-        map.setPadding(0, (int) ( height / 1.35), 0,0);
+        map.setPadding(0, (int) (height / 1.45), 0, 0);
 
         // Prompt the user for permission.
         getLocationPermission();
@@ -107,6 +160,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * onRequestPermissionsResult.
      */
     private void getLocationPermission() {
+
         // if the user granted permission to use the device location
         if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
@@ -124,10 +178,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * updates the locationPermissionGranted variable based on the user permission dialog
      */
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
         locationPermissionGranted = false;
         switch (requestCode) {
             case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
@@ -142,13 +195,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
+    /*
+     * sets location enabled to be true and updates maps ui
+     */
     private void updateLocationUI() {
         if (map == null) {
             return;
         }
         try {
             if (locationPermissionGranted) {
-                // sets location enabled to be true and updates ui
                 map.setMyLocationEnabled(true);
                 map.getUiSettings().setMyLocationButtonEnabled(true);
             } else {
@@ -173,6 +228,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         try {
             if (locationPermissionGranted) {
                 Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
+
                 locationResult.addOnCompleteListener(this, new OnCompleteListener<Location>() {
                     @Override
                     public void onComplete(@NonNull Task<Location> task) {
@@ -181,7 +237,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             lastKnownLocation = task.getResult();
                             if (lastKnownLocation != null) {
                                 LatLng currentLocation = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
-                                map.addMarker(new MarkerOptions().position(currentLocation).title(getString(R.string.current_location)));
+//                                map.addMarker(new MarkerOptions().position(currentLocation).title(getString(R.string.current_location)));
                                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, DEFAULT_ZOOM));
                             }
                         } else {
@@ -196,5 +252,48 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } catch (SecurityException e) {
             Log.e("Exception: %s", e.getMessage(), e);
         }
+    }
+
+    // saves map current location and camera position when activity is paused
+    @Override
+    protected void onSaveInstanceState(@NonNull @org.jetbrains.annotations.NotNull Bundle outState) {
+
+        if (map != null) {
+            outState.putParcelable(KEY_CAMERA_POSITION, map.getCameraPosition());
+            outState.putParcelable(KEY_LOCATION, lastKnownLocation);
+        }
+
+        super.onSaveInstanceState(outState);
+    }
+
+    // removes fragment from view if back buttons is pressed
+    @Override
+    public void onBackPressed() {
+
+        // if there are no stacks showing go to home screen
+        if (emptyBackStack()) {
+            super.onBackPressed();
+        }
+
+        if (!emptyBackStack()) {
+            fragmentManager.popBackStack();
+
+            // is back stack empty set addGuide button to be visible
+            if (fragmentManager.getBackStackEntryCount() == 1)
+                showAddBtn();
+        }
+    }
+
+    // if the fragment manager stack is empty
+    public boolean emptyBackStack() {
+        return fragmentManager.getBackStackEntryCount() == 0;
+    }
+
+    public void hideAddBtn() {
+        addGuide.setVisibility(View.INVISIBLE);
+    }
+
+    public void showAddBtn() {
+        addGuide.setVisibility(View.VISIBLE);
     }
 }
