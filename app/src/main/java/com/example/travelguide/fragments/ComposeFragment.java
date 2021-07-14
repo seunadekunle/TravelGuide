@@ -1,8 +1,6 @@
 package com.example.travelguide.fragments;
 
 import android.content.Intent;
-import android.location.Address;
-import android.location.Geocoder;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.travelguide.HelperClass.HelperClass;
 import com.example.travelguide.R;
 import com.example.travelguide.activities.MapsActivity;
 import com.example.travelguide.classes.Guide;
@@ -23,15 +22,12 @@ import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.android.material.snackbar.Snackbar;
-import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -44,11 +40,11 @@ import static com.example.travelguide.R.string.empty_text;
  */
 public class ComposeFragment extends Fragment {
 
-    private static final String TAG = "ComposeFragment";
+    public static final String TAG = "ComposeFragment";
     private static final String ARG_LONG = "longitude";
     private static final String ARG_LAT = "latitude";
 
-    // TODO: Rename and change types of parameters
+    // parameters for passing data
     private Double longParam;
     private Double latParam;
 
@@ -102,17 +98,8 @@ public class ComposeFragment extends Fragment {
         addBtn = view.findViewById(R.id.addBtn);
         etText = view.findViewById(R.id.etText);
 
-
         // gets location info from coordinates and sets button text
-        List<Address> likelyNames = new ArrayList<>();
-        Geocoder geocoder = new Geocoder(getContext());
-        try {
-            likelyNames = geocoder.getFromLocation(latParam, longParam, 1);
-            setButtonText(likelyNames.get(0).getAddressLine(0));
-
-        } catch (IOException e) {
-            Log.i(TAG, e.getMessage());
-        }
+        setButtonText(HelperClass.getAddress(getContext(), latParam, longParam));
 
         // button click listener to add new guide
         locationBtn.setOnClickListener(new View.OnClickListener() {
@@ -159,7 +146,7 @@ public class ComposeFragment extends Fragment {
         guide.saveInBackground(new SaveCallback() {
             @Override
             public void done(ParseException e) {
-                if (e != null){
+                if (e != null) {
                     Log.i(TAG, "Error while saving tag", e);
                     return;
                 }

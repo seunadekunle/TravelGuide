@@ -1,6 +1,5 @@
 package com.example.travelguide.activities;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -13,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -21,6 +21,7 @@ import com.example.travelguide.R;
 import com.example.travelguide.classes.Guide;
 import com.example.travelguide.databinding.ActivityMapsBinding;
 import com.example.travelguide.fragments.ComposeFragment;
+import com.example.travelguide.fragments.LocationDetail;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -49,6 +50,8 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -62,7 +65,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private int fragmentsFrameId;
     private FloatingActionButton addGuide;
     private FragmentManager fragmentManager;
+
+    // different fragments
     private ComposeFragment composeFragment;
+    private LocationDetail locationDetail;
 
     // The entry point to the Fused Location Provider.
     private FusedLocationProviderClient fusedLocationProviderClient;
@@ -119,7 +125,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mapFragment.getMapAsync(this);
         }
 
-        // creates new instance of Compose Fragment
+        // creates new instance of the different fragments
         composeFragment = new ComposeFragment();
 
         // add button on click listener
@@ -134,14 +140,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if (!composeFragment.isAdded())
                     ft.add(fragmentsFrameId, composeFragment);
 
-                // add transaction to backstack
-                ft.addToBackStack("Compose");
-
-                // show fragment
-                ft.show(composeFragment);
-
-                // Complete the changes added above
-                ft.commit();
+                finishTransaction(ft, ComposeFragment.TAG, (Fragment) composeFragment);
                 hideAddBtn();
             }
         });
@@ -152,7 +151,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Create a new PlacesClient instance
         PlacesClient placesClient = Places.createClient(this);
 
-        loginUser("seun", "seun");
+        if (ParseUser.getCurrentUser() == null)
+            loginUser("seun", "seun");
     }
 
     // gets the dimensions of the screen the app is loading at
@@ -171,9 +171,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
+        map.getUiSettings().setMapToolbarEnabled(false);
+        map.getUiSettings().setScrollGesturesEnabled(true);
 
         // sets padding to change position of map controls
         map.setPadding(0, (int) (height / 1.45), 0, 0);
+
+        map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(@NonNull @NotNull Marker marker) {
+
+                // gets the location of the marker
+                Double latitude = ((ParseGeoPoint) marker.getTag()).getLatitude();
+                Double longitude = ((ParseGeoPoint) marker.getTag()).getLongitude();
+
+                locationDetail = LocationDetail.newInstance(latitude, longitude);
+
+                // Begin the transaction
+                FragmentTransaction ft = fragmentManager.beginTransaction();
+
+                // add fragment to container
+                ft.replace(fragmentsFrameId, locationDetail);
+
+                // complete the transaction
+                finishTransaction(ft, LocationDetail.TAG, (Fragment) locationDetail);
+                hideAddBtn();
+
+                return true;
+            }
+        });
 
         // Prompt the user for permission.
         getLocationPermission();
@@ -181,17 +207,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Turn on the My Location layer and the related control on the map.
         updateLocationUI();
 
+        // get list of currrent guides
         getGuides();
 
         // Get the current location of the device and set the position of the map.
         getDeviceLocation();
     }
 
+    // completes fragment transaction
+    private void finishTransaction(FragmentTransaction ft, String name, Fragment fragment) {
+
+        // add transaction to backstack
+        ft.addToBackStack(name);
+        // show fragment
+        ft.show(fragment);
+
+        // Complete the changes added above
+        ft.commit();
+    }
+
 
     // gets list of locations from the ParseServer
-    private void getGuides() {
+    public void getGuides() {
 
-        // clears the make of markers
+        // clears the map of markers
         map.clear();
 
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Guide");
@@ -199,13 +238,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         query.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> locations, ParseException e) {
+
                 if (e == null) {
                     for (int i = 0; i < locations.size(); i++) {
-
                         // retrieves geo point from database and adds marker to that point
                         ParseGeoPoint locationData = locations.get(i).getParseGeoPoint(Guide.getKeyLocation());
                         LatLng location = new LatLng(locationData.getLatitude(), locationData.getLongitude());
-                        addMarker(new MarkerOptions().position(location));
+                        addMarker(new MarkerOptions().position(location), locations.get(i).getParseGeoPoint(Guide.getKeyLocation()));
                     }
                 } else {
                     Log.e(TAG, "Not getting guides", e);
@@ -244,13 +283,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         locationPermissionGranted = false;
-        switch (requestCode) {
-            case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    locationPermissionGranted = true;
-                }
+        if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {// If request is cancelled, the result arrays are empty.
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                locationPermissionGranted = true;
             }
         }
         updateLocationUI();
@@ -273,7 +309,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 map.getUiSettings().setMyLocationButtonEnabled(false);
                 lastKnownLocation = null;
 
-                // call location app setting again
+                // call location permissions dialog again
                 getLocationPermission();
             }
         } catch (SecurityException e) {
@@ -318,8 +354,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    private void addMarker(MarkerOptions newMarker) {
-        map.addMarker(newMarker);
+    // add new marker to the map along with tag
+    private void addMarker(MarkerOptions newMarker, ParseGeoPoint objectId) {
+        Marker marker = map.addMarker(newMarker);
+        marker.setTag(objectId);
 
     }
 
@@ -340,16 +378,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onBackPressed() {
 
         // if there are no stacks showing go to home screen
-        if (emptyBackStack()) {
+        if (emptyBackStack())
             super.onBackPressed();
-        }
 
         if (!emptyBackStack()) {
             fragmentManager.popBackStack();
 
-            // is back stack empty set addGuide button to be visible
-            if (fragmentManager.getBackStackEntryCount() == 1)
+            // is back stack empty set addGuide button to be visible and refresh page
+            if (fragmentManager.getBackStackEntryCount() == 1){
                 showAddBtn();
+            }
+
         }
     }
 
@@ -358,15 +397,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return fragmentManager.getBackStackEntryCount() == 0;
     }
 
+    // TODO: Add transition
+    // sets the view state for the addGuide Button
     public void hideAddBtn() {
         addGuide.setVisibility(View.INVISIBLE);
     }
 
+    // sets the view state for the addGuide Button
     public void showAddBtn() {
         addGuide.setVisibility(View.VISIBLE);
     }
 
-    @SuppressLint("ShowToast")
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
 

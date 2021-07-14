@@ -3,4 +3,8 @@
     <dimen name="fab_margin_bottom">35dp</dimen>
     <dimen name="action_buttons_margin">15dp</dimen>
     <dimen name="compose_margin">20dp</dimen>
+    <dimen name="text_margin">16dp</dimen>
+    <dimen name="avatar_size_img">25dp</dimen>
+    <dimen name="location_header">25sp</dimen>
+    <dimen name="progress_bar_padding">150dp</dimen>
 </resources>
