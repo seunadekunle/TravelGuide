@@ -143,26 +143,31 @@ public class ComposeFragment extends Fragment {
                     return;
                 }
 
-                Guide guide = new Guide();
-                guide.setAuthor(ParseUser.getCurrentUser());
-                guide.setText(text);
-                guide.setLocation(location);
-                guide.saveInBackground(new SaveCallback() {
-                    @Override
-                    public void done(ParseException e) {
-                        if (e != null){
-                            Log.i(TAG, "Error while saving tag", e);
-                            return;
-                        }
-
-                        guide.setText("");
-                        getActivity().onBackPressed();
-                    }
-                });
-
+                ParseUser user = ParseUser.getCurrentUser();
+                saveGuide(text, user);
             }
         });
 
+    }
+
+    // creates new Travel guide and updates it to the database
+    private void saveGuide(String text, ParseUser user) {
+        Guide guide = new Guide();
+        guide.setAuthor(user);
+        guide.setText(text);
+        guide.setLocation(location);
+        guide.saveInBackground(new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
+                if (e != null){
+                    Log.i(TAG, "Error while saving tag", e);
+                    return;
+                }
+
+                guide.setText("");
+                getActivity().onBackPressed();
+            }
+        });
     }
 
     @Override

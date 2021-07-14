@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,6 +18,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.travelguide.R;
+import com.example.travelguide.classes.Guide;
 import com.example.travelguide.databinding.ActivityMapsBinding;
 import com.example.travelguide.fragments.ComposeFragment;
 import com.google.android.gms.common.api.Status;
@@ -30,6 +30,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
@@ -39,9 +41,15 @@ import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.parse.FindCallback;
 import com.parse.LogInCallback;
 import com.parse.ParseException;
+import com.parse.ParseGeoPoint;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
+
+import java.util.List;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -173,9 +181,40 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Turn on the My Location layer and the related control on the map.
         updateLocationUI();
 
+        getGuides();
+
         // Get the current location of the device and set the position of the map.
         getDeviceLocation();
     }
+
+
+    // gets list of locations from the ParseServer
+    private void getGuides() {
+
+        // clears the make of markers
+        map.clear();
+
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Guide");
+        query.whereExists(Guide.getKeyLocation());
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> locations, ParseException e) {
+                if (e == null) {
+                    for (int i = 0; i < locations.size(); i++) {
+
+                        // retrieves geo point from database and adds marker to that point
+                        ParseGeoPoint locationData = locations.get(i).getParseGeoPoint(Guide.getKeyLocation());
+                        LatLng location = new LatLng(locationData.getLatitude(), locationData.getLongitude());
+                        addMarker(new MarkerOptions().position(location));
+                    }
+                } else {
+                    Log.e(TAG, "Not getting guides", e);
+                }
+            }
+        });
+        ParseQuery.clearAllCachedResults();
+    }
+
 
     /*
      * Request location permission, so that we can get the location of the
@@ -260,7 +299,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             lastKnownLocation = task.getResult();
                             if (lastKnownLocation != null) {
                                 LatLng currentLocation = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
-//                                map.addMarker(new MarkerOptions().position(currentLocation).title(getString(R.string.current_location)));
                                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, DEFAULT_ZOOM));
 
                                 // sends current location data to compose fragment
@@ -278,6 +316,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } catch (SecurityException e) {
             Log.e("Exception: %s", e.getMessage(), e);
         }
+    }
+
+    private void addMarker(MarkerOptions newMarker) {
+        map.addMarker(newMarker);
+
     }
 
     // saves map current location and camera position when activity is paused
@@ -334,13 +377,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 // if result code is ok set the location for the new guide
                 Place place = Autocomplete.getPlaceFromIntent(data);
                 composeFragment.setLocation(place);
-            }
-            else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
+            } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
 
                 Status status = Autocomplete.getStatusFromIntent(data);
                 Log.i(TAG, status.getStatusMessage());
-            }
-            else if (resultCode == RESULT_CANCELED) {
+            } else if (resultCode == RESULT_CANCELED) {
 
                 if (composeFragment.getLocation() == null)
                     // tell the user they didn't select a location
@@ -356,7 +397,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void loginUser(String username, String password) {
         Log.i(TAG, "username" + username);
         Log.i(TAG, "password" + password);
-        ;        ParseUser.logInInBackground(username, password, new LogInCallback() {
+        ;
+        ParseUser.logInInBackground(username, password, new LogInCallback() {
             @Override
             public void done(ParseUser user, ParseException e) {
                 if (e != null) {
