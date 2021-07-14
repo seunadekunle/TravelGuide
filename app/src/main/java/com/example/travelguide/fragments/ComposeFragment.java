@@ -98,8 +98,9 @@ public class ComposeFragment extends Fragment {
         addBtn = view.findViewById(R.id.addBtn);
         etText = view.findViewById(R.id.etText);
 
-        // gets location info from coordinates and sets button text
-        setButtonText(HelperClass.getAddress(getContext(), latParam, longParam));
+        if (latParam != null && longParam != null)
+            // gets location info from coordinates and sets button text
+            setButtonText(HelperClass.getAddress(getContext(), latParam, longParam));
 
         // button click listener to add new guide
         locationBtn.setOnClickListener(new View.OnClickListener() {
@@ -122,11 +123,13 @@ public class ComposeFragment extends Fragment {
                 String text = etText.getText().toString();
 
                 if (text.isEmpty()) {
-                    Snackbar.make(etText, empty_text, Snackbar.LENGTH_SHORT).show();
+                    Snackbar emptyText  = Snackbar.make(etText, empty_text, Snackbar.LENGTH_SHORT);
+                    HelperClass.displaySnackBarWithBottomMargin(emptyText, 0, 1000);
                     return;
                 }
                 if (location == null) {
-                    Snackbar.make(etText, R.string.no_locattion, Snackbar.LENGTH_SHORT).show();
+                    Snackbar emptyLocation  = Snackbar.make(etText, R.string.no_locattion, Snackbar.LENGTH_SHORT);
+                    HelperClass.displaySnackBarWithBottomMargin(emptyLocation, 0, 1000);
                     return;
                 }
 

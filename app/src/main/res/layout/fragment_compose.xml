@@ -20,7 +20,7 @@
             android:fontFamily="sans-serif-black"
             android:text="@string/new_guide"
             android:textColor="#000000"
-            android:textSize="30dp"/>
+            android:textSize="30dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -64,25 +64,25 @@
                 android:inputType="textMultiLine" />
         </LinearLayout>
 
-        <!--        <LinearLayout-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="match_parent"-->
-        <!--            android:layout_marginTop="45dp"-->
-        <!--            android:orientation="vertical">-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="45dp"
+            android:orientation="vertical">
 
 
-        <!--            <TextView-->
-        <!--                android:id="@+id/textView4"-->
-        <!--                android:layout_width="match_parent"-->
-        <!--                android:layout_height="wrap_content"-->
-        <!--                android:text="Add photo" />-->
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/add_photo" />
 
-        <!--            <Button-->
-        <!--                android:id="@+id/photoBtn"-->
-        <!--                android:layout_width="match_parent"-->
-        <!--                android:layout_height="wrap_content"-->
-        <!--                android:text="@string/add_location" />-->
-        <!--        </LinearLayout>-->
+            <Button
+                android:id="@+id/photoBtn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/add_photo" />
+        </LinearLayout>
 
 
         <LinearLayout

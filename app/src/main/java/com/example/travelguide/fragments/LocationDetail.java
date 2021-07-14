@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.travelguide.HelperClass.HelperClass;
 import com.example.travelguide.R;
@@ -45,6 +46,7 @@ public class LocationDetail extends Fragment {
     private GuidesAdapter adapter;
     private TextView tvAddress;
     private ProgressBar pbLoading;
+    protected SwipeRefreshLayout swipeContainer;
 
     private static final String ARG_LAT = "lat";
     private static final String ARG_LONG = "long";
@@ -93,6 +95,7 @@ public class LocationDetail extends Fragment {
         rvGuides = view.findViewById(R.id.rvGuides);
         tvAddress = view.findViewById(R.id.tvAddress);
         pbLoading = view.findViewById(R.id.pbLoading);
+        swipeContainer = view.findViewById(R.id.swipeContainer);
 
         // Set the adapter of the recycler view
         adapter = new GuidesAdapter(guideList, context);
@@ -103,7 +106,23 @@ public class LocationDetail extends Fragment {
         tvAddress.setText(HelperClass.getAddress(context, parseLocation.getLatitude(), parseLocation.getLongitude()));
 
         pbLoading.setVisibility(View.VISIBLE);
+        
+        // Setup refresh listener which triggers new data loading
+        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                fetchListAsync(0);
+            }
+        });
+        
         queryGuides();
+    }
+
+    private void fetchListAsync(int i) {
+        queryGuides();
+
+        // sets refreshing state to false
+        swipeContainer.setRefreshing(false);
     }
 
 

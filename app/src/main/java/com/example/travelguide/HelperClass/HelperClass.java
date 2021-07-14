@@ -4,6 +4,10 @@ import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
 import android.util.Log;
+import android.view.View;
+import android.widget.FrameLayout;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,5 +33,19 @@ public class HelperClass {
             Log.i(TAG, e.getMessage());
         }
         return "";
+    }
+
+    /*
+     * displays snackbar with margin
+     * gotten from https://stackoverflow.com/questions/36588881/snackbar-behind-navigation-bar
+     */
+    public static void displaySnackBarWithBottomMargin(Snackbar snackbar, int sideMargin, int marginBottom) {
+        final View snackBarView = snackbar.getView();
+        final FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) snackBarView.getLayoutParams();
+
+        params.setMargins(params.leftMargin + sideMargin, params.topMargin, params.rightMargin + sideMargin, params.bottomMargin + marginBottom);
+
+        snackBarView.setLayoutParams(params);
+        snackbar.show();
     }
 }

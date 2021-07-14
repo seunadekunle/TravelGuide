@@ -10,4 +10,5 @@
     <string name="add_location">Add Location</string>
     <string name="empty_text">The text field is empty</string>
     <string name="no_locattion">No location has been selected</string>
+    <string name="add_photo">Add photo</string>
 </resources>
