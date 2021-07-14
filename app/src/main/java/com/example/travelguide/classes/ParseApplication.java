@@ -3,6 +3,7 @@ package com.example.travelguide.classes;
 import android.app.Application;
 
 import com.parse.Parse;
+import com.parse.ParseObject;
 
 public class ParseApplication extends Application {
 
@@ -11,6 +12,9 @@ public class ParseApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        // Register parse models
+        ParseObject.registerSubclass(Guide.class);
 
         Parse.initialize(new Parse.Configuration.Builder(this)
                 .applicationId("LehUdwXhP2IpTN6Tnu7gXIayECJALrtOKyEao0N5")

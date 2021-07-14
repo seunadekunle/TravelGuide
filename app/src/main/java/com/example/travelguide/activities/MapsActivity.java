@@ -1,5 +1,6 @@
 package com.example.travelguide.activities;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -37,6 +38,10 @@ import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
+import com.parse.LogInCallback;
+import com.parse.ParseException;
+import com.parse.ParseUser;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -138,6 +143,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // Create a new PlacesClient instance
         PlacesClient placesClient = Places.createClient(this);
+
+        loginUser("seun", "seun");
     }
 
     // gets the dimensions of the screen the app is loading at
@@ -316,6 +323,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         addGuide.setVisibility(View.VISIBLE);
     }
 
+    @SuppressLint("ShowToast")
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
 
@@ -323,6 +331,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             if (resultCode == RESULT_OK) {
 
+                // if result code is ok set the location for the new guide
                 Place place = Autocomplete.getPlaceFromIntent(data);
                 composeFragment.setLocation(place);
             }
@@ -333,12 +342,29 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
             else if (resultCode == RESULT_CANCELED) {
 
-                // tell the user they didn't select a location
-                Toast.makeText(this, getString(R.string.location_not_selected), Toast.LENGTH_SHORT).show();
+                if (composeFragment.getLocation() == null)
+                    // tell the user they didn't select a location
+                    Snackbar.make(addGuide, R.string.location_not_selected, Snackbar.LENGTH_SHORT).show();
             }
             return;
         }
 
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    // logs in the user using Parse
+    private void loginUser(String username, String password) {
+        Log.i(TAG, "username" + username);
+        Log.i(TAG, "password" + password);
+        ;        ParseUser.logInInBackground(username, password, new LogInCallback() {
+            @Override
+            public void done(ParseUser user, ParseException e) {
+                if (e != null) {
+//                    showLoginState(R.string.login_failed);
+                    Log.e(TAG, "Issue with login", e);
+                    return;
+                }
+            }
+        });
     }
 }

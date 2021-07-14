@@ -2,8 +2,11 @@ package com.example.travelguide.classes;
 
 import android.util.Log;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.parse.ParseClassName;
+import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
+import com.parse.ParseUser;
 
 import java.util.Date;
 
@@ -19,6 +22,29 @@ public class Guide extends ParseObject {
     private static final String KEY_VIDEO = "video";
     private static final String KEY_LIKES = "likes";
 
+    public void setAuthor(ParseUser user){
+        put(KEY_AUTHOR, user);
+    }
+
+    public void setText(String newText) {
+        put(KEY_TEXT, newText);
+    }
+
+    public void setLocation(LatLng newLocation) {
+        put(KEY_LOCATION, new ParseGeoPoint(newLocation.latitude, newLocation.longitude));
+    }
+
+    public LatLng getLocation() {
+        return (new LatLng(getParseGeoPoint(KEY_LOCATION).getLatitude(), getParseGeoPoint(KEY_LOCATION).getLongitude()));
+    }
+
+    public String getText() {
+        return getString(KEY_TEXT);
+    }
+
+    public ParseUser getAuthor() {
+        return getParseUser(KEY_AUTHOR);
+    }
 
     public static String getKeyCreationDate() {
         return KEY_CREATION_DATE;

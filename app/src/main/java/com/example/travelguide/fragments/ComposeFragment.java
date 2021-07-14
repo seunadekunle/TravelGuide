@@ -17,10 +17,16 @@ import androidx.fragment.app.Fragment;
 
 import com.example.travelguide.R;
 import com.example.travelguide.activities.MapsActivity;
+import com.example.travelguide.classes.Guide;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
+import com.google.android.material.snackbar.Snackbar;
+import com.parse.Parse;
+import com.parse.ParseException;
+import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -29,9 +35,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.example.travelguide.R.string.empty_text;
+
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link ComposeFragment#newInstance} factory method to
+ * Use the {@link ComposeFragment} factory method to
  * create an instance of this fragment.
  */
 public class ComposeFragment extends Fragment {
@@ -124,6 +132,34 @@ public class ComposeFragment extends Fragment {
         addBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                String text = etText.getText().toString();
+
+                if (text.isEmpty()) {
+                    Snackbar.make(etText, empty_text, Snackbar.LENGTH_SHORT).show();
+                    return;
+                }
+                if (location == null) {
+                    Snackbar.make(etText, R.string.no_locattion, Snackbar.LENGTH_SHORT).show();
+                    return;
+                }
+
+                Guide guide = new Guide();
+                guide.setAuthor(ParseUser.getCurrentUser());
+                guide.setText(text);
+                guide.setLocation(location);
+                guide.saveInBackground(new SaveCallback() {
+                    @Override
+                    public void done(ParseException e) {
+                        if (e != null){
+                            Log.i(TAG, "Error while saving tag", e);
+                            return;
+                        }
+
+                        guide.setText("");
+                        getActivity().onBackPressed();
+                    }
+                });
+
             }
         });
 
@@ -148,6 +184,10 @@ public class ComposeFragment extends Fragment {
         longParam = newLocation.longitude;
         latParam = newLocation.latitude;
         location = newLocation;
+    }
+
+    public LatLng getLocation() {
+        return location;
     }
 
     private void setButtonText(String newText) {
