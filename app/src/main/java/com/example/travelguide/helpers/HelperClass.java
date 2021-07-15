@@ -1,11 +1,16 @@
-package com.example.travelguide.HelperClass;
+package com.example.travelguide.helpers;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
+
+import androidx.core.app.ActivityCompat;
 
 import com.google.android.material.snackbar.Snackbar;
 
@@ -17,6 +22,15 @@ import java.util.List;
 public class HelperClass {
 
     private static String TAG = "HelperClass";
+    // Storage Permissions
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
+
+    public static int picRadius = 50;
+    public static int resizedImgDimen = 600;
 
     // gets location info from coordinates
     public static String getAddress(Context context, Double latitude, Double longitude) {
@@ -26,7 +40,6 @@ public class HelperClass {
 
         try {
             likelyNames = geocoder.getFromLocation(latitude, longitude, 1);
-            Log.i(TAG, String.valueOf(likelyNames));
             return likelyNames.get(0).getAddressLine(0);
 
         } catch (IOException e) {
@@ -48,4 +61,21 @@ public class HelperClass {
         snackBarView.setLayoutParams(params);
         snackbar.show();
     }
+
+
+    // Check if we have write permission
+    public static void verifyStoragePermissions(Activity activity) {
+        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_STORAGE,
+                    REQUEST_EXTERNAL_STORAGE
+            );
+        }
+    }
+
+
 }

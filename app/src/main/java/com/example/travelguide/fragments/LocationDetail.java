@@ -16,19 +16,16 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.example.travelguide.HelperClass.HelperClass;
+import com.example.travelguide.helpers.HelperClass;
 import com.example.travelguide.R;
 import com.example.travelguide.adapters.GuidesAdapter;
 import com.example.travelguide.classes.Guide;
-import com.google.android.gms.maps.model.LatLng;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseQuery;
-import com.parse.ParseUser;
 
 import org.jetbrains.annotations.NotNull;
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
+    android:clickable="true"
     tools:context=".fragments.ComposeFragment">
 
     <!-- TODO: Update blank fragment layout -->
@@ -45,9 +47,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="45dp"
+            android:layout_marginTop="30dp"
             android:orientation="vertical">
-
 
             <TextView
                 android:id="@+id/textView3"
@@ -67,23 +68,31 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="45dp"
-            android:orientation="vertical">
+            android:layout_marginTop="30dp"
+            android:orientation="horizontal"
+            android:layout_marginBottom="7.5dp">
 
-
-            <TextView
-                android:id="@+id/textView4"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/add_photo" />
-
-            <Button
+            <ImageButton
                 android:id="@+id/photoBtn"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/add_photo" />
+                android:layout_width="@dimen/add_guide_media_btn"
+                android:layout_height="@dimen/add_guide_media_btn"
+                android:background="@android:color/transparent"
+                android:contentDescription="@string/add_photo"
+                android:src="@drawable/image_btn_bg" />
         </LinearLayout>
 
+        <ImageView
+            android:id="@+id/ivPreview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:src="@tools:sample/avatars"
+            android:visibility="invisible"/>
+
+        <VideoView
+            android:id="@+id/vvPreview"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:visibility="invisible"/>
 
         <LinearLayout
             android:layout_width="match_parent"

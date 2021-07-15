@@ -7,4 +7,7 @@
     <dimen name="avatar_size_img">25dp</dimen>
     <dimen name="location_header">25sp</dimen>
     <dimen name="progress_bar_padding">150dp</dimen>
+    <dimen name="corner_radius">10dp</dimen>
+    <dimen name="add_guide_media_btn">50dp</dimen>
+    <dimen name="img_btn_padding">10dp</dimen>
 </resources>

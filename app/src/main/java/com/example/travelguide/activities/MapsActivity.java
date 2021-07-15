@@ -2,11 +2,15 @@ package com.example.travelguide.activities;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -22,6 +26,7 @@ import com.example.travelguide.classes.Guide;
 import com.example.travelguide.databinding.ActivityMapsBinding;
 import com.example.travelguide.fragments.ComposeFragment;
 import com.example.travelguide.fragments.LocationDetail;
+import com.example.travelguide.helpers.HelperClass;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -106,6 +111,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        // verify that we have storage permissions
+        HelperClass.verifyStoragePermissions(this);
 
         // bind ui element to variable
         addGuide = binding.addGuide;
@@ -274,7 +282,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-
     /*
      * updates the locationPermissionGranted variable based on the user permission dialog
      */
@@ -385,7 +392,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             fragmentManager.popBackStack();
 
             // is back stack empty set addGuide button to be visible and refresh page
-            if (fragmentManager.getBackStackEntryCount() == 1){
+            if (fragmentManager.getBackStackEntryCount() == 1) {
                 showAddBtn();
             }
 
@@ -413,9 +420,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
 
+            // if result code is ok set the location for the new guide
             if (resultCode == RESULT_OK) {
 
-                // if result code is ok set the location for the new guide
                 Place place = Autocomplete.getPlaceFromIntent(data);
                 composeFragment.setLocation(place);
             } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
@@ -450,4 +457,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
     }
+
+
 }

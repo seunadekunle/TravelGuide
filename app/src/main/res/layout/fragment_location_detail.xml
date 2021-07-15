@@ -14,7 +14,7 @@
         android:layout_marginTop="7.5dp"
         android:layout_marginEnd="7.5dp"
         android:layout_marginBottom="7.5dp"
-        app:cardCornerRadius="5dp"
+        app:cardCornerRadius="@dimen/corner_radius"
         app:cardElevation="0dp"
         tools:ignore="MissingConstraints">
 
