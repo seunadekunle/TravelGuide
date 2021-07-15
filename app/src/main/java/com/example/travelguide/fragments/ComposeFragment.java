@@ -3,8 +3,10 @@ package com.example.travelguide.fragments;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.ImageDecoder;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -68,9 +70,10 @@ public class ComposeFragment extends Fragment {
     private static final String ARG_LAT = "latitude";
 
     private static final int CAPTURE_MEDIA_RESULT_CODE = 34;
+    public static final int PICK_PHOTO_GALLERY_CODE = 1046;
 
-    private String photoFileName = "photo.jpg";
-    private String videoFileName = "video.mp4";
+    private final String photoFileName = "photo.jpg";
+    private final String videoFileName = "video.mp4";
     File photoFile;
     File videoFile;
 
@@ -85,6 +88,7 @@ public class ComposeFragment extends Fragment {
     private Button locationBtn;
     private Button addBtn;
     private ImageButton photoBtn;
+    private ImageButton galleryBtn;
     private ImageView ivPreview;
     private VideoView vvPreview;
     private MediaController controller;
@@ -125,6 +129,13 @@ public class ComposeFragment extends Fragment {
 //    }
 
     @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_compose, container, false);
+    }
+
+    @Override
     public void onViewCreated(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
@@ -132,6 +143,7 @@ public class ComposeFragment extends Fragment {
         addBtn = view.findViewById(R.id.addBtn);
         etText = view.findViewById(R.id.etText);
         photoBtn = view.findViewById(R.id.photoBtn);
+        galleryBtn = view.findViewById(R.id.galleryBtn);
         ivPreview = view.findViewById(R.id.ivPreview);
         vvPreview = view.findViewById(R.id.vvPreview);
 
@@ -168,19 +180,16 @@ public class ComposeFragment extends Fragment {
                 Uri photoUri = FileProvider.getUriForFile(getContext(), "com.travelguide.fileprovider", photoFile);
                 Uri videoUri = Uri.fromFile(videoFile);
 
-                // intent to take a photo
-                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+                onPickMedia(photoUri, videoUri);
+            }
+        });
 
-                // intent to take a video
-                Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-                takeVideoIntent.putExtra(MediaStore.EXTRA_OUTPUT, videoUri);
-//                takeVideoIntent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, 30);
+        galleryBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onPickPhoto(v);
 
-                // creates an intent to choose the photo or camera intent
-                Intent chooserIntent = Intent.createChooser(takePictureIntent, "Capture Image or Video");
-                chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{takeVideoIntent});
-                startActivityForResult(chooserIntent, CAPTURE_MEDIA_RESULT_CODE);
+
             }
         });
 
@@ -210,80 +219,37 @@ public class ComposeFragment extends Fragment {
 
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable @org.jetbrains.annotations.Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+    // creates intent to create a new photo or video
+    private void onPickMedia(Uri photoUri, Uri videoUri) {
 
-        if (requestCode == CAPTURE_MEDIA_RESULT_CODE) {
+        // intent to take a photo
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
 
-            if (resultCode == getActivity().RESULT_OK) {
+        // intent to take a video
+        Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+        takeVideoIntent.putExtra(MediaStore.EXTRA_OUTPUT, videoUri);
+//                takeVideoIntent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, 30);
 
-                if (data.getData() == null) {
-                    // resize bitmap
-                    Uri takenPhotoUri = Uri.fromFile(getPhotoFileUri(photoFileName));
-                    // get image from disk
-                    Bitmap rawTakenImage = BitmapFactory.decodeFile(takenPhotoUri.getPath());
-                    Bitmap resizedBitmap = BitmapScaler.scaleToFitWidth(rawTakenImage, HelperClass.resizedImgDimen);
+        // creates an intent to choose the photo or camera intent
+        Intent chooserIntent = Intent.createChooser(takePictureIntent, "Capture Image or Video");
+        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{takeVideoIntent});
 
-                    // Configure byte output stream
-                    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-                    // Compress the image further
-                    resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 40, bytes);
-                    // Create a new file for the resized bitmap (`getPhotoFileUri` defined above)
-                    File resizedFile = getPhotoFileUri(photoFileName + "_resized");
-                    try {
-                        resizedFile.createNewFile();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    FileOutputStream fos = null;
-                    try {
-                        fos = new FileOutputStream(resizedFile);
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    }
-                    // Write the bytes of the bitmap to file
-                    try {
-                        fos.write(bytes.toByteArray());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    try {
-                        fos.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+        // checks if the intent is valid
+        if (chooserIntent.resolveActivity(getContext().getPackageManager()) != null)
+            startActivityForResult(chooserIntent, CAPTURE_MEDIA_RESULT_CODE);
+    }
 
-                    Bitmap takenImage = BitmapFactory.decodeFile(resizedFile.getAbsolutePath());
+    // Trigger gallery selection for a photo
+    public void onPickPhoto(View view) {
+        // Create intent for picking a photo from the gallery
+        Intent intent = new Intent(Intent.ACTION_PICK,
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 
-                    // adjust view states to be visible
-                    ivPreview.setVisibility(View.VISIBLE);
-                    vvPreview.setVisibility(View.GONE);
-
-                    // sets other file to be null
-                    videoFile = null;
-
-                    // Load the taken image into a preview
-                    Glide.with(getContext())
-                            .load(resizedFile.getAbsolutePath())
-                            .override(HelperClass.resizedImgDimen, HelperClass.resizedImgDimen)
-                            .transform(new RoundedCornersTransformation(HelperClass.picRadius, 0))
-                            .into(ivPreview);
-                } else {
-
-                    // adjust view states to be visible
-                    vvPreview.setVisibility(View.VISIBLE);
-                    ivPreview.setVisibility(View.GONE);
-
-                    // sets other file to be null
-                    photoFile = null;
-
-                    // play recorded video
-                    playbackRecordedVideo(data.getData());
-                }
-            } else { // Result was a failure
-                Toast.makeText(getContext(), "Media wasn't taken!", Toast.LENGTH_SHORT).show();
-            }
+        // as long as intent isn't nullt
+        if (intent.resolveActivity(getContext().getPackageManager()) != null) {
+            // Bring up gallery to select a photo
+            startActivityForResult(intent, PICK_PHOTO_GALLERY_CODE);
         }
     }
 
@@ -296,9 +262,9 @@ public class ComposeFragment extends Fragment {
         guide.setLocation(location);
 
         // sets the photo and video fields if they exist
-        if(photo != null)
+        if (photo != null)
             guide.setPhoto(new ParseFile(photo));
-        else if(video != null)
+        else if (video != null)
             guide.setPhoto(new ParseFile(video));
 
         // uploads new guide in the background
@@ -312,18 +278,150 @@ public class ComposeFragment extends Fragment {
 
                 // clears guide and goes back to main fragment
                 guide.setText("");
+                ivPreview.setImageResource(0);
+                vvPreview.setVideoPath("");
+
                 getActivity().onBackPressed();
             }
         });
     }
 
+
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_compose, container, false);
+    public void onActivityResult(int requestCode, int resultCode, @Nullable @org.jetbrains.annotations.Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == CAPTURE_MEDIA_RESULT_CODE) {
+
+            if (resultCode == getActivity().RESULT_OK) {
+
+                if (data.getData() == null) {
+
+                    // resize bitmap
+                    Uri takenPhotoUri = Uri.fromFile(getPhotoFileUri(photoFileName));
+                    File resizedFile = getResizedImg(takenPhotoUri);
+
+                    // updates value of photoFile
+                    photoFile = resizedFile;
+                    loadImgIntoPreview();
+
+                    // Bitmap takenImage = BitmapFactory.decodeFile(resizedFile.getAbsolutePath());
+
+                    showImgView();
+
+                } else {
+
+                    // if the request code is that of the gallery intent
+                    if (requestCode == PICK_PHOTO_GALLERY_CODE) {
+                        Uri photoUri = data.getData();
+
+                        photoFile = getResizedImg(photoUri);
+                        loadImgIntoPreview();
+
+                        showImgView();
+                    } else {
+                        // adjust view states to be visible
+                        vvPreview.setVisibility(View.VISIBLE);
+                        ivPreview.setVisibility(View.GONE);
+
+                        // sets other file to be null
+                        photoFile = null;
+
+                        // play recorded video
+                        playbackRecordedVideo(data.getData());
+                    }
+
+
+                }
+            } else { // Result was a failure
+                Toast.makeText(getContext(), "Media wasn't taken!", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
+    /*
+     * returns a compressed, resized image
+     * reference: https://guides.codepath.com/android/Accessing-the-Camera-and-Stored-Media#accessing-stored-media
+     */
+    @NotNull
+    private File getResizedImg(Uri takenPhotoUri) {
+
+        // get image from disk
+        Bitmap rawTakenImage = BitmapFactory.decodeFile(takenPhotoUri.getPath());
+        Bitmap resizedBitmap = BitmapScaler.scaleToFitWidth(rawTakenImage, HelperClass.resizedImgDimen);
+
+        // Configure byte output stream
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        // Compress the image further
+        resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 40, bytes);
+        // Create a new file for the resized bitmap (`getPhotoFileUri` defined above)
+        File resizedFile = getPhotoFileUri(photoFileName + "_resized");
+        try {
+            resizedFile.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(resizedFile);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        // Write the bytes of the bitmap to file
+        try {
+            fos.write(bytes.toByteArray());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return resizedFile;
+    }
+
+    private void showImgView() {
+        // adjust view states to be visible
+        ivPreview.setVisibility(View.VISIBLE);
+        vvPreview.setVisibility(View.GONE);
+
+        // sets other file to be null
+        videoFile = null;
+    }
+
+    // load image into preview ui element
+    private void loadImgIntoPreview() {
+        // Load the taken image into a preview
+        Glide.with(getContext())
+                .load(photoFile)
+                .override(HelperClass.resizedImgDimen, HelperClass.resizedImgDimen)
+                .transform(new RoundedCornersTransformation(HelperClass.picRadius, 0))
+                .into(ivPreview);
+    }
+
+    // plays video that has been recorded
+    public void playbackRecordedVideo(Uri videoUri) {
+
+        vvPreview.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mp) {
+                mp.setOnVideoSizeChangedListener(new MediaPlayer.OnVideoSizeChangedListener() {
+                    @Override
+                    public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
+
+                        // sets the controller to be anchored to the video view
+                        controller = new MediaController(getContext());
+                        vvPreview.setMediaController(controller);
+                        controller.setAnchorView(vvPreview);
+                    }
+                });
+            }
+        });
+        vvPreview.setVideoURI(videoUri);
+        vvPreview.requestFocus();
+        vvPreview.start();
+    }
 
     // sets location from Google place object and changes button text
     public void setLocation(Place newLocation) {
@@ -350,7 +448,7 @@ public class ComposeFragment extends Fragment {
 
     /*
      * Returns the File for a photo stored on disk given the fileName
-     * https://guides.codepath.com/android/Accessing-the-Camera-and-Stored-Media#accessing-stored-media
+     * reference - https://guides.codepath.com/android/Accessing-the-Camera-and-Stored-Media#accessing-stored-media
      */
     public File getPhotoFileUri(String fileName) {
         // Get safe storage directory for photos
@@ -378,26 +476,26 @@ public class ComposeFragment extends Fragment {
                 Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + fileName);
     }
 
-    // plays video
-    public void playbackRecordedVideo(Uri videoUri) {
-
-        vvPreview.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mp) {
-                mp.setOnVideoSizeChangedListener(new MediaPlayer.OnVideoSizeChangedListener() {
-                    @Override
-                    public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
-                        controller = new MediaController(getContext());
-                        vvPreview.setMediaController(controller);
-                        controller.setAnchorView(vvPreview);
-                    }
-                });
+    /* returns a Bitmap object given a Uri
+     *  reference: https://guides.codepath.com/android/Accessing-the-Camera-and-Stored-Media#accessing-stored-media
+     * */
+    public Bitmap loadFromUri(Uri photoUri) {
+        Bitmap image = null;
+        try {
+            // check version of Android on device
+            if (Build.VERSION.SDK_INT > 27) {
+                // on newer versions of Android, use the new decodeBitmap method
+                ImageDecoder.Source source = ImageDecoder.createSource(getContext().getContentResolver(), photoUri);
+                image = ImageDecoder.decodeBitmap(source);
+            } else {
+                // support older versions of Android by using getBitmap
+                image = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), photoUri);
             }
-        });
-        vvPreview.setVideoURI(videoUri);
-        vvPreview.requestFocus();
-        vvPreview.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return image;
     }
 
-//    TODO: add delete button for medi
+//    TODO: add delete button for media
 }

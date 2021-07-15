@@ -141,7 +141,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // if the fragment is available call onMapReady function
         if (mapFragment != null) {
-
             mapFragment.getMapAsync(this);
         }
 
@@ -164,6 +163,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 hideAddBtn();
             }
         });
+
+        hideAddBtn();
     }
 
     // gets the dimensions of the screen the app is loading at
@@ -214,13 +215,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // Prompt the user for permission.
         getLocationPermission();
-
         // Turn on the My Location layer and the related control on the map.
         updateLocationUI();
-
         // get list of currrent guides
         getGuides();
-
         // Get the current location of the device and set the position of the map.
         getDeviceLocation();
     }
@@ -266,6 +264,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     // hides progress bar
                     pbMaps.setVisibility(View.INVISIBLE);
+                    showAddBtn();
                 } else {
                     Log.e(TAG, "Not getting guides", e);
                 }
@@ -391,7 +390,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onSaveInstanceState(outState);
     }
 
-    // removes fragment from view if back buttons is pressed
+    // removes fragment from view if back button is pressed
     @Override
     public void onBackPressed() {
 
@@ -407,7 +406,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 getGuides();
                 showAddBtn();
             }
-
         }
     }
 
@@ -471,6 +469,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
-//    TODO: add zoom when navigating from adding new guide
+    // TODO: add zoom when navigating from adding new guide
 
 }
