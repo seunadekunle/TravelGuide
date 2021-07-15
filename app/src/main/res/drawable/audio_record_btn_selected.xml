@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="oval">
+
+            <padding
+                android:bottom="@dimen/img_btn_padding"
+                android:left="@dimen/img_btn_padding"
+                android:right="@dimen/img_btn_padding"
+                android:top="@dimen/img_btn_padding" />
+            <size
+                android:width="@dimen/add_guide_media_btn"
+                android:height="@dimen/add_guide_media_btn" />
+            <solid android:color="@android:color/holo_red_dark" />
+
+        </shape>
+    </item>
+
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/off_white" />
+        </shape>
+    </item>
+
+</layer-list>

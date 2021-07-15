@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="fab_margin_bottom">35dp</dimen>
+    <dimen name="fab_margin_bottom">75dp</dimen>
     <dimen name="action_buttons_margin">15dp</dimen>
     <dimen name="compose_margin">20dp</dimen>
     <dimen name="text_margin">16dp</dimen>
@@ -10,4 +10,7 @@
     <dimen name="corner_radius">10dp</dimen>
     <dimen name="add_guide_media_btn">50dp</dimen>
     <dimen name="img_btn_padding">10dp</dimen>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="fragment_horizontal_margin">16dp</dimen>
+    <dimen name="fragment_vertical_margin">16dp</dimen>
 </resources>

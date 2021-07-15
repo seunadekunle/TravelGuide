@@ -88,16 +88,33 @@
                 android:contentDescription="@string/add_photo"
                 android:src="@drawable/gallery_btn_bg" />
 
+            <ImageButton
+                android:id="@+id/audioBtn"
+                android:layout_width="@dimen/add_guide_media_btn"
+                android:layout_height="@dimen/add_guide_media_btn"
+                android:layout_marginStart="25dp"
+                android:background="@android:color/transparent"
+                android:contentDescription="@string/add_audio"
+                android:src="@drawable/audio_btn_bg" />
+
         </LinearLayout>
+
+        <include
+            android:id="@+id/recordingLayout"
+            layout="@layout/recording_layout"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:layout_gravity="center"
+            android:visibility="gone"/>
 
         <ImageView
             android:id="@+id/ivPreview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone"
             android:layout_gravity="center"
-            tools:src="@tools:sample/avatars"
-            android:layout_marginTop="40dp"/>
+            android:layout_marginTop="40dp"
+            android:visibility="gone"
+            tools:src="@tools:sample/avatars" />
 
         <VideoView
             android:id="@+id/vvPreview"

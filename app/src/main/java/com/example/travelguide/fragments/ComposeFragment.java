@@ -1,10 +1,12 @@
 package com.example.travelguide.fragments;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ImageDecoder;
 import android.media.MediaPlayer;
+import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -18,10 +20,15 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.MediaController;
 import android.widget.Toast;
 import android.widget.VideoView;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.FileProvider;
@@ -74,8 +81,13 @@ public class ComposeFragment extends Fragment {
 
     private final String photoFileName = "photo.jpg";
     private final String videoFileName = "video.mp4";
-    File photoFile;
-    File videoFile;
+    private String audioFileName = "";
+    private File photoFile;
+    private File videoFile;
+
+    MediaRecorder mediaRecorder;
+
+    ActivityResultLauncher<Intent> galleryActivityLauncher;
 
     // parameters for passing data
     private Double longParam;
@@ -89,9 +101,14 @@ public class ComposeFragment extends Fragment {
     private Button addBtn;
     private ImageButton photoBtn;
     private ImageButton galleryBtn;
+    private ImageButton audioBtn;
     private ImageView ivPreview;
     private VideoView vvPreview;
     private MediaController controller;
+    private LinearLayout recordingLayout;
+
+    // ui elements for the audio recorder
+    private ImageButton recordBtn;
 
     public ComposeFragment() {
         // Required empty public constructor
@@ -144,8 +161,15 @@ public class ComposeFragment extends Fragment {
         etText = view.findViewById(R.id.etText);
         photoBtn = view.findViewById(R.id.photoBtn);
         galleryBtn = view.findViewById(R.id.galleryBtn);
+        audioBtn = view.findViewById(R.id.audioBtn);
         ivPreview = view.findViewById(R.id.ivPreview);
         vvPreview = view.findViewById(R.id.vvPreview);
+        recordingLayout = view.findViewById(R.id.recordingLayout);
+
+        recordBtn = view.findViewById(R.id.recordBtn);
+
+        // Create media recorder
+        MediaRecorder mediaRecorder = new MediaRecorder();
 
         if (latParam != null && longParam != null)
             // gets location info from coordinates and sets button text
@@ -166,6 +190,7 @@ public class ComposeFragment extends Fragment {
             }
         });
 
+        // add photo button on click
         photoBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -184,12 +209,85 @@ public class ComposeFragment extends Fragment {
             }
         });
 
+        // You can do the assignment inside onAttach or onCreate, i.e, before the activity is displayed
+        galleryActivityLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
+                        Uri photoUri = result.getData().getData();
+
+                        Log.i(TAG, String.valueOf(photoUri));
+                        photoFile = getResizedImg(photoUri);
+                        loadImgIntoPreview();
+
+                        showImgView();
+                    }
+                });
+
+        // gallery button on click
         galleryBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onPickPhoto(v);
+            }
+        });
 
+        // audio button on click
+        audioBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleAudioView();
 
+                // Verify that the device has a mic first
+                PackageManager pmanager = getContext().getPackageManager();
+                if (pmanager.hasSystemFeature(PackageManager.FEATURE_MICROPHONE)) {
+//
+//                    // Set the file location for the audio
+//                    audioFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
+//                    audioFileName += "/audiorecordtest.3gp";
+//
+//                    // Set the audio format and encoder
+//                    mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+//                    mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+//                    mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+//
+//                    // Setup the output location
+//                    mediaRecorder.setOutputFile(audioFileName);
+
+                }
+//                else if(ContextCompat.checkSelfPermission(getContext(), Manifest.permission.RECORD_AUDIO) == PERMISSION_D)
+                else {
+                    // no mic on device
+                    Snackbar emptyText = Snackbar.make(etText, R.string.no_recorder, Snackbar.LENGTH_SHORT);
+                    HelperClass.displaySnackBarWithBottomMargin(emptyText, 80, getActivity());
+                    toggleAudioView();
+                }
+            }
+        });
+
+        // audio button on click
+        recordBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i(TAG, "recordBtn clicked");
+                recordBtn.setSelected(!recordBtn.isSelected());
+
+                if (!recordBtn.isSelected()) {
+                    // Start recording the audio
+                    try {
+                        mediaRecorder.prepare();
+                        mediaRecorder.start();
+
+                    } catch (IOException e) {
+                        Log.e(TAG, "prepare() failed");
+                    }
+                } else {
+                    // Stop recording the audio
+                    mediaRecorder.stop();
+                    mediaRecorder.reset();
+                    mediaRecorder.release();
+                }
             }
         });
 
@@ -201,14 +299,14 @@ public class ComposeFragment extends Fragment {
                 // if the text field is empty
                 if (text.isEmpty()) {
                     Snackbar emptyText = Snackbar.make(etText, empty_text, Snackbar.LENGTH_SHORT);
-                    HelperClass.displaySnackBarWithBottomMargin(emptyText, 0, 1000);
+                    HelperClass.displaySnackBarWithBottomMargin(emptyText, 80, getActivity());
                     return;
                 }
 
                 // if no location is selected
                 if (location == null) {
                     Snackbar emptyLocation = Snackbar.make(etText, R.string.no_locattion, Snackbar.LENGTH_SHORT);
-                    HelperClass.displaySnackBarWithBottomMargin(emptyLocation, 0, 1000);
+                    HelperClass.displaySnackBarWithBottomMargin(emptyLocation, 80, getActivity());
                     return;
                 }
 
@@ -217,6 +315,17 @@ public class ComposeFragment extends Fragment {
             }
         });
 
+    }
+
+    private void toggleAudioView() {
+        // shows recording view based on state of audio button
+        if (!audioBtn.isSelected()) {
+            audioBtn.setSelected(true);
+            recordingLayout.setVisibility(View.VISIBLE);
+        } else {
+            audioBtn.setSelected(false);
+            recordingLayout.setVisibility(View.GONE);
+        }
     }
 
     // creates intent to create a new photo or video
@@ -249,7 +358,7 @@ public class ComposeFragment extends Fragment {
         // as long as intent isn't nullt
         if (intent.resolveActivity(getContext().getPackageManager()) != null) {
             // Bring up gallery to select a photo
-            startActivityForResult(intent, PICK_PHOTO_GALLERY_CODE);
+            galleryActivityLauncher.launch(intent);
         }
     }
 
@@ -306,37 +415,27 @@ public class ComposeFragment extends Fragment {
                     loadImgIntoPreview();
 
                     // Bitmap takenImage = BitmapFactory.decodeFile(resizedFile.getAbsolutePath());
-
+                    // sets other buttons to be not clickable
                     showImgView();
 
                 } else {
+                    // adjust view states to be visible
+                    vvPreview.setVisibility(View.VISIBLE);
+                    ivPreview.setVisibility(View.GONE);
 
-                    // if the request code is that of the gallery intent
-                    if (requestCode == PICK_PHOTO_GALLERY_CODE) {
-                        Uri photoUri = data.getData();
+                    // sets other file to be null
+                    photoFile = null;
 
-                        photoFile = getResizedImg(photoUri);
-                        loadImgIntoPreview();
-
-                        showImgView();
-                    } else {
-                        // adjust view states to be visible
-                        vvPreview.setVisibility(View.VISIBLE);
-                        ivPreview.setVisibility(View.GONE);
-
-                        // sets other file to be null
-                        photoFile = null;
-
-                        // play recorded video
-                        playbackRecordedVideo(data.getData());
-                    }
-
-
+                    // play recorded video
+                    playbackRecordedVideo(data.getData());
                 }
-            } else { // Result was a failure
-                Toast.makeText(getContext(), "Media wasn't taken!", Toast.LENGTH_SHORT).show();
+
+
             }
+        } else { // Result was a failure
+            Toast.makeText(getContext(), "Media wasn't taken!", Toast.LENGTH_SHORT).show();
         }
+
     }
 
     /*
@@ -347,7 +446,8 @@ public class ComposeFragment extends Fragment {
     private File getResizedImg(Uri takenPhotoUri) {
 
         // get image from disk
-        Bitmap rawTakenImage = BitmapFactory.decodeFile(takenPhotoUri.getPath());
+        Bitmap rawTakenImage = loadFromUri(takenPhotoUri);
+        Log.i(TAG, String.valueOf(rawTakenImage));
         Bitmap resizedBitmap = BitmapScaler.scaleToFitWidth(rawTakenImage, HelperClass.resizedImgDimen);
 
         // Configure byte output stream

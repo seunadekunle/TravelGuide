@@ -10,6 +10,7 @@
         </intent>
     </queries>
 
+    <!-- Permissions needed for the app -->
     <permission
         android:name="android.permission.ACCESS_FINE_LOCATION"
         android:protectionLevel="dangerous" />
@@ -26,6 +27,7 @@
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
         android:name=".classes.ParseApplication"

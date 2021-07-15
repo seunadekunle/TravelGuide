@@ -4,9 +4,7 @@
     xmlns:map="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
-
+    android:layout_height="match_parent">
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/addGuide"
@@ -24,6 +22,7 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:fitsSystemWindows="true"
         map:cameraTilt="45"
         map:uiCompass="false"
         tools:context=".activities.MapsActivity" />
@@ -32,15 +31,21 @@
         android:id="@+id/fragmentsFrame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="false" />
+        android:fitsSystemWindows="true" >
+
+        <SearchView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fitsSystemWindows="false" />
+    </FrameLayout>
 
     <ProgressBar
         android:id="@+id/pbMaps"
         style="?android:attr/progressBarStyle"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="@dimen/progress_bar_padding"
         android:background="@color/white"
-        android:visibility="invisible"/>
+        android:padding="@dimen/progress_bar_padding"
+        android:visibility="invisible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

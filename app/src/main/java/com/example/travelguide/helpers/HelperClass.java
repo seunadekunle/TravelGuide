@@ -52,13 +52,10 @@ public class HelperClass {
      * displays snackbar with margin
      * gotten from https://stackoverflow.com/questions/36588881/snackbar-behind-navigation-bar
      */
-    public static void displaySnackBarWithBottomMargin(Snackbar snackbar, int sideMargin, int marginBottom) {
+    public static void displaySnackBarWithBottomMargin(Snackbar snackbar, int marginBottom, Context context) {
         final View snackBarView = snackbar.getView();
-        final FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) snackBarView.getLayoutParams();
 
-        params.setMargins(params.leftMargin + sideMargin, params.topMargin, params.rightMargin + sideMargin, params.bottomMargin + marginBottom);
-
-        snackBarView.setLayoutParams(params);
+        snackBarView.setTranslationY(-(DeviceDimenHelper.convertDpToPixel(marginBottom, context)));
         snackbar.show();
     }
 

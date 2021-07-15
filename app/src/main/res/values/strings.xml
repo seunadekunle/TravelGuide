@@ -11,4 +11,15 @@
     <string name="empty_text">The text field is empty</string>
     <string name="no_locattion">No location has been selected</string>
     <string name="add_photo">Add photo</string>
+    <string name="add_audio">add audio</string>
+    <string name="no_recorder">There is no microphone on this device</string>
+    <!-- Strings related to login -->
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="welcome">"Welcome!"</string>
+    <string name="invalid_username">Not a valid username</string>
+    <string name="invalid_password">Password must be >5 characters</string>
+    <string name="login_failed">"Login failed"</string>
 </resources>

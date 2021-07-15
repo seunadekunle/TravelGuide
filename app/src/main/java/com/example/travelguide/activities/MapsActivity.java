@@ -1,12 +1,17 @@
 package com.example.travelguide.activities;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
@@ -116,7 +121,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // Initialize Places SDK
         Places.initialize(getApplicationContext(), getResources().getString(R.string.google_maps_key));
-
         // Create a new PlacesClient instance
         PlacesClient placesClient = Places.createClient(this);
 
@@ -127,22 +131,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         addGuide = binding.addGuide;
         pbMaps = binding.pbMaps;
 
-
         fragmentsFrameId = R.id.fragmentsFrame;
         fragmentManager = getSupportFragmentManager();
 
         setWindowDimen();
 
-        // Construct a FusedLocationProviderClient.
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) fragmentManager.findFragmentById(R.id.map);
-
-        // if the fragment is available call onMapReady function
-        if (mapFragment != null) {
-            mapFragment.getMapAsync(this);
-        }
+        initializeMap();
 
         // creates new instance of the different fragments
         composeFragment = new ComposeFragment();
@@ -167,6 +161,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         hideAddBtn();
     }
 
+    private void initializeMap() {
+        // Construct a FusedLocationProviderClient.
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        SupportMapFragment mapFragment = (SupportMapFragment) fragmentManager.findFragmentById(R.id.map);
+
+        // if the fragment is available call onMapReady function
+        if (mapFragment != null) {
+            mapFragment.getMapAsync(this);
+        }
+    }
+
     // gets the dimensions of the screen the app is loading at
     private void setWindowDimen() {
         DisplayMetrics displayMetrics = new DisplayMetrics();
@@ -188,6 +195,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // sets padding to change position of map controls
         map.setPadding(0, (int) (height / 1.45), 0, 0);
+
+        // Prompt the user for permission.
+        getLocationPermission();
+        // Turn on the My Location layer and the related control on the map.
+        updateLocationUI();
+        // get list of currrent guides
+        getGuides();
+        // Get the current location of the device and set the position of the map.
+        getDeviceLocation();
 
         map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
@@ -213,14 +229,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
-        // Prompt the user for permission.
-        getLocationPermission();
-        // Turn on the My Location layer and the related control on the map.
-        updateLocationUI();
-        // get list of currrent guides
-        getGuides();
-        // Get the current location of the device and set the position of the map.
-        getDeviceLocation();
     }
 
     // completes fragment transaction

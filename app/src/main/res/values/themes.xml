@@ -1,9 +1,15 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Theme.TravelGuide" parent="Theme.MaterialComponents.Light">
+
+        <item name="android:windowTranslucentStatus" tools:ignore="DuplicateDefinition">true</item>
+        <!-- light theme navigation and status bar   -->
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
+
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/purple_500</item>
+        <item name="colorPrimary">#FFFFFF</item>
         <item name="colorPrimaryVariant">@color/purple_700</item>
         <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->
@@ -11,9 +17,5 @@
         <item name="colorSecondaryVariant">@color/teal_700</item>
         <item name="colorOnSecondary">@color/black</item>
         <!-- Status bar color. -->
-
-        <!--makes status bar and navigation bar transparent-->
-        <item name="android:windowTranslucentStatus">true</item>
-        <item name="android:navigationBarColor">@color/white</item>
     </style>
 </resources>

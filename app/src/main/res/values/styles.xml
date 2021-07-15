@@ -1,8 +1,2 @@
 <resources>
-
-    <style name="Widget.Theme.TravelGuide.ButtonBar.Fullscreen" parent="">
-        <item name="android:background">@color/light_blue_600</item>
-        <item name="android:buttonBarStyle">?android:attr/buttonBarStyle</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
-    </style>
 </resources>

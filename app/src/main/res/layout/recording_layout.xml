@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+    <ImageButton
+        android:id="@+id/recordBtn"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/add_guide_media_btn"
+        android:layout_gravity="center"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/add_audio"
+        android:src="@drawable/audio_record_btn_bg" />
+
+</LinearLayout>
