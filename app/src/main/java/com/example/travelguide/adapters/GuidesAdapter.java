@@ -11,7 +11,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.travelguide.classes.Guide;
-import com.example.travelguide.databinding.FragmentLocationDetailBinding;
+import com.example.travelguide.databinding.FragmentLocationGuideListBinding;
+import com.example.travelguide.databinding.LocationGuideBinding;
 import com.parse.ParseFile;
 
 import java.util.List;
@@ -35,7 +36,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-        return new ViewHolder(FragmentLocationDetailBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+        return new ViewHolder(LocationGuideBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
     }
 
     @Override
@@ -83,7 +84,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
         public TextView tvDetail;
         public ImageView ivAvatar;
 
-        public ViewHolder(FragmentLocationDetailBinding binding) {
+        public ViewHolder(LocationGuideBinding binding) {
             super(binding.getRoot());
 
             // binds ui elements to variables

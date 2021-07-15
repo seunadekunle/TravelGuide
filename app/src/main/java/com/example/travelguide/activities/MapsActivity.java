@@ -2,15 +2,12 @@ package com.example.travelguide.activities;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.Toast;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,7 +22,7 @@ import com.example.travelguide.R;
 import com.example.travelguide.classes.Guide;
 import com.example.travelguide.databinding.ActivityMapsBinding;
 import com.example.travelguide.fragments.ComposeFragment;
-import com.example.travelguide.fragments.LocationDetail;
+import com.example.travelguide.fragments.LocationGuide;
 import com.example.travelguide.helpers.HelperClass;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -63,17 +60,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public static final int AUTOCOMPLETE_REQUEST_CODE = 1;
     private static final String TAG = MapsActivity.class.getSimpleName();
+    private int fragmentsFrameId;
+
 
     // Ui elements
     private GoogleMap map;
     private ActivityMapsBinding binding;
-    private int fragmentsFrameId;
     private FloatingActionButton addGuide;
     private FragmentManager fragmentManager;
+    private ProgressBar pbMaps;
 
     // different fragments
     private ComposeFragment composeFragment;
-    private LocationDetail locationDetail;
+    private LocationGuide locationGuide;
 
     // The entry point to the Fused Location Provider.
     private FusedLocationProviderClient fusedLocationProviderClient;
@@ -115,8 +114,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // verify that we have storage permissions
         HelperClass.verifyStoragePermissions(this);
 
+        // Initialize Places SDK
+        Places.initialize(getApplicationContext(), getResources().getString(R.string.google_maps_key));
+
+        // Create a new PlacesClient instance
+        PlacesClient placesClient = Places.createClient(this);
+
+        if (ParseUser.getCurrentUser() == null)
+            loginUser("seun", "seun");
+
         // bind ui element to variable
         addGuide = binding.addGuide;
+        pbMaps = binding.pbMaps;
+
+
         fragmentsFrameId = R.id.fragmentsFrame;
         fragmentManager = getSupportFragmentManager();
 
@@ -130,6 +141,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // if the fragment is available call onMapReady function
         if (mapFragment != null) {
+
             mapFragment.getMapAsync(this);
         }
 
@@ -152,15 +164,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 hideAddBtn();
             }
         });
-
-        // Initialize Places SDK
-        Places.initialize(getApplicationContext(), getResources().getString(R.string.google_maps_key));
-
-        // Create a new PlacesClient instance
-        PlacesClient placesClient = Places.createClient(this);
-
-        if (ParseUser.getCurrentUser() == null)
-            loginUser("seun", "seun");
     }
 
     // gets the dimensions of the screen the app is loading at
@@ -193,16 +196,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Double latitude = ((ParseGeoPoint) marker.getTag()).getLatitude();
                 Double longitude = ((ParseGeoPoint) marker.getTag()).getLongitude();
 
-                locationDetail = LocationDetail.newInstance(latitude, longitude);
+                locationGuide = LocationGuide.newInstance(latitude, longitude);
 
                 // Begin the transaction
                 FragmentTransaction ft = fragmentManager.beginTransaction();
 
                 // add fragment to container
-                ft.replace(fragmentsFrameId, locationDetail);
+                ft.replace(fragmentsFrameId, locationGuide);
 
                 // complete the transaction
-                finishTransaction(ft, LocationDetail.TAG, (Fragment) locationDetail);
+                finishTransaction(ft, LocationGuide.TAG, (Fragment) locationGuide);
                 hideAddBtn();
 
                 return true;
@@ -238,6 +241,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // gets list of locations from the ParseServer
     public void getGuides() {
 
+        // shows progress bar
+        pbMaps.setVisibility(View.VISIBLE);
+
         // clears the map of markers
         map.clear();
 
@@ -249,11 +255,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 if (e == null) {
                     for (int i = 0; i < locations.size(); i++) {
-                        // retrieves geo point from database and adds marker to that point
+
+                        // retrieves geo point from database and converts it to a LatLng Object
                         ParseGeoPoint locationData = locations.get(i).getParseGeoPoint(Guide.getKeyLocation());
                         LatLng location = new LatLng(locationData.getLatitude(), locationData.getLongitude());
+
+                        // adds a new marker with the LatLng object
                         addMarker(new MarkerOptions().position(location), locations.get(i).getParseGeoPoint(Guide.getKeyLocation()));
                     }
+
+                    // hides progress bar
+                    pbMaps.setVisibility(View.INVISIBLE);
                 } else {
                     Log.e(TAG, "Not getting guides", e);
                 }
@@ -365,7 +377,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void addMarker(MarkerOptions newMarker, ParseGeoPoint objectId) {
         Marker marker = map.addMarker(newMarker);
         marker.setTag(objectId);
-
     }
 
     // saves map current location and camera position when activity is paused

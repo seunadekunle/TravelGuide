@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/off_white"
-    tools:context=".fragments.LocationDetail">
+    tools:context=".fragments.LocationGuide">
 
 
     <LinearLayout
@@ -38,7 +38,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 app:layoutManager="LinearLayoutManager"
-                tools:listitem="@layout/fragment_location_detail" />
+                tools:listitem="@layout/location_guide" />
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 

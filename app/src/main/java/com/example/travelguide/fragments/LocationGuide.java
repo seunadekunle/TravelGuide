@@ -33,9 +33,9 @@ import java.util.List;
 /**
  * A fragment representing a list of Items.
  */
-public class LocationDetail extends Fragment {
+public class LocationGuide extends Fragment {
 
-    public static final String TAG = "LocationDetail";
+    public static final String TAG = "LocationGuide";
 
     private Context context;
     private RecyclerView rvGuides;
@@ -51,12 +51,12 @@ public class LocationDetail extends Fragment {
     private ParseGeoPoint parseLocation;
 
     // Mandatory empty constructor for the fragment manager
-    public LocationDetail() {
+    public LocationGuide() {
     }
 
     @SuppressWarnings("unused")
-    public static LocationDetail newInstance(Double latCoord, Double longCoord) {
-        LocationDetail fragment = new LocationDetail();
+    public static LocationGuide newInstance(Double latCoord, Double longCoord) {
+        LocationGuide fragment = new LocationGuide();
         Bundle args = new Bundle();
 
         args.putDouble(ARG_LAT, latCoord);
@@ -80,7 +80,7 @@ public class LocationDetail extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_location_detail_list, container, false);
+        return inflater.inflate(R.layout.fragment_location_guide_list, container, false);
     }
 
     @Override
