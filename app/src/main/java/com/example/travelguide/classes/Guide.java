@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.parse.ParseClassName;
+import com.parse.ParseFile;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
@@ -22,7 +23,7 @@ public class Guide extends ParseObject {
     private static final String KEY_VIDEO = "video";
     private static final String KEY_LIKES = "likes";
 
-    public void setAuthor(ParseUser user){
+    public void setAuthor(ParseUser user) {
         put(KEY_AUTHOR, user);
     }
 
@@ -32,6 +33,14 @@ public class Guide extends ParseObject {
 
     public void setLocation(LatLng newLocation) {
         put(KEY_LOCATION, new ParseGeoPoint(newLocation.latitude, newLocation.longitude));
+    }
+
+    public void setPhoto(ParseFile newPhoto) {
+        put(KEY_PHOTO, newPhoto);
+    }
+
+    public void setVideo(ParseFile newVideo) {
+        put(KEY_PHOTO, newVideo);
     }
 
     public LatLng getLocation() {
@@ -44,6 +53,14 @@ public class Guide extends ParseObject {
 
     public ParseUser getAuthor() {
         return getParseUser(KEY_AUTHOR);
+    }
+
+    public ParseFile getPhoto() {
+        return getParseFile(KEY_PHOTO);
+    }
+
+    public ParseFile getVideo() {
+        return getParseFile(KEY_VIDEO);
     }
 
     public static String getKeyCreationDate() {

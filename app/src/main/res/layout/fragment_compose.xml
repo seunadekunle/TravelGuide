@@ -86,13 +86,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             tools:src="@tools:sample/avatars"
-            android:visibility="invisible"/>
+            android:visibility="gone"/>
 
         <VideoView
             android:id="@+id/vvPreview"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:visibility="invisible"/>
+            android:layout_height="300dp"
+            android:visibility="gone"
+            android:layout_gravity="center" />
 
         <LinearLayout
             android:layout_width="match_parent"

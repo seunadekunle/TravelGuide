@@ -3,6 +3,7 @@ package com.example.travelguide.fragments;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -86,6 +87,7 @@ public class ComposeFragment extends Fragment {
     private ImageButton photoBtn;
     private ImageView ivPreview;
     private VideoView vvPreview;
+    private MediaController controller;
 
     public ComposeFragment() {
         // Required empty public constructor
@@ -173,6 +175,7 @@ public class ComposeFragment extends Fragment {
                 // intent to take a video
                 Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
                 takeVideoIntent.putExtra(MediaStore.EXTRA_OUTPUT, videoUri);
+//                takeVideoIntent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, 30);
 
                 // creates an intent to choose the photo or camera intent
                 Intent chooserIntent = Intent.createChooser(takePictureIntent, "Capture Image or Video");
@@ -255,8 +258,7 @@ public class ComposeFragment extends Fragment {
 
                     // adjust view states to be visible
                     ivPreview.setVisibility(View.VISIBLE);
-                    vvPreview.setVisibility(View.INVISIBLE);
-
+                    vvPreview.setVisibility(View.GONE);
 
                     // sets other file to be null
                     videoFile = null;
@@ -271,7 +273,7 @@ public class ComposeFragment extends Fragment {
 
                     // adjust view states to be visible
                     vvPreview.setVisibility(View.VISIBLE);
-                    ivPreview.setVisibility(View.INVISIBLE);
+                    ivPreview.setVisibility(View.GONE);
 
                     // sets other file to be null
                     photoFile = null;
@@ -286,12 +288,20 @@ public class ComposeFragment extends Fragment {
     }
 
     // creates new Travel guide and updates it to the database
-    private void saveGuide(String text, ParseUser user, File photo, File audio) {
+    private void saveGuide(String text, ParseUser user, File photo, File video) {
 
         Guide guide = new Guide();
         guide.setAuthor(user);
         guide.setText(text);
         guide.setLocation(location);
+
+        // sets the photo and video fields if they exist
+        if(photo != null)
+            guide.setPhoto(new ParseFile(photo));
+        else if(video != null)
+            guide.setPhoto(new ParseFile(video));
+
+        // uploads new guide in the background
         guide.saveInBackground(new SaveCallback() {
             @Override
             public void done(ParseException e) {
@@ -370,9 +380,24 @@ public class ComposeFragment extends Fragment {
 
     // plays video
     public void playbackRecordedVideo(Uri videoUri) {
+
+        vvPreview.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mp) {
+                mp.setOnVideoSizeChangedListener(new MediaPlayer.OnVideoSizeChangedListener() {
+                    @Override
+                    public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
+                        controller = new MediaController(getContext());
+                        vvPreview.setMediaController(controller);
+                        controller.setAnchorView(vvPreview);
+                    }
+                });
+            }
+        });
         vvPreview.setVideoURI(videoUri);
-        vvPreview.setMediaController(new MediaController(getContext()));
         vvPreview.requestFocus();
         vvPreview.start();
     }
+
+//    TODO: add delete button for medi
 }

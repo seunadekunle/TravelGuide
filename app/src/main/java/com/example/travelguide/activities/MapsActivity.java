@@ -393,6 +393,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             // is back stack empty set addGuide button to be visible and refresh page
             if (fragmentManager.getBackStackEntryCount() == 1) {
+                getGuides();
                 showAddBtn();
             }
 
@@ -458,5 +459,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
 
+
+//    TODO: add zoom when navigating from adding new guide
 
 }
