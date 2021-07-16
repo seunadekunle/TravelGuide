@@ -20,17 +20,14 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
-import com.example.travelguide.R;
 import com.example.travelguide.activities.MapsActivity;
 import com.example.travelguide.classes.Guide;
 import com.example.travelguide.databinding.LocationGuideBinding;
-import com.example.travelguide.helpers.HelperClass;
 import com.parse.ParseFile;
 
 import java.util.List;
-
-import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
 /**
  * {@link RecyclerView.Adapter} that can display a {@link Guide}.
@@ -66,7 +63,9 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
+    public void onBindViewHolder(final ViewHolder holder, int position, RequestManager requestManager) {
+
+        holder.setRequestManager(requestManager);
 
         // fills ui elements with information from the guide
         Guide guide = guides.get(position);
@@ -74,23 +73,31 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
         holder.tvUsername.setText(guide.getAuthor().getUsername());
         holder.tvDetail.setText(guide.getText());
 
-        if (guide.getPhoto() != null) {
+        if (guide.getPhoto() != null || guide.getVideo() != null || guide.getAudio() != null) {
 
-            String photoUrl = guide.getPhoto().getUrl();
-            Glide.with(context)
-                    .load(photoUrl).centerCrop().override(HelperClass.detailImgDimen, HelperClass.detailImgDimen)
-                    .transform(new RoundedCornersTransformation(HelperClass.picRadius, 0)).into(holder.ibThumb);
+            holder.mediaLayout.setVisibility(View.VISIBLE);
 
-            holder.ibThumb.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                    // hide add button and zoom image
-                    ((MapsActivity) activity).hideAddBtn();
-                    zoomImageFromThumb(holder.ibThumb, photoUrl);
-                }
-            });
+//            if (guide.getPhoto() != null) {
+//
+//                holder.ibThumb.setVisibility(View.VISIBLE);
+//
+//                String photoUrl = guide.getPhoto().getUrl();
+//                Glide.with(context)
+//                        .load(photoUrl).centerCrop().override(HelperClass.detailImgDimen, HelperClass.detailImgDimen)
+//                        .transform(new RoundedCornersTransformation(HelperClass.picRadius, 0)).into(holder.ibThumb);
+//
+//                holder.ibThumb.setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//
+//                        // hide add button and zoom image
+//                        ((MapsActivity) activity).hideAddBtn();
+//                        zoomImageFromThumb(holder.ibThumb, photoUrl, expandedImageView);
+//                    }
+//                });
+//            }
         }
+
 
         // loads user profile image on timeline
         ParseFile profileImg = guide.getAuthor().getParseFile("avatar");
@@ -128,6 +135,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
 
         private ConstraintLayout mediaLayout;
         private ImageButton ibThumb;
+        private RequestManager requestManager;
 
         public ViewHolder(LocationGuideBinding binding) {
             super(binding.getRoot());
@@ -140,13 +148,17 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
             mediaLayout = binding.mediaContainer.mediaLayout;
             ibThumb = binding.mediaContainer.ibThumb;
         }
+
+        public void setRequestManager(RequestManager requestManager) {
+            this.requestManager = requestManager;
+        }
     }
 
 
     /* creates an expanded view after clicking on thumbnail
      * ref: https://developer.android.com/training/animation/zoom.html
      */
-    private void zoomImageFromThumb(final View thumbView, String imgUrl) {
+    private void zoomImageFromThumb(final View thumbView, String imgUrl, ImageView expandedImageView) {
         // If there's an animation in progress, cancel it
         // immediately and proceed with this one.
         if (currentAnimator != null) {
