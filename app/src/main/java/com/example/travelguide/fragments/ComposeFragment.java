@@ -22,7 +22,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.MediaController;
-import android.widget.Toast;
 import android.widget.VideoView;
 
 import androidx.activity.result.ActivityResult;
@@ -57,12 +56,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
 import static com.example.travelguide.R.string.empty_text;
+import static com.google.android.gms.common.util.IOUtils.toByteArray;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -90,6 +91,7 @@ public class ComposeFragment extends Fragment {
     private int playerPos;
 
     ActivityResultLauncher<Intent> galleryActivityLauncher;
+    ActivityResultLauncher<Intent> mediaActivityLauncher;
 
     // parameters for passing data
     private Double longParam;
@@ -101,9 +103,10 @@ public class ComposeFragment extends Fragment {
     private EditText etText;
     private Button locationBtn;
     private Button addBtn;
-    private ImageButton photoBtn;
+    private ImageButton mediaBtn;
     private ImageButton galleryBtn;
     private ImageButton audioBtn;
+    private ImageButton clearBtn;
     private ImageView ivPreview;
     private VideoView vvPreview;
     private MediaController controller;
@@ -164,9 +167,11 @@ public class ComposeFragment extends Fragment {
         locationBtn = view.findViewById(R.id.locationBtn);
         addBtn = view.findViewById(R.id.addBtn);
         etText = view.findViewById(R.id.etText);
-        photoBtn = view.findViewById(R.id.photoBtn);
+        mediaBtn = view.findViewById(R.id.photoBtn);
         galleryBtn = view.findViewById(R.id.galleryBtn);
         audioBtn = view.findViewById(R.id.audioBtn);
+        clearBtn = view.findViewById(R.id.clearBtn);
+
         ivPreview = view.findViewById(R.id.ivPreview);
         vvPreview = view.findViewById(R.id.vvPreview);
 
@@ -188,6 +193,7 @@ public class ComposeFragment extends Fragment {
         locationBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 // Set the fields to specify which types of place data to return
                 List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.PHOTO_METADATAS);
 
@@ -199,10 +205,57 @@ public class ComposeFragment extends Fragment {
             }
         });
 
-        // add photo button on click
-        photoBtn.setOnClickListener(new View.OnClickListener() {
+        // You can do the assignment inside onAttach or onCreate, i.e, before the activity is displayed
+        mediaActivityLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
+
+                        if (result.getResultCode() == getActivity().RESULT_OK) {
+
+                            if (result.getData().getData() == null) {
+
+                                // resize bitmap
+                                Uri takenPhotoUri = Uri.fromFile(getMediaFileUri(photoFileName, Environment.DIRECTORY_PICTURES));
+                                File resizedFile = getResizedImg(takenPhotoUri);
+
+                                // updates value of photoFile
+                                photoFile = resizedFile;
+                                loadImgIntoPreview();
+
+                                // Bitmap takenImage = BitmapFactory.decodeFile(resizedFile.getAbsolutePath());
+                                // sets other buttons to be not clickable
+                                showImgView();
+
+                            } else {
+                                // adjust view states to be visible
+                                vvPreview.setVisibility(View.VISIBLE);
+                                ivPreview.setVisibility(View.GONE);
+
+                                // sets other file to be null
+                                photoFile = null;
+
+                                // play recorded video
+                                playbackRecordedVideo(result.getData().getData());
+                            }
+                        } else {
+                            Snackbar noMedia = Snackbar.make(mediaBtn, "Media wasn't taken", Snackbar.LENGTH_SHORT);
+                            HelperClass.displaySnackBarWithBottomMargin(noMedia, 50, getContext());
+
+                            mediaBtn.setSelected(false);
+                        }
+                    }
+                });
+
+        // add media button on click
+        mediaBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                HelperClass.toggleButtonState(mediaBtn);
+                toggleMediaBtns(mediaBtn);
+
 
                 // Create a File reference for future access
                 photoFile = getMediaFileUri(photoFileName, Environment.DIRECTORY_PICTURES);
@@ -235,13 +288,21 @@ public class ComposeFragment extends Fragment {
                             loadImgIntoPreview();
 
                             showImgView();
+                        } else {
+                            HelperClass.toggleButtonState(galleryBtn);
                         }
                     }
                 });
+
         // gallery button on click
         galleryBtn.setOnClickListener(new View.OnClickListener() {
+
             @Override
             public void onClick(View v) {
+
+                HelperClass.toggleButtonState(galleryBtn);
+                toggleMediaBtns(galleryBtn);
+
                 onPickPhoto();
             }
         });
@@ -251,6 +312,10 @@ public class ComposeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 toggleAudioView();
+                toggleMediaBtns(audioBtn);
+
+                if (audioBtn.isSelected())
+                    setupRecorder();
             }
         });
 
@@ -258,6 +323,7 @@ public class ComposeFragment extends Fragment {
         recordBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 HelperClass.toggleButtonState(recordBtn);
 
                 if (recordBtn.isSelected()) {
@@ -312,6 +378,7 @@ public class ComposeFragment extends Fragment {
                         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                         try {
                             mediaPlayer.reset();
+                            Log.i(TAG, audioFile.getAbsolutePath());
                             mediaPlayer.setDataSource(audioFile.getAbsolutePath());
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -331,6 +398,29 @@ public class ComposeFragment extends Fragment {
                 }
             }
 
+        });
+
+        // clears all the ui elements and associated variables
+        clearBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mediaBtn.setSelected(false);
+                galleryBtn.setSelected(false);
+
+                if (audioBtn.isSelected()) {
+                    toggleAudioView();
+                }
+
+                // buttons are all clickable
+                setBtnState(true);
+
+                // media variables are null
+                clearMediaVariables();
+
+                ivPreview.setImageResource(0);
+                ivPreview.setVisibility(View.GONE);
+                vvPreview.setVisibility(View.GONE);
+            }
         });
 
         addBtn.setOnClickListener(new View.OnClickListener() {
@@ -356,6 +446,7 @@ public class ComposeFragment extends Fragment {
                 saveGuide(text, user, photoFile, videoFile, audioFile);
             }
         });
+
     }
 
     private void setupRecorder() {
@@ -374,11 +465,11 @@ public class ComposeFragment extends Fragment {
             mediaRecorder = new MediaRecorder();
 
             // creates audio file in podcast directory
-            audioFile = getMediaFileUri("audioguide.aac", Environment.DIRECTORY_PODCASTS);
+            audioFile = getMediaFileUri("audioguide.mp4", Environment.DIRECTORY_PODCASTS);
 
             // Set the audio format and encoder
             mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS);
+            mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
             mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
             mediaRecorder.setOutputFile(audioFile.getAbsolutePath());
         }
@@ -389,7 +480,6 @@ public class ComposeFragment extends Fragment {
         if (!audioBtn.isSelected()) {
             audioBtn.setSelected(true);
             recordingLayout.setVisibility(View.VISIBLE);
-            setupRecorder();
         } else {
             audioBtn.setSelected(false);
             recordingLayout.setVisibility(View.GONE);
@@ -412,9 +502,7 @@ public class ComposeFragment extends Fragment {
         Intent chooserIntent = Intent.createChooser(takePictureIntent, "Capture Image or Video");
         chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{takeVideoIntent});
 
-        // checks if the intent is valid
-        if (chooserIntent.resolveActivity(getContext().getPackageManager()) != null)
-            startActivityForResult(chooserIntent, CAPTURE_MEDIA_RESULT_CODE);
+        mediaActivityLauncher.launch(chooserIntent);
     }
 
     // Trigger gallery selection for a photo
@@ -442,9 +530,21 @@ public class ComposeFragment extends Fragment {
             guide.setPhoto(new ParseFile(photo));
         else if (video != null)
             guide.setVideo(new ParseFile(video));
-        else if (audio != null)
-            guide.setAudio(new ParseFile(audio));
+        else if (audio != null) {
 
+            // Save sound using input stream
+            // ref: https://stackoverflow.com/questions/43350226/android-how-to-upload-an-audio-file-with-parse-sdk
+            byte[] soundBytes;
+            try {
+                InputStream inputStream = getContext().getContentResolver().openInputStream(Uri.fromFile(audio));
+                soundBytes = new byte[inputStream.available()];
+                soundBytes = toByteArray(inputStream);
+                guide.setAudio(new ParseFile("audio.mp4", soundBytes));
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         // uploads new guide in the background
         guide.saveInBackground(new SaveCallback() {
             @Override
@@ -465,49 +565,6 @@ public class ComposeFragment extends Fragment {
                 getActivity().onBackPressed();
             }
         });
-    }
-
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable @org.jetbrains.annotations.Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == CAPTURE_MEDIA_RESULT_CODE) {
-
-            if (resultCode == getActivity().RESULT_OK) {
-
-                if (data.getData() == null) {
-
-                    // resize bitmap
-                    Uri takenPhotoUri = Uri.fromFile(getMediaFileUri(photoFileName, Environment.DIRECTORY_PICTURES));
-                    File resizedFile = getResizedImg(takenPhotoUri);
-
-                    // updates value of photoFile
-                    photoFile = resizedFile;
-                    loadImgIntoPreview();
-
-                    // Bitmap takenImage = BitmapFactory.decodeFile(resizedFile.getAbsolutePath());
-                    // sets other buttons to be not clickable
-                    showImgView();
-
-                } else {
-                    // adjust view states to be visible
-                    vvPreview.setVisibility(View.VISIBLE);
-                    ivPreview.setVisibility(View.GONE);
-
-                    // sets other file to be null
-                    photoFile = null;
-
-                    // play recorded video
-                    playbackRecordedVideo(data.getData());
-                }
-
-
-            }
-        } else { // Result was a failure
-            Toast.makeText(getContext(), "Media wasn't taken!", Toast.LENGTH_SHORT).show();
-        }
-
     }
 
     /*
@@ -554,6 +611,7 @@ public class ComposeFragment extends Fragment {
     }
 
     private void showImgView() {
+
         // adjust view states to be visible
         ivPreview.setVisibility(View.VISIBLE);
         vvPreview.setVisibility(View.GONE);
@@ -594,6 +652,7 @@ public class ComposeFragment extends Fragment {
                 });
             }
         });
+
         vvPreview.setVideoURI(videoUri);
         vvPreview.requestFocus();
         vvPreview.start();
@@ -673,5 +732,27 @@ public class ComposeFragment extends Fragment {
         return image;
     }
 
+    // makes selected button the only one clickable
+    public void toggleMediaBtns(ImageButton selected) {
+
+        setBtnState(false);
+        selected.setClickable(true);
+    }
+
+    // changes the state of all buttons
+    private void setBtnState(boolean state) {
+        audioBtn.setClickable(state);
+        mediaBtn.setClickable(state);
+        galleryBtn.setClickable(state);
+    }
+
+    private void clearMediaVariables() {
+        videoFile = null;
+        audioFile = null;
+        photoFile = null;
+
+        mediaPlayer = null;
+        mediaRecorder = null;
+    }
     //    TODO: add delete button for media
 }
