@@ -28,7 +28,7 @@ public class HelperClass {
 
     public static int picRadius = 25;
     public static int resizedImgDimen = 650;
-    public static int detailImgDimen = 650;
+    public static int detailImgDimen = 475;
 
     // gets location info from coordinates
     public static String getAddress(Context context, Double latitude, Double longitude) {

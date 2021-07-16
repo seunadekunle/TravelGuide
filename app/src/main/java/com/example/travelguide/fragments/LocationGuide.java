@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -44,6 +45,7 @@ public class LocationGuide extends Fragment {
     private TextView tvAddress;
     private ProgressBar pbLoading;
     protected SwipeRefreshLayout swipeContainer;
+    private ImageView expandedImgView;
 
     private static final String ARG_LAT = "lat";
     private static final String ARG_LONG = "long";
@@ -95,7 +97,7 @@ public class LocationGuide extends Fragment {
         swipeContainer = view.findViewById(R.id.swipeContainer);
 
         // Set the adapter of the recycler view
-        adapter = new GuidesAdapter(guideList, context);
+        adapter = new GuidesAdapter(guideList, context, view.findViewById(R.id.expandedImgView), view.findViewById(R.id.expandedImgViewBG), getActivity());
         rvGuides.setAdapter(adapter);
         rvGuides.setLayoutManager(new LinearLayoutManager(context));
 

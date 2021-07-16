@@ -8,7 +8,6 @@
     android:background="@color/off_white"
     tools:context=".fragments.LocationGuide">
 
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -41,8 +40,13 @@
                 tools:listitem="@layout/location_guide" />
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
     </LinearLayout>
+
+    <include
+        android:id="@+id/imgExpanded"
+        layout="@layout/image_expanded"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
     <ProgressBar
         android:id="@+id/pbLoading"
@@ -50,6 +54,4 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="@dimen/progress_bar_padding" />
-
-
 </FrameLayout>

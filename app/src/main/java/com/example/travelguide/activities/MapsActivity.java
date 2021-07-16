@@ -401,14 +401,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     // TODO: Add transition
     // sets the view state for the addGuide Button
-    public void hideAddBtn() {
-        addGuide.setVisibility(View.INVISIBLE);
-    }
+    public void hideAddBtn() { addGuide.setVisibility(View.INVISIBLE); }
 
     // sets the view state for the addGuide Button
     public void showAddBtn() {
         addGuide.setVisibility(View.VISIBLE);
     }
+
 
     public void zoomToLocation(LatLng location){
         map.animateCamera(CameraUpdateFactory.newLatLngZoom(location, DEFAULT_ZOOM));
