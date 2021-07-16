@@ -12,7 +12,7 @@
             <size
                 android:width="@dimen/add_guide_media_btn"
                 android:height="@dimen/add_guide_media_btn" />
-            <solid android:color="@color/white" />
+            <solid android:color="@color/media_button_selected" />
             <corners android:radius="@dimen/corner_radius" />
 
         </shape>

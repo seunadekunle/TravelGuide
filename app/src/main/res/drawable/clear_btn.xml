@@ -18,6 +18,6 @@
         </shape>
     </item>
 
-    <item android:drawable="@drawable/ic_graphic_eq" />
+    <item android:drawable="@drawable/ic_clear_btn" />
 
 </layer-list>

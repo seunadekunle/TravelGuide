@@ -64,48 +64,62 @@
                 android:inputType="textMultiLine" />
         </LinearLayout>
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
-            android:layout_marginBottom="7.5dp"
-            android:orientation="horizontal">
+            android:layout_marginBottom="7.5dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/photoBtn"
+                    android:layout_width="@dimen/add_guide_media_btn"
+                    android:layout_height="@dimen/add_guide_media_btn"
+                    android:background="@android:color/transparent"
+                    android:contentDescription="@string/add_photo"
+                    android:src="@drawable/image_btn_bg" />
+
+                <ImageButton
+                    android:id="@+id/galleryBtn"
+                    android:layout_width="@dimen/add_guide_media_btn"
+                    android:layout_height="@dimen/add_guide_media_btn"
+                    android:layout_marginStart="25dp"
+                    android:background="@android:color/transparent"
+                    android:contentDescription="@string/add_photo"
+                    android:src="@drawable/gallery_btn_bg" />
+
+                <ImageButton
+                    android:id="@+id/audioBtn"
+                    android:layout_width="@dimen/add_guide_media_btn"
+                    android:layout_height="@dimen/add_guide_media_btn"
+                    android:layout_marginStart="25dp"
+                    android:background="@android:color/transparent"
+                    android:contentDescription="@string/add_audio"
+                    android:src="@drawable/audio_btn_bg" />
+
+            </LinearLayout>
 
             <ImageButton
-                android:id="@+id/photoBtn"
-                android:layout_width="@dimen/add_guide_media_btn"
-                android:layout_height="@dimen/add_guide_media_btn"
-                android:background="@android:color/transparent"
-                android:contentDescription="@string/add_photo"
-                android:src="@drawable/image_btn_bg" />
-
-            <ImageButton
-                android:id="@+id/galleryBtn"
+                android:id="@+id/clearBtn"
                 android:layout_width="@dimen/add_guide_media_btn"
                 android:layout_height="@dimen/add_guide_media_btn"
                 android:layout_marginStart="25dp"
                 android:background="@android:color/transparent"
-                android:contentDescription="@string/add_photo"
-                android:src="@drawable/gallery_btn_bg" />
-
-            <ImageButton
-                android:id="@+id/audioBtn"
-                android:layout_width="@dimen/add_guide_media_btn"
-                android:layout_height="@dimen/add_guide_media_btn"
-                android:layout_marginStart="25dp"
-                android:background="@android:color/transparent"
-                android:contentDescription="@string/add_audio"
-                android:src="@drawable/audio_btn_bg" />
-
-        </LinearLayout>
-
+                android:contentDescription="@string/delete_media"
+                android:src="@drawable/clear_btn_bg"
+                android:layout_alignParentEnd="true"/>
+        </RelativeLayout>
 
         <LinearLayout
             android:id="@+id/recordingLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:layout_margin="40dp"
+            android:orientation="vertical"
             android:visibility="gone">
 
             <include
@@ -121,7 +135,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="20dp"
-                android:visibility="gone"/>
+                android:visibility="gone" />
 
         </LinearLayout>
 
