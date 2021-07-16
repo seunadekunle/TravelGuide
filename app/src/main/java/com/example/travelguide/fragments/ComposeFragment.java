@@ -35,13 +35,14 @@ import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.example.travelguide.R;
-import com.example.travelguide.activities.MapsActivity;
 import com.example.travelguide.classes.Guide;
 import com.example.travelguide.helpers.BitmapScaler;
 import com.example.travelguide.helpers.HelperClass;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.Autocomplete;
+import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.android.material.snackbar.Snackbar;
 import com.parse.ParseException;
@@ -77,8 +78,7 @@ public class ComposeFragment extends Fragment {
     private static final String ARG_LONG = "longitude";
     private static final String ARG_LAT = "latitude";
 
-    private static final int CAPTURE_MEDIA_RESULT_CODE = 34;
-    public static final int PICK_PHOTO_GALLERY_CODE = 1046;
+    public static final int AUTOCOMPLETE_REQUEST_CODE = 1;
 
     private final String photoFileName = "photo.jpg";
     private final String videoFileName = "video.mp4";
@@ -90,8 +90,10 @@ public class ComposeFragment extends Fragment {
     MediaPlayer mediaPlayer;
     private int playerPos;
 
+    // Activity Result Launcher
     ActivityResultLauncher<Intent> galleryActivityLauncher;
     ActivityResultLauncher<Intent> mediaActivityLauncher;
+    ActivityResultLauncher<Intent> searchActivityLauncher;
 
     // parameters for passing data
     private Double longParam;
@@ -185,27 +187,41 @@ public class ComposeFragment extends Fragment {
             // gets location info from coordinates and sets button text
             setButtonText(HelperClass.getAddress(getContext(), latParam, longParam));
 
+        setActivityLaunchers();
         setClickListeners();
     }
 
-    private void setClickListeners() {
-        // button click listener to add new guide
-        locationBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
 
-                // Set the fields to specify which types of place data to return
-                List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.PHOTO_METADATAS);
+    private void setActivityLaunchers() {
+        // assignment for google places search activity
+        searchActivityLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
 
-                // Start the autocomplete intent.
-                Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fields)
-                        .build(getContext());
-                // ensure that the request code is the one defined in MapsActivity
-                getActivity().startActivityForResult(intent, MapsActivity.AUTOCOMPLETE_REQUEST_CODE);
-            }
-        });
+                        // if result code is ok set the location for the new guide
+                        if (result.getResultCode() == getActivity().RESULT_OK) {
 
-        // You can do the assignment inside onAttach or onCreate, i.e, before the activity is displayed
+                            Place place = Autocomplete.getPlaceFromIntent(result.getData());
+                            setLocation(place);
+                        } else if (result.getResultCode() == AutocompleteActivity.RESULT_ERROR) {
+
+                            Status status = Autocomplete.getStatusFromIntent(result.getData());
+                            Log.i(TAG, status.getStatusMessage());
+                        } else if (result.getResultCode() == getActivity().RESULT_CANCELED) {
+
+                            if (getLocation() == null)
+
+                                // tell the user they didn't select a location
+                                Snackbar.make(addBtn, R.string.location_not_selected, Snackbar.LENGTH_SHORT).show();
+                        }
+                        return;
+
+                    }
+                });
+
+        // set launcher for photo/video intent
         mediaActivityLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 new ActivityResultCallback<ActivityResult>() {
@@ -243,10 +259,55 @@ public class ComposeFragment extends Fragment {
                             Snackbar noMedia = Snackbar.make(mediaBtn, "Media wasn't taken", Snackbar.LENGTH_SHORT);
                             HelperClass.displaySnackBarWithBottomMargin(noMedia, 50, getContext());
 
-                            mediaBtn.setSelected(false);
+                            HelperClass.toggleButtonState(mediaBtn);
+                            setBtnState(true);
                         }
                     }
                 });
+
+        // set launcher for gallery activity
+        galleryActivityLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
+
+                        if (result.getData() != null) {
+
+                            // gets image data from gallery
+                            Uri photoUri = result.getData().getData();
+
+                            Log.i(TAG, String.valueOf(photoUri));
+                            photoFile = getResizedImg(photoUri);
+                            loadImgIntoPreview();
+
+                            showImgView();
+                        } else {
+                            HelperClass.toggleButtonState(galleryBtn);
+                            setBtnState(true);
+                        }
+                    }
+                });
+    }
+
+    private void setClickListeners() {
+
+        // button click listener to add new guide
+        locationBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                // Set the fields to specify which types of place data to return
+                List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.PHOTO_METADATAS);
+
+                // Start the autocomplete intent.
+                Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fields)
+                        .build(getContext());
+
+                searchActivityLauncher.launch(intent);
+            }
+        });
+
 
         // add media button on click
         mediaBtn.setOnClickListener(new View.OnClickListener() {
@@ -270,29 +331,6 @@ public class ComposeFragment extends Fragment {
                 onPickMedia(photoUri, videoUri);
             }
         });
-
-        // You can do the assignment inside onAttach or onCreate, i.e, before the activity is displayed
-        galleryActivityLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                new ActivityResultCallback<ActivityResult>() {
-                    @Override
-                    public void onActivityResult(ActivityResult result) {
-
-                        if (result.getData() != null) {
-
-                            // gets image data from gallery
-                            Uri photoUri = result.getData().getData();
-
-                            Log.i(TAG, String.valueOf(photoUri));
-                            photoFile = getResizedImg(photoUri);
-                            loadImgIntoPreview();
-
-                            showImgView();
-                        } else {
-                            HelperClass.toggleButtonState(galleryBtn);
-                        }
-                    }
-                });
 
         // gallery button on click
         galleryBtn.setOnClickListener(new View.OnClickListener() {
@@ -362,7 +400,6 @@ public class ComposeFragment extends Fragment {
 
                         playLayout.setVisibility(View.VISIBLE);
                     }
-
                 }
             }
         });
@@ -397,7 +434,6 @@ public class ComposeFragment extends Fragment {
                     }
                 }
             }
-
         });
 
         // clears all the ui elements and associated variables
@@ -576,13 +612,13 @@ public class ComposeFragment extends Fragment {
 
         // get image from disk
         Bitmap rawTakenImage = loadFromUri(takenPhotoUri);
-        Log.i(TAG, String.valueOf(rawTakenImage));
         Bitmap resizedBitmap = BitmapScaler.scaleToFitWidth(rawTakenImage, HelperClass.resizedImgDimen);
 
         // Configure byte output stream
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         // Compress the image further
         resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 40, bytes);
+
         // Create a new file for the resized bitmap (`getPhotoFileUri` defined above)
         File resizedFile = getMediaFileUri("resized_" + photoFileName, Environment.DIRECTORY_PICTURES);
         try {

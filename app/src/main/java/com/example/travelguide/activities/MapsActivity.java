@@ -64,7 +64,6 @@ import java.util.List;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
-    public static final int AUTOCOMPLETE_REQUEST_CODE = 1;
     private static final String TAG = MapsActivity.class.getSimpleName();
     private int fragmentsFrameId;
 
@@ -410,33 +409,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void showAddBtn() {
         addGuide.setVisibility(View.VISIBLE);
     }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-
-        if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
-
-            // if result code is ok set the location for the new guide
-            if (resultCode == RESULT_OK) {
-
-                Place place = Autocomplete.getPlaceFromIntent(data);
-                composeFragment.setLocation(place);
-            } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
-
-                Status status = Autocomplete.getStatusFromIntent(data);
-                Log.i(TAG, status.getStatusMessage());
-            } else if (resultCode == RESULT_CANCELED) {
-
-                if (composeFragment.getLocation() == null)
-                    // tell the user they didn't select a location
-                    Snackbar.make(addGuide, R.string.location_not_selected, Snackbar.LENGTH_SHORT).show();
-            }
-            return;
-        }
-
-        super.onActivityResult(requestCode, resultCode, data);
-    }
-
 
     public void zoomToLocation(LatLng location){
         map.animateCamera(CameraUpdateFactory.newLatLngZoom(location, DEFAULT_ZOOM));
