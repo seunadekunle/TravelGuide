@@ -29,6 +29,7 @@ public class StartActivity extends AppCompatActivity {
 
     private FragmentManager fragmentManager;
     private LoginFragment loginFragment;
+    private LoginFragment signUpFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +46,8 @@ public class StartActivity extends AppCompatActivity {
         getSupportActionBar().hide();
 
         fragmentManager = getSupportFragmentManager();
-        loginFragment = new LoginFragment();
+        loginFragment = LoginFragment.newInstance("Login");
+        signUpFragment = LoginFragment.newInstance("Signup");
 
         entryFrameId = R.id.entryForm;
         loginBtn = binding.loginBtn;
@@ -55,6 +57,7 @@ public class StartActivity extends AppCompatActivity {
         loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
 
                 // goes to login fragment
                 FragmentTransaction ft = fragmentManager.beginTransaction();
@@ -66,7 +69,10 @@ public class StartActivity extends AppCompatActivity {
         signupBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                // goes to login fragment
+                FragmentTransaction ft = fragmentManager.beginTransaction();
+                ft.replace(entryFrameId, signUpFragment);
+                HelperClass.finishTransaction(ft, TAG, (Fragment) loginFragment);
             }
         });
     }

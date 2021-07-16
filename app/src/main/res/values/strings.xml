@@ -22,4 +22,6 @@
     <string name="login_failed">"Login failed"</string>
     <string name="sign_up">Sign Up</string>
     <string name="log_in">Log in</string>
+    <string name="empty_fields">Fields are empty</string>
+    <string name="sign_up_failed">Sorry, the Sign Up Failed</string>
 </resources>

@@ -28,6 +28,7 @@ import com.example.travelguide.classes.Guide;
 import com.example.travelguide.databinding.ActivityMapsBinding;
 import com.example.travelguide.fragments.ComposeFragment;
 import com.example.travelguide.fragments.LocationGuide;
+import com.example.travelguide.helpers.DeviceDimenHelper;
 import com.example.travelguide.helpers.HelperClass;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -134,7 +135,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         fragmentsFrameId = R.id.fragmentsFrame;
         fragmentManager = getSupportFragmentManager();
 
-        setWindowDimen();
+        height = DeviceDimenHelper.getDisplayHeight(this);
+        width = DeviceDimenHelper.getDisplayWidth(this);
 
         initializeMap();
 
@@ -172,15 +174,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (mapFragment != null) {
             mapFragment.getMapAsync(this);
         }
-    }
-
-    // gets the dimensions of the screen the app is loading at
-    private void setWindowDimen() {
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        this.getDisplay().getRealMetrics(displayMetrics);
-
-        height = displayMetrics.heightPixels;
-        width = displayMetrics.widthPixels;
     }
 
     /**
