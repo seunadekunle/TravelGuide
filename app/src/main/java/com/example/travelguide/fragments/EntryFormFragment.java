@@ -16,7 +16,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.travelguide.R;
 import com.example.travelguide.activities.StartActivity;
-import com.example.travelguide.databinding.FragmentLoginBinding;
+import com.example.travelguide.databinding.FragmentEntryBinding;
 import com.example.travelguide.helpers.HelperClass;
 import com.google.android.material.snackbar.Snackbar;
 import com.parse.LogInCallback;
@@ -33,7 +33,7 @@ public class EntryFormFragment extends Fragment {
 
     private static final String INVALID_ENTRY_DATA_ERROR = "Invalid username/password.";
 
-    private FragmentLoginBinding binding;
+    private FragmentEntryBinding binding;
     private String entryState;
 
     private ProgressBar loadingProgressBar;
@@ -77,7 +77,7 @@ public class EntryFormFragment extends Fragment {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
-        binding = FragmentLoginBinding.inflate(inflater, container, false);
+        binding = FragmentEntryBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 

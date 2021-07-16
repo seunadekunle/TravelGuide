@@ -261,6 +261,7 @@ public class ComposeFragment extends Fragment {
 
                             HelperClass.toggleButtonState(mediaBtn);
                             setBtnState(true);
+                            clearMediaVariables();
                         }
                     }
                 });
@@ -285,6 +286,7 @@ public class ComposeFragment extends Fragment {
                         } else {
                             HelperClass.toggleButtonState(galleryBtn);
                             setBtnState(true);
+                            clearMediaVariables();
                         }
                     }
                 });
