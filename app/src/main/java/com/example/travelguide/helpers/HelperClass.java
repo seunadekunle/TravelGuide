@@ -8,6 +8,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageButton;
 
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
@@ -77,9 +78,7 @@ public class HelperClass {
                 Manifest.permission.ACCESS_FINE_LOCATION
         };
 
-        if (!hasPermissions(activity.getApplicationContext(), PERMISSIONS)) {
-            ActivityCompat.requestPermissions(activity, PERMISSIONS, PERMISSION_ALL);
-        }
+        ActivityCompat.requestPermissions(activity, PERMISSIONS, PERMISSION_ALL);
     }
 
     // checks if the permissions passsd have been granted
@@ -111,7 +110,10 @@ public class HelperClass {
         return fragmentManager.getBackStackEntryCount() == 0;
     }
 
-    
+    // changes the ui state of button
+    public static void toggleButtonState(ImageButton button) {
+        button.setSelected(!button.isSelected());
+    }
 
 
 }

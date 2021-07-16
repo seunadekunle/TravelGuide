@@ -5,12 +5,12 @@
     android:orientation="horizontal">
 
     <ImageButton
-        android:id="@+id/recordBtn"
+        android:id="@+id/playBtn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:background="@android:color/transparent"
         android:contentDescription="@string/add_audio"
-        android:src="@drawable/audio_record_btn_bg" />
+        android:src="@drawable/audio_play_btn_bg" />
 
 </LinearLayout>

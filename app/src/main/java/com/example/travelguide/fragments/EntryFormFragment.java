@@ -17,26 +17,29 @@ import androidx.fragment.app.Fragment;
 import com.example.travelguide.R;
 import com.example.travelguide.activities.StartActivity;
 import com.example.travelguide.databinding.FragmentLoginBinding;
-import com.example.travelguide.databinding.FragmentLoginBinding;
 import com.example.travelguide.helpers.HelperClass;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.snackbar.Snackbar;
 import com.parse.LogInCallback;
 import com.parse.ParseException;
 import com.parse.ParseUser;
 import com.parse.SignUpCallback;
 
-public class LoginFragment extends Fragment {
+public class EntryFormFragment extends Fragment {
 
-    private static final String TAG = "LoginFragment";
+    private static final String TAG = "EntryFormFragment";
     private static final String ARG_TYPE = "type";
 
     private FragmentLoginBinding binding;
     private String entryState;
 
+    private ProgressBar loadingProgressBar;
+    private EditText usernameEditText;
+    private EditText passwordEditText;
+    private Button loginButton;
+    private Button signUpButton;
 
     // empty constructor is required
-    public LoginFragment() {
+    public EntryFormFragment() {
 
     }
 
@@ -44,8 +47,8 @@ public class LoginFragment extends Fragment {
      * @param type Parameter 1.
      * @return A new instance of fragment ComposeFragment.
      */
-    public static LoginFragment newInstance(String type) {
-        LoginFragment fragment = new LoginFragment();
+    public static EntryFormFragment newInstance(String type) {
+        EntryFormFragment fragment = new EntryFormFragment();
         Bundle args = new Bundle();
 
         args.putString(ARG_TYPE, type);
@@ -78,19 +81,18 @@ public class LoginFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        final EditText usernameEditText = binding.username;
-        final EditText passwordEditText = binding.password;
-        final Button loginButton = binding.login;
-        final Button signUpButton = binding.signup;
-        final ProgressBar loadingProgressBar = binding.loading;
+        usernameEditText = binding.username;
+        passwordEditText = binding.password;
+        loginButton = binding.login;
+        signUpButton = binding.signup;
+        loadingProgressBar = binding.loading;
 
 
         // changes the action button based on entry state
-        if (entryState.equals("Signup")){
+        if (entryState.equals("Signup")) {
             signUpButton.setVisibility(View.VISIBLE);
             loginButton.setVisibility(View.GONE);
-        }
-        else if (entryState.equals("Login")){
+        } else if (entryState.equals("Login")) {
             signUpButton.setVisibility(View.GONE);
             loginButton.setVisibility(View.VISIBLE);
         }
@@ -98,7 +100,6 @@ public class LoginFragment extends Fragment {
         signUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                loadingProgressBar.setVisibility(View.VISIBLE);
                 signUpUser(usernameEditText.getText().toString(), passwordEditText.getText().toString());
             }
         });
@@ -106,7 +107,6 @@ public class LoginFragment extends Fragment {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                loadingProgressBar.setVisibility(View.VISIBLE);
                 loginUser(usernameEditText.getText().toString(), passwordEditText.getText().toString());
             }
         });
@@ -117,39 +117,40 @@ public class LoginFragment extends Fragment {
         Log.i(TAG, "username" + username);
         Log.i(TAG, "password" + password);
 
-        ParseUser.logInInBackground(username, password, new LogInCallback() {
-            @Override
-            public void done(ParseUser user, ParseException e) {
-                if (e != null) {
+        if (isInputValid(username, password)) {
 
-                    Log.e(TAG, "Issue with login", e);
-                    return;
+            loadingProgressBar.setVisibility(View.VISIBLE);
+            ParseUser.logInInBackground(username, password, new LogInCallback() {
+                @Override
+                public void done(ParseUser user, ParseException e) {
+                    if (e != null) {
+
+                        if (e.getMessage().equals(getString(R.string.error_invalid_credentials))) {
+                            showSignUpState(R.string.error_invalid_credentials);
+                            loadingProgressBar.setVisibility(View.GONE);
+                        }
+                        Log.e(TAG, "Issue with login " + e.getMessage());
+                        return;
+                    }
+
+                    ((StartActivity) getActivity()).navigateToMapView();
                 }
+            });
 
-                ((StartActivity) getActivity()).navigateToMapView();
-            }
-        });
+        }
     }
 
 
     private void signUpUser(String username, String password) {
 
         // if username or password is empty show error meessage
-        if (username.isEmpty() && password.isEmpty()) {
-            showSignUpState(R.string.empty_fields);
-            return;
-        } else if (username.isEmpty()) {
-            showSignUpState(R.string.invalid_username);
-            return;
-        } else if (username.isEmpty()) {
-            showSignUpState(R.string.invalid_password);
-            return;
-        } else {
+        if (isInputValid(username, password)) {
             // create a new parse user
             ParseUser user = new ParseUser();
             user.setUsername(username);
             user.setPassword(password);
 
+            loadingProgressBar.setVisibility(View.VISIBLE);
             // signs the user up in background
             user.signUpInBackground(new SignUpCallback() {
                 @Override
@@ -167,11 +168,27 @@ public class LoginFragment extends Fragment {
         }
     }
 
+    // returns if the entered values are valid
+    private boolean isInputValid(String username, String password) {
+
+        if (username.isEmpty() && password.isEmpty()) {
+            showSignUpState(R.string.empty_fields);
+            return false;
+        } else if (username.isEmpty()) {
+            showSignUpState(R.string.invalid_username);
+            return false;
+        } else if (password.isEmpty()) {
+            showSignUpState(R.string.invalid_password);
+            return false;
+        }
+
+        return true;
+    }
 
     // shows the sign up state
-    public void showSignUpState(@StringRes Integer stateString){
+    private void showSignUpState(@StringRes Integer stateString) {
         Snackbar stateText = Snackbar.make(getView(), stateString, Snackbar.LENGTH_SHORT);
-        HelperClass.displaySnackBarWithBottomMargin(stateText, 80, getActivity());
+        HelperClass.displaySnackBarWithBottomMargin(stateText, 500, getActivity());
     }
 
     @Override

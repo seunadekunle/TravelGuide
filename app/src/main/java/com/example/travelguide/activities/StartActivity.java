@@ -12,8 +12,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.example.travelguide.R;
 import com.example.travelguide.databinding.ActivityStartBinding;
-import com.example.travelguide.fragments.ComposeFragment;
-import com.example.travelguide.fragments.LoginFragment;
+import com.example.travelguide.fragments.EntryFormFragment;
 import com.example.travelguide.helpers.HelperClass;
 import com.parse.ParseUser;
 
@@ -28,8 +27,8 @@ public class StartActivity extends AppCompatActivity {
     private int entryFrameId;
 
     private FragmentManager fragmentManager;
-    private LoginFragment loginFragment;
-    private LoginFragment signUpFragment;
+    private EntryFormFragment entryFormFragment;
+    private EntryFormFragment signUpFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,8 +45,8 @@ public class StartActivity extends AppCompatActivity {
         getSupportActionBar().hide();
 
         fragmentManager = getSupportFragmentManager();
-        loginFragment = LoginFragment.newInstance("Login");
-        signUpFragment = LoginFragment.newInstance("Signup");
+        entryFormFragment = EntryFormFragment.newInstance("Login");
+        signUpFragment = EntryFormFragment.newInstance("Signup");
 
         entryFrameId = R.id.entryForm;
         loginBtn = binding.loginBtn;
@@ -61,8 +60,8 @@ public class StartActivity extends AppCompatActivity {
 
                 // goes to login fragment
                 FragmentTransaction ft = fragmentManager.beginTransaction();
-                ft.replace(entryFrameId, loginFragment);
-                HelperClass.finishTransaction(ft, TAG, (Fragment) loginFragment);
+                ft.replace(entryFrameId, entryFormFragment);
+                HelperClass.finishTransaction(ft, TAG, (Fragment) entryFormFragment);
             }
         });
 
@@ -72,7 +71,7 @@ public class StartActivity extends AppCompatActivity {
                 // goes to login fragment
                 FragmentTransaction ft = fragmentManager.beginTransaction();
                 ft.replace(entryFrameId, signUpFragment);
-                HelperClass.finishTransaction(ft, TAG, (Fragment) loginFragment);
+                HelperClass.finishTransaction(ft, TAG, (Fragment) entryFormFragment);
             }
         });
     }

@@ -36,7 +36,8 @@
         <SearchView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fitsSystemWindows="false" />
+            android:fitsSystemWindows="false"
+            android:iconifiedByDefault="true"/>
     </FrameLayout>
 
     <ProgressBar

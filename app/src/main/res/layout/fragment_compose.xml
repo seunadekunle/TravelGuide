@@ -99,18 +99,36 @@
 
         </LinearLayout>
 
-        <include
+
+        <LinearLayout
             android:id="@+id/recordingLayout"
-            layout="@layout/recording_layout"
             android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:layout_gravity="center"
-            android:visibility="gone"/>
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_margin="40dp"
+            android:visibility="gone">
+
+            <include
+                layout="@layout/recording_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center" />
+
+            <include
+                android:id="@+id/playLayout"
+                layout="@layout/play_audio_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="20dp"
+                android:visibility="gone"/>
+
+        </LinearLayout>
 
         <ImageView
             android:id="@+id/ivPreview"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="200dp"
             android:layout_gravity="center"
             android:layout_marginTop="40dp"
             android:visibility="gone"
