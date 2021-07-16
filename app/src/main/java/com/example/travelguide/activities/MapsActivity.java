@@ -116,16 +116,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // verify that we have storage permissions
-        HelperClass.verifyStoragePermissions(this);
+        // verify that we have permissions
+        HelperClass.verifyPermissions(this);
+
+        // Prompt the user for permission.
+        getLocationPermission();
 
         // Initialize Places SDK
         Places.initialize(getApplicationContext(), getResources().getString(R.string.google_maps_key));
         // Create a new PlacesClient instance
         PlacesClient placesClient = Places.createClient(this);
-
-        if (ParseUser.getCurrentUser() == null)
-            loginUser("seun", "seun");
 
         // bind ui element to variable
         addGuide = binding.addGuide;
@@ -153,7 +153,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if (!composeFragment.isAdded())
                     ft.add(fragmentsFrameId, composeFragment);
 
-                finishTransaction(ft, ComposeFragment.TAG, (Fragment) composeFragment);
+                HelperClass.finishTransaction(ft, ComposeFragment.TAG, (Fragment) composeFragment);
                 hideAddBtn();
             }
         });
@@ -198,6 +198,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // Prompt the user for permission.
         getLocationPermission();
+
         // Turn on the My Location layer and the related control on the map.
         updateLocationUI();
         // get list of currrent guides
@@ -222,25 +223,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 ft.replace(fragmentsFrameId, locationGuide);
 
                 // complete the transaction
-                finishTransaction(ft, LocationGuide.TAG, (Fragment) locationGuide);
+                HelperClass.finishTransaction(ft, LocationGuide.TAG, (Fragment) locationGuide);
                 hideAddBtn();
 
                 return true;
             }
         });
 
-    }
-
-    // completes fragment transaction
-    private void finishTransaction(FragmentTransaction ft, String name, Fragment fragment) {
-
-        // add transaction to backstack
-        ft.addToBackStack(name);
-        // show fragment
-        ft.show(fragment);
-
-        // Complete the changes added above
-        ft.commit();
     }
 
 
@@ -330,13 +319,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             if (locationPermissionGranted) {
                 map.setMyLocationEnabled(true);
                 map.getUiSettings().setMyLocationButtonEnabled(true);
+                getDeviceLocation();
             } else {
                 map.setMyLocationEnabled(false);
                 map.getUiSettings().setMyLocationButtonEnabled(false);
                 lastKnownLocation = null;
 
                 // call location permissions dialog again
-                getLocationPermission();
+//                getLocationPermission();
             }
         } catch (SecurityException e) {
             Log.e("Exception: %s", e.getMessage());
@@ -361,15 +351,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             lastKnownLocation = task.getResult();
                             if (lastKnownLocation != null) {
                                 LatLng currentLocation = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
-                                map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, DEFAULT_ZOOM));
+                                zoomToLocation(currentLocation);
 
                                 // sends current location data to compose fragment
                                 composeFragment.setLocation(new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()));
                             }
                         } else {
                             Log.e(TAG, "Exception: %s", task.getException());
-                            map.moveCamera(CameraUpdateFactory
-                                    .newLatLngZoom(defaultLocation, DEFAULT_ZOOM));
+                            zoomToLocation(defaultLocation);
                             map.getUiSettings().setMyLocationButtonEnabled(false);
                         }
                     }
@@ -403,10 +392,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onBackPressed() {
 
         // if there are no stacks showing go to home screen
-        if (emptyBackStack())
+        if (HelperClass.emptyBackStack(fragmentManager))
             super.onBackPressed();
 
-        if (!emptyBackStack()) {
+        // if the stack isn't empty
+        if (!HelperClass.emptyBackStack(fragmentManager)) {
             fragmentManager.popBackStack();
 
             // is back stack empty set addGuide button to be visible and refresh page
@@ -415,11 +405,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 showAddBtn();
             }
         }
-    }
-
-    // if the fragment manager stack is empty
-    public boolean emptyBackStack() {
-        return fragmentManager.getBackStackEntryCount() == 0;
     }
 
     // TODO: Add transition
@@ -459,24 +444,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    // logs in the user using Parse
-    private void loginUser(String username, String password) {
-        Log.i(TAG, "username" + username);
-        Log.i(TAG, "password" + password);
-        ;
-        ParseUser.logInInBackground(username, password, new LogInCallback() {
-            @Override
-            public void done(ParseUser user, ParseException e) {
-                if (e != null) {
-//                    showLoginState(R.string.login_failed);
-                    Log.e(TAG, "Issue with login", e);
-                    return;
-                }
-            }
-        });
+
+    public void zoomToLocation(LatLng location){
+        map.animateCamera(CameraUpdateFactory.newLatLngZoom(location, DEFAULT_ZOOM));
     }
-
-
     // TODO: add zoom when navigating from adding new guide
 
 }
