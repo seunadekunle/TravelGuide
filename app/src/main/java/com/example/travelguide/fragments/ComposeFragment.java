@@ -81,13 +81,13 @@ public class ComposeFragment extends Fragment {
 
     private final String photoFileName = "photo.jpg";
     private final String videoFileName = "video.mp4";
-    private String audioFileName = "";
+    private File audioFile;
     private File photoFile;
     private File videoFile;
 
     MediaRecorder mediaRecorder;
     MediaPlayer mediaPlayer;
-
+    private int playerPos;
 
     ActivityResultLauncher<Intent> galleryActivityLauncher;
 
@@ -176,10 +176,6 @@ public class ComposeFragment extends Fragment {
         recordBtn = view.findViewById(R.id.recordBtn);
         playBtn = view.findViewById(R.id.playBtn);
 
-        // Create media recorder and player
-        mediaRecorder = new MediaRecorder();
-        mediaPlayer = new MediaPlayer();
-
         if (latParam != null && longParam != null)
             // gets location info from coordinates and sets button text
             setButtonText(HelperClass.getAddress(getContext(), latParam, longParam));
@@ -209,7 +205,7 @@ public class ComposeFragment extends Fragment {
             public void onClick(View v) {
 
                 // Create a File reference for future access
-                photoFile = getPhotoFileUri(photoFileName);
+                photoFile = getMediaFileUri(photoFileName, Environment.DIRECTORY_PICTURES);
                 videoFile = getVideoFileUri(videoFileName);
 
                 // wrap File object into a content provider
@@ -246,7 +242,7 @@ public class ComposeFragment extends Fragment {
         galleryBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onPickPhoto(v);
+                onPickPhoto();
             }
         });
 
@@ -255,33 +251,6 @@ public class ComposeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 toggleAudioView();
-
-                if (audioBtn.isSelected()) {
-
-                    // Verify that the device has a mic first
-                    PackageManager pmanager = getContext().getPackageManager();
-                    if (pmanager.hasSystemFeature(PackageManager.FEATURE_MICROPHONE)) {
-
-                        // Set the file location for the audio
-                        audioFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
-                        audioFileName += "/audiorecordtest.3gp";
-
-                        // Set the audio format and encoder
-                        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-                        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-                        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-
-                        // Setup the output location
-                        mediaRecorder.setOutputFile(audioFileName);
-
-                    } else {
-                        // no mic on device
-                        Snackbar emptyText = Snackbar.make(etText, R.string.no_recorder, Snackbar.LENGTH_SHORT);
-                        HelperClass.displaySnackBarWithBottomMargin(emptyText, 80, getActivity());
-                        toggleAudioView();
-                    }
-                }
-
             }
         });
 
@@ -292,10 +261,8 @@ public class ComposeFragment extends Fragment {
                 HelperClass.toggleButtonState(recordBtn);
 
                 if (recordBtn.isSelected()) {
-
                     // Start recording the audio
                     try {
-                        Log.i(TAG, "recording started");
                         mediaRecorder.prepare();
                         mediaRecorder.start();
 
@@ -306,13 +273,30 @@ public class ComposeFragment extends Fragment {
 
                     Log.i(TAG, "recording stopped");
 
-                    // Stop recording the audio
-                    mediaRecorder.stop();
-                    mediaRecorder.reset();
-                    mediaRecorder.release();
+                    if (mediaRecorder != null) {
 
-                    recordBtn.setClickable(false);
-                    playLayout.setVisibility(View.VISIBLE);
+                        // Stop recording the audio
+                        mediaRecorder.stop();
+                        mediaRecorder.reset();
+                        mediaRecorder.release();
+
+                        // can't record again
+                        recordBtn.setClickable(false);
+
+                        // variables to play audio
+                        playerPos = 0;
+                        mediaPlayer = new MediaPlayer();
+                        // toggles button once audio is finished playing
+                        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                            @Override
+                            public void onCompletion(MediaPlayer mp) {
+                                HelperClass.toggleButtonState(playBtn);
+                            }
+                        });
+
+                        playLayout.setVisibility(View.VISIBLE);
+                    }
+
                 }
             }
         });
@@ -322,26 +306,31 @@ public class ComposeFragment extends Fragment {
             public void onClick(View v) {
 
                 HelperClass.toggleButtonState(playBtn);
+                // plays or pause audio based on button state
+                if (mediaPlayer != null) {
+                    if (playBtn.isSelected()) {
+                        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                        try {
+                            mediaPlayer.reset();
+                            mediaPlayer.setDataSource(audioFile.getAbsolutePath());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        try {
+                            mediaPlayer.prepare();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
 
-                if (playBtn.isSelected()) {
-                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                    try {
-                        mediaPlayer.reset();
-                        mediaPlayer.setDataSource(audioFileName);
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                        mediaPlayer.seekTo(playerPos);
+                        mediaPlayer.start();
+                    } else {
+                        playerPos = mediaPlayer.getCurrentPosition();
+                        mediaPlayer.pause();
                     }
-                    try {
-                        mediaPlayer.prepare();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                    // start to play the audio
-                    mediaPlayer.start();
-                    mediaPlayer.getCurrentPosition();
                 }
             }
+
         });
 
         addBtn.setOnClickListener(new View.OnClickListener() {
@@ -364,9 +353,35 @@ public class ComposeFragment extends Fragment {
                 }
 
                 ParseUser user = ParseUser.getCurrentUser();
-                saveGuide(text, user, photoFile, videoFile);
+                saveGuide(text, user, photoFile, videoFile, audioFile);
             }
         });
+    }
+
+    private void setupRecorder() {
+        // Verify that the device has a mic first
+        PackageManager pmanager = getContext().getPackageManager();
+        if (!pmanager.hasSystemFeature(PackageManager.FEATURE_MICROPHONE)) {
+
+            // no mic on device
+            Snackbar emptyText = Snackbar.make(etText, R.string.no_recorder, Snackbar.LENGTH_SHORT);
+            HelperClass.displaySnackBarWithBottomMargin(emptyText, 80, getActivity());
+
+            // hide audio view
+            toggleAudioView();
+        } else {
+
+            mediaRecorder = new MediaRecorder();
+
+            // creates audio file in podcast directory
+            audioFile = getMediaFileUri("audioguide.aac", Environment.DIRECTORY_PODCASTS);
+
+            // Set the audio format and encoder
+            mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS);
+            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+            mediaRecorder.setOutputFile(audioFile.getAbsolutePath());
+        }
     }
 
     private void toggleAudioView() {
@@ -374,6 +389,7 @@ public class ComposeFragment extends Fragment {
         if (!audioBtn.isSelected()) {
             audioBtn.setSelected(true);
             recordingLayout.setVisibility(View.VISIBLE);
+            setupRecorder();
         } else {
             audioBtn.setSelected(false);
             recordingLayout.setVisibility(View.GONE);
@@ -402,20 +418,19 @@ public class ComposeFragment extends Fragment {
     }
 
     // Trigger gallery selection for a photo
-    public void onPickPhoto(View view) {
+    public void onPickPhoto() {
+
         // Create intent for picking a photo from the gallery
         Intent intent = new Intent(Intent.ACTION_PICK,
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 
-        // as long as intent isn't nullt
-        if (intent.resolveActivity(getContext().getPackageManager()) != null) {
-            // Bring up gallery to select a photo
-            galleryActivityLauncher.launch(intent);
-        }
+        // as long as intent isn't null
+        // Bring up gallery to select a photo
+        galleryActivityLauncher.launch(intent);
     }
 
     // creates new Travel guide and updates it to the database
-    private void saveGuide(String text, ParseUser user, File photo, File video) {
+    private void saveGuide(String text, ParseUser user, File photo, File video, File audio) {
 
         Guide guide = new Guide();
         guide.setAuthor(user);
@@ -426,7 +441,9 @@ public class ComposeFragment extends Fragment {
         if (photo != null)
             guide.setPhoto(new ParseFile(photo));
         else if (video != null)
-            guide.setPhoto(new ParseFile(video));
+            guide.setVideo(new ParseFile(video));
+        else if (audio != null)
+            guide.setAudio(new ParseFile(audio));
 
         // uploads new guide in the background
         guide.saveInBackground(new SaveCallback() {
@@ -441,6 +458,9 @@ public class ComposeFragment extends Fragment {
                 guide.setText("");
                 ivPreview.setImageResource(0);
                 vvPreview.setVideoPath("");
+                photoFile = new File("");
+                videoFile = new File("");
+                audioFile = new File("");
 
                 getActivity().onBackPressed();
             }
@@ -459,7 +479,7 @@ public class ComposeFragment extends Fragment {
                 if (data.getData() == null) {
 
                     // resize bitmap
-                    Uri takenPhotoUri = Uri.fromFile(getPhotoFileUri(photoFileName));
+                    Uri takenPhotoUri = Uri.fromFile(getMediaFileUri(photoFileName, Environment.DIRECTORY_PICTURES));
                     File resizedFile = getResizedImg(takenPhotoUri);
 
                     // updates value of photoFile
@@ -507,7 +527,7 @@ public class ComposeFragment extends Fragment {
         // Compress the image further
         resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 40, bytes);
         // Create a new file for the resized bitmap (`getPhotoFileUri` defined above)
-        File resizedFile = getPhotoFileUri(photoFileName + "_resized");
+        File resizedFile = getMediaFileUri("resized_" + photoFileName, Environment.DIRECTORY_PICTURES);
         try {
             resizedFile.createNewFile();
         } catch (IOException e) {
@@ -544,6 +564,10 @@ public class ComposeFragment extends Fragment {
 
     // load image into preview ui element
     private void loadImgIntoPreview() {
+
+        ivPreview.setImageResource(0);
+
+
         // Load the taken image into a preview
         Glide.with(getContext())
                 .load(photoFile)
@@ -602,11 +626,11 @@ public class ComposeFragment extends Fragment {
      * Returns the File for a photo stored on disk given the fileName
      * reference - https://guides.codepath.com/android/Accessing-the-Camera-and-Stored-Media#accessing-stored-media
      */
-    public File getPhotoFileUri(String fileName) {
+    public File getMediaFileUri(String fileName, String dir) {
         // Get safe storage directory for photos
         // Use `getExternalFilesDir` on Context to access package-specific directories.
         // This way, we don't need to request external read/write runtime permissions.
-        File mediaStorageDir = new File(getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES), TAG);
+        File mediaStorageDir = new File(getContext().getExternalFilesDir(dir), TAG);
 
         // Create the storage directory if it does not exist
         if (!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()) {

@@ -1,12 +1,11 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.TravelGuide" parent="Theme.MaterialComponents.Light">
+    <style name="Theme.TravelGuide" parent="Theme.MaterialComponents.DayNight">
 
         <item name="android:windowTranslucentStatus" tools:ignore="DuplicateDefinition">true</item>
         <!-- light theme navigation and status bar   -->
         <item name="android:windowTranslucentNavigation">true</item>
-        <item name="android:navigationBarColor">@android:color/transparent</item>
-        <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>\
 
         <!-- Primary brand color. -->
         <item name="colorPrimary">#2196F3</item>

@@ -40,7 +40,11 @@ public class Guide extends ParseObject {
     }
 
     public void setVideo(ParseFile newVideo) {
-        put(KEY_PHOTO, newVideo);
+        put(KEY_VIDEO, newVideo);
+    }
+
+    public void setAudio(ParseFile newAudio) {
+        put(KEY_AUDIO, newAudio);
     }
 
     public LatLng getLocation() {

@@ -25,12 +25,6 @@ import java.util.List;
 public class HelperClass {
 
     private static String TAG = "HelperClass";
-    // Storage Permissions
-    private static final int REQUEST_EXTERNAL_STORAGE = 1;
-    private static String[] PERMISSIONS_STORAGE = {
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-    };
 
     public static int picRadius = 50;
     public static int resizedImgDimen = 650;
@@ -75,7 +69,8 @@ public class HelperClass {
                 Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.RECORD_AUDIO,
                 Manifest.permission.ACCESS_NETWORK_STATE,
-                Manifest.permission.ACCESS_FINE_LOCATION
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.MANAGE_EXTERNAL_STORAGE
         };
 
         ActivityCompat.requestPermissions(activity, PERMISSIONS, PERMISSION_ALL);

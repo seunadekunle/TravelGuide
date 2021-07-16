@@ -24,10 +24,14 @@ import com.parse.ParseException;
 import com.parse.ParseUser;
 import com.parse.SignUpCallback;
 
+import java.util.Objects;
+
 public class EntryFormFragment extends Fragment {
 
     private static final String TAG = "EntryFormFragment";
     private static final String ARG_TYPE = "type";
+
+    private static final String INVALID_ENTRY_DATA_ERROR = "Invalid username/password.";
 
     private FragmentLoginBinding binding;
     private String entryState;
@@ -125,7 +129,8 @@ public class EntryFormFragment extends Fragment {
                 public void done(ParseUser user, ParseException e) {
                     if (e != null) {
 
-                        if (e.getMessage().equals(getString(R.string.error_invalid_credentials))) {
+                        // if the username or password is wrong
+                        if (Objects.equals(e.getMessage(), INVALID_ENTRY_DATA_ERROR)) {
                             showSignUpState(R.string.error_invalid_credentials);
                             loadingProgressBar.setVisibility(View.GONE);
                         }
