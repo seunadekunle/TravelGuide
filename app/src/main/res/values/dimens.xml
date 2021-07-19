@@ -15,4 +15,5 @@
     <dimen name="fragment_vertical_margin">16dp</dimen>
     <dimen name="header_text_size">30sp</dimen>
     <dimen name="margin_start_screen_text">95dp</dimen>
+    <dimen name="guide_content_margin">15dp</dimen>
 </resources>

@@ -17,10 +17,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.example.travelguide.helpers.HelperClass;
 import com.example.travelguide.R;
 import com.example.travelguide.adapters.GuidesAdapter;
 import com.example.travelguide.classes.Guide;
+import com.example.travelguide.helpers.HelperClass;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
@@ -105,7 +105,7 @@ public class LocationGuide extends Fragment {
         tvAddress.setText(HelperClass.getAddress(context, parseLocation.getLatitude(), parseLocation.getLongitude()));
 
         pbLoading.setVisibility(View.VISIBLE);
-        
+
         // Setup refresh listener which triggers new data loading
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -113,7 +113,7 @@ public class LocationGuide extends Fragment {
                 fetchListAsync(0);
             }
         });
-        
+
         queryGuides();
     }
 

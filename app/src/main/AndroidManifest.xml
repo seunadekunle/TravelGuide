@@ -2,7 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.travelguide"
-    android:requestLegacyExternalStorage="true">
+    android:requestLegacyExternalStorage="true"
+    tools:remove="android:appComponentFactory">
 
     <queries>
 
@@ -56,7 +57,7 @@
         </provider>
 
         <activity android:name=".activities.SearchActivity" />
-        <!--              The API key for Google Map API -->
+        <!--     The API key for Google Map API -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
@@ -67,8 +68,7 @@
         <activity
             android:name=".activities.MapsActivity"
             android:label="@string/app_name"
-            android:screenOrientation="portrait">
-        </activity>
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

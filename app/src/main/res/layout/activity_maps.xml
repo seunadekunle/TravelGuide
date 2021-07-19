@@ -37,7 +37,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fitsSystemWindows="false"
-            android:iconifiedByDefault="true"/>
+            android:iconifiedByDefault="false"
+            android:queryBackground="@android:color/transparent"/>
     </FrameLayout>
 
     <ProgressBar

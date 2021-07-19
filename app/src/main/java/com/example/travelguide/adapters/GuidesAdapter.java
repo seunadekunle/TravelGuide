@@ -8,6 +8,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,11 +22,28 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.travelguide.activities.MapsActivity;
 import com.example.travelguide.classes.Guide;
 import com.example.travelguide.databinding.LocationGuideBinding;
+import com.example.travelguide.helpers.DeviceDimenHelper;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.drm.DrmSessionManager;
+import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
+import com.google.android.exoplayer2.extractor.ExtractorsFactory;
+import com.google.android.exoplayer2.source.DefaultMediaSourceFactory;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.MediaSourceFactory;
+import com.google.android.exoplayer2.source.ProgressiveMediaSource;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelector;
+import com.google.android.exoplayer2.ui.PlayerView;
+import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
+import com.google.android.exoplayer2.upstream.DefaultLoadErrorHandlingPolicy;
 import com.parse.ParseFile;
 
 import java.util.List;
@@ -63,15 +82,34 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position, RequestManager requestManager) {
-
-        holder.setRequestManager(requestManager);
+    public void onBindViewHolder(final ViewHolder holder, int position) {
 
         // fills ui elements with information from the guide
         Guide guide = guides.get(position);
 
         holder.tvUsername.setText(guide.getAuthor().getUsername());
         holder.tvDetail.setText(guide.getText());
+
+        holder.epPlayerView.setMinimumHeight(DeviceDimenHelper.getDisplayHeight(context)/ 27);
+
+        DefaultBandwidthMeter.Builder bandwidthMeter = new DefaultBandwidthMeter.Builder(context);
+        TrackSelector trackSelector = new DefaultTrackSelector(context);
+        SimpleExoPlayer exoPlayer = new SimpleExoPlayer.Builder(context).build();
+
+        Uri videoUri = Uri.parse("https://parsefiles.back4app.com/LehUdwXhP2IpTN6Tnu7gXIayECJALrtOKyEao0N5/b9836ed482291697cfc52d395ddd3325_audio.mp4");
+        MediaItem mediaItem = MediaItem.fromUri(videoUri);
+
+        DefaultHttpDataSourceFactory dataSourceFactory = new DefaultHttpDataSourceFactory("exoplayer_video");
+        ExtractorsFactory extractorsFactory =  new DefaultExtractorsFactory();
+        exoPlayer.setMediaItem(mediaItem);
+
+        holder.epPlayerView.setPlayer(exoPlayer);
+        exoPlayer.prepare();
+        exoPlayer.setPlayWhenReady(false);
+
+//        holder.epPlayerView
+
+
 
         if (guide.getPhoto() != null || guide.getVideo() != null || guide.getAudio() != null) {
 
@@ -95,6 +133,10 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
 //                        zoomImageFromThumb(holder.ibThumb, photoUrl, expandedImageView);
 //                    }
 //                });
+//            }
+
+//            if(guide.getVideo() != null){
+//
 //            }
         }
 
@@ -135,7 +177,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
 
         private ConstraintLayout mediaLayout;
         private ImageButton ibThumb;
-        private RequestManager requestManager;
+        public PlayerView epPlayerView;
 
         public ViewHolder(LocationGuideBinding binding) {
             super(binding.getRoot());
@@ -147,10 +189,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
 
             mediaLayout = binding.mediaContainer.mediaLayout;
             ibThumb = binding.mediaContainer.ibThumb;
-        }
-
-        public void setRequestManager(RequestManager requestManager) {
-            this.requestManager = requestManager;
+            epPlayerView = binding.mediaContainer.epPlayer;
         }
     }
 
