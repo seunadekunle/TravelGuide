@@ -1,10 +1,12 @@
 package com.example.travelguide.activities;
 
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
 
@@ -15,8 +17,12 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.travelguide.R;
+import com.example.travelguide.adapters.SearchListAdapter;
 import com.example.travelguide.classes.Guide;
 import com.example.travelguide.databinding.ActivityMapsBinding;
 import com.example.travelguide.fragments.ComposeFragment;
@@ -50,6 +56,7 @@ import com.parse.ParseQuery;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -65,15 +72,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private FragmentManager fragmentManager;
     private ProgressBar pbMaps;
     private SearchView searchView;
+    private RecyclerView rvSearchList;
+
+    private SearchListAdapter adapter;
+    private List<AutocompletePrediction> predictions;
 
     // different fragments
     private ComposeFragment composeFragment;
     private LocationGuide locationGuide;
+    private SupportMapFragment mapFragment;
+
 
     // The entry point to the Fused Location Provider.
     private FusedLocationProviderClient fusedLocationProviderClient;
     private CameraPosition cameraPosition;
-    private SupportMapFragment mapFragment;
 
     // A default location (Sydney, Australia) and default zoom to use when location permission is
     // not granted.
@@ -123,6 +135,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         addGuide = binding.addGuide;
         pbMaps = binding.pbMaps;
         searchView = binding.searchView;
+        rvSearchList = binding.rvSearchList;
 
         fragmentsFrameId = R.id.fragmentsFrame;
         fragmentManager = getSupportFragmentManager();
@@ -135,40 +148,65 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // creates new instance of the different fragments
         composeFragment = new ComposeFragment();
 
+        // elements needed for the search recyclerview
+        predictions = new ArrayList<>();
+        adapter = new SearchListAdapter(predictions, this);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(rvSearchList.getContext()
+                , linearLayoutManager.getOrientation());
+
+        // sets elements of the recycler view
+        rvSearchList.setAdapter(adapter);
+        rvSearchList.setLayoutManager(linearLayoutManager);
+        // adds lines between the recyclerview elements
+        rvSearchList.addItemDecoration(dividerItemDecoration);
+
         // Creates a new token for the autocomplete session
         AutocompleteSessionToken token = AutocompleteSessionToken.newInstance();
+        // Get the SearchView and set the searchable configuration
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 
             @Override
             public boolean onQueryTextSubmit(String query) {
 
                 searchView.clearFocus();
+                hideKeyboard();
+
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
 
-                FindAutocompletePredictionsRequest request = FindAutocompletePredictionsRequest.builder()
-                        .setOrigin(new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()))
-                        .setSessionToken(token).setQuery(newText).build();
 
-                placesClient.findAutocompletePredictions(request).addOnSuccessListener((response) -> {
-                    for (AutocompletePrediction prediction : response.getAutocompletePredictions()) {
-                        Log.i(TAG, prediction.getPlaceId());
-                        Log.i(TAG, prediction.getPrimaryText(null).toString());
-                    }
-                }).addOnFailureListener((exception) -> {
-                    if (exception instanceof ApiException) {
-                        ApiException apiException = (ApiException) exception;
-                        Log.e(TAG, "Place not found: " + apiException.getStatusCode());
-                    }
-                });
+                if (lastKnownLocation != null) {
+                    FindAutocompletePredictionsRequest request = FindAutocompletePredictionsRequest.builder()
+                            .setOrigin(new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()))
+                            .setSessionToken(token).setQuery(newText).build();
 
+                    placesClient.findAutocompletePredictions(request).addOnSuccessListener((response) -> {
+
+                        predictions = response.getAutocompletePredictions();
+                        adapter.clear();
+                        adapter.addAll(predictions);
+
+                        for (AutocompletePrediction prediction : predictions) {
+                            Log.i(TAG, prediction.getPlaceId());
+                            Log.i(TAG, prediction.getPrimaryText(null).toString());
+                        }
+                    }).addOnFailureListener((exception) -> {
+                        if (exception instanceof ApiException) {
+                            ApiException apiException = (ApiException) exception;
+                            Log.e(TAG, "Place not found: " + apiException.getStatusCode());
+                        }
+                    });
+                }
 
                 return false;
             }
         });
+
+
         // add button on click listener
         addGuide.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -183,11 +221,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     ft.add(fragmentsFrameId, composeFragment);
 
                 HelperClass.finishTransaction(ft, ComposeFragment.TAG, (Fragment) composeFragment);
-                hideAddBtn();
+                hideOverlayBtns();
             }
         });
 
-        hideAddBtn();
+        hideOverlayBtns();
     }
 
     private void initializeMap() {
@@ -244,7 +282,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 // complete the transaction
                 HelperClass.finishTransaction(ft, LocationGuide.TAG, (Fragment) locationGuide);
-                hideAddBtn();
+                hideOverlayBtns();
 
                 return true;
             }
@@ -281,7 +319,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     // hides progress bar
                     pbMaps.setVisibility(View.INVISIBLE);
-                    showAddBtn();
+                    showOverlayBtns();
                 } else {
                     Log.e(TAG, "Not getting guides", e);
                 }
@@ -390,6 +428,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     // add new marker to the map along with tag
+    // TODO: replace with place id
     private void addMarker(MarkerOptions newMarker, ParseGeoPoint objectId) {
         Marker marker = map.addMarker(newMarker);
         marker.setTag(objectId);
@@ -407,41 +446,66 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onSaveInstanceState(outState);
     }
 
-    // removes fragment from view if back button is pressed
+    // handles the back press based what is showing
     @Override
     public void onBackPressed() {
 
-        // if there are no stacks showing go to home screen
-        if (HelperClass.emptyBackStack(fragmentManager))
-            super.onBackPressed();
+        if (!(searchView.isIconified())) {
+            closeSearchView();
+        } else {
 
-        // if the stack isn't empty
-        if (!HelperClass.emptyBackStack(fragmentManager)) {
-            fragmentManager.popBackStack();
+            // if there are no stacks showing go to home screen
+            if (HelperClass.emptyBackStack(fragmentManager)) {
+                super.onBackPressed();
 
-            // is back stack empty set addGuide button to be visible and refresh page
-            if (fragmentManager.getBackStackEntryCount() == 1) {
-                getGuides();
-                showAddBtn();
+            } else {
+                // if the stack isn't empty
+                fragmentManager.popBackStack();
+
+                // is back stack empty set addGuide button to be visible and refresh page
+                if (fragmentManager.getBackStackEntryCount() == 1) {
+                    getGuides();
+                    showOverlayBtns();
+                }
             }
         }
     }
 
     // TODO: Add transition
     // sets the view state for the addGuide Button
-    public void hideAddBtn() {
+    public void hideOverlayBtns() {
         addGuide.setVisibility(View.INVISIBLE);
+        searchView.setVisibility(View.INVISIBLE);
     }
 
     // sets the view state for the addGuide Button
-    public void showAddBtn() {
+    public void showOverlayBtns() {
         addGuide.setVisibility(View.VISIBLE);
+        searchView.setVisibility(View.VISIBLE);
     }
 
-
+    // TODO: add zoom when navigating from adding new guide
     public void zoomToLocation(LatLng location) {
         map.animateCamera(CameraUpdateFactory.newLatLngZoom(location, DEFAULT_ZOOM));
     }
-    // TODO: add zoom when navigating from adding new guide
 
+    /// close the searchview element
+    private void closeSearchView() {
+        searchView.clearFocus();
+        searchView.setQuery("", false);
+        searchView.setIconified(true);
+        searchView.onActionViewCollapsed();
+    }
+
+    /*
+     *  hides current keyboard
+     *  ref: https://stackoverflow.com/questions/43061216/dismiss-keyboard-on-button-click-that-close-fragment
+     */
+    public void hideKeyboard() {
+        View view = getCurrentFocus();
+        if (view != null) {
+            InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            inputManager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        }
+    }
 }

@@ -42,7 +42,6 @@ import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
 /**
  * {@link RecyclerView.Adapter} that can display a {@link Guide}.
- * TODO: Replace the implementation with code for your data type.
  */
 public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder> {
 
@@ -121,7 +120,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
                     public void onClick(View v) {
 
                         // hide add button and zoom image
-                        ((MapsActivity) activity).hideAddBtn();
+                        ((MapsActivity) activity).hideOverlayBtns();
                         zoomImageFromThumb(holder.ibThumb, photoUrl, expandedImageView);
                     }
                 });
@@ -199,7 +198,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
         return guides.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView tvUsername;
         public TextView tvDetail;
         public ImageView ivAvatar;
@@ -366,7 +365,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
                 currentAnimator = set;
 
                 // show add button
-                ((MapsActivity) activity).showAddBtn();
+                ((MapsActivity) activity).showOverlayBtns();
             }
         });
     }
