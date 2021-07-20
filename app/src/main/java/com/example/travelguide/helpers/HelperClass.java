@@ -77,18 +77,6 @@ public class HelperClass {
         ActivityCompat.requestPermissions(activity, PERMISSIONS, PERMISSION_ALL);
     }
 
-    // checks if the permissions passsd have been granted
-    public static boolean hasPermissions(Context context, String[] permissions) {
-        if (context != null && permissions != null) {
-            for (String permission : permissions) {
-                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
     // completes fragment transaction
     public static void finishTransaction(FragmentTransaction ft, String name, Fragment fragment) {
 

@@ -5,7 +5,8 @@
     android:layout_height="match_parent"
     android:background="@color/white"
     android:clickable="true"
-    tools:context=".fragments.ComposeFragment">
+    tools:context=".fragments.ComposeFragment"
+    android:focusable="true">
 
     <!-- TODO: Update blank fragment layout -->
     <LinearLayout

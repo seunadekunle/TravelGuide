@@ -31,15 +31,17 @@
         android:id="@+id/fragmentsFrame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="true" >
+        android:fitsSystemWindows="true">
 
         <SearchView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fitsSystemWindows="false"
-            android:iconifiedByDefault="false"
-            android:queryBackground="@android:color/transparent"/>
+            android:iconifiedByDefault="true"
+            android:queryBackground="@color/white" />
+
     </FrameLayout>
+
 
     <ProgressBar
         android:id="@+id/pbMaps"

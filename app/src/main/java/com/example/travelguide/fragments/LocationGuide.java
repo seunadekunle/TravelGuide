@@ -21,6 +21,8 @@ import com.example.travelguide.R;
 import com.example.travelguide.adapters.GuidesAdapter;
 import com.example.travelguide.classes.Guide;
 import com.example.travelguide.helpers.HelperClass;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
@@ -46,6 +48,7 @@ public class LocationGuide extends Fragment {
     private ProgressBar pbLoading;
     protected SwipeRefreshLayout swipeContainer;
     private ImageView expandedImgView;
+    private SimpleExoPlayer globalPlayer;
 
     private static final String ARG_LAT = "lat";
     private static final String ARG_LONG = "long";
@@ -97,7 +100,7 @@ public class LocationGuide extends Fragment {
         swipeContainer = view.findViewById(R.id.swipeContainer);
 
         // Set the adapter of the recycler view
-        adapter = new GuidesAdapter(guideList, context, view.findViewById(R.id.expandedImgView), view.findViewById(R.id.expandedImgViewBG), getActivity());
+        adapter = new GuidesAdapter(guideList, context, view.findViewById(R.id.expandedImgView), view.findViewById(R.id.expandedImgViewBG), getActivity(), globalPlayer);
         rvGuides.setAdapter(adapter);
         rvGuides.setLayoutManager(new LinearLayoutManager(context));
 
@@ -152,12 +155,23 @@ public class LocationGuide extends Fragment {
                 // clears the adapter
                 adapter.clear();
                 // save received posts to list and notify adapter of new data
-                guideList.addAll(guides);
+                adapter.addAll(guides);
                 adapter.notifyDataSetChanged();
 
                 pbLoading.setVisibility(View.INVISIBLE);
             }
         });
 
+    }
+
+
+    @Override
+    public void onDestroy() {
+
+        // release the media player for the list
+        if(globalPlayer != null)
+            globalPlayer.release();
+
+        super.onDestroy();
     }
 }
