@@ -16,6 +16,6 @@
         </shape>
     </item>
 
-    <item android:drawable="@android:drawable/ic_media_pause" />
+    <item android:drawable="@drawable/ic_baseline_pause_24" />
 
 </layer-list>

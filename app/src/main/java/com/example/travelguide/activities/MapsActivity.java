@@ -1,21 +1,14 @@
 package com.example.travelguide.activities;
 
-import android.app.Activity;
-import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.location.Location;
-import android.os.Build;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.ProgressBar;
+import android.widget.SearchView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -30,7 +23,7 @@ import com.example.travelguide.fragments.ComposeFragment;
 import com.example.travelguide.fragments.LocationGuide;
 import com.example.travelguide.helpers.DeviceDimenHelper;
 import com.example.travelguide.helpers.HelperClass;
-import com.google.android.gms.common.api.Status;
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -44,19 +37,16 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.AutocompletePrediction;
+import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
 import com.google.android.libraries.places.api.net.PlacesClient;
-import com.google.android.libraries.places.widget.Autocomplete;
-import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.parse.FindCallback;
-import com.parse.LogInCallback;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.parse.ParseUser;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -74,6 +64,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private FloatingActionButton addGuide;
     private FragmentManager fragmentManager;
     private ProgressBar pbMaps;
+    private SearchView searchView;
 
     // different fragments
     private ComposeFragment composeFragment;
@@ -131,6 +122,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // bind ui element to variable
         addGuide = binding.addGuide;
         pbMaps = binding.pbMaps;
+        searchView = binding.searchView;
 
         fragmentsFrameId = R.id.fragmentsFrame;
         fragmentManager = getSupportFragmentManager();
@@ -143,6 +135,40 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // creates new instance of the different fragments
         composeFragment = new ComposeFragment();
 
+        // Creates a new token for the autocomplete session
+        AutocompleteSessionToken token = AutocompleteSessionToken.newInstance();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+
+                searchView.clearFocus();
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+
+                FindAutocompletePredictionsRequest request = FindAutocompletePredictionsRequest.builder()
+                        .setOrigin(new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()))
+                        .setSessionToken(token).setQuery(newText).build();
+
+                placesClient.findAutocompletePredictions(request).addOnSuccessListener((response) -> {
+                    for (AutocompletePrediction prediction : response.getAutocompletePredictions()) {
+                        Log.i(TAG, prediction.getPlaceId());
+                        Log.i(TAG, prediction.getPrimaryText(null).toString());
+                    }
+                }).addOnFailureListener((exception) -> {
+                    if (exception instanceof ApiException) {
+                        ApiException apiException = (ApiException) exception;
+                        Log.e(TAG, "Place not found: " + apiException.getStatusCode());
+                    }
+                });
+
+
+                return false;
+            }
+        });
         // add button on click listener
         addGuide.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -403,7 +429,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     // TODO: Add transition
     // sets the view state for the addGuide Button
-    public void hideAddBtn() { addGuide.setVisibility(View.INVISIBLE); }
+    public void hideAddBtn() {
+        addGuide.setVisibility(View.INVISIBLE);
+    }
 
     // sets the view state for the addGuide Button
     public void showAddBtn() {
@@ -411,7 +439,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
-    public void zoomToLocation(LatLng location){
+    public void zoomToLocation(LatLng location) {
         map.animateCamera(CameraUpdateFactory.newLatLngZoom(location, DEFAULT_ZOOM));
     }
     // TODO: add zoom when navigating from adding new guide

@@ -18,6 +18,6 @@
         </shape>
     </item>
 
-    <item android:drawable="@android:drawable/ic_menu_gallery" />
+    <item android:drawable="@drawable/ic_baseline_photo_library_24" />
 
 </layer-list>

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
-        <shape android:shape="oval">
+        <shape xmlns:android="http://schemas.android.com/apk/res/android"
+            android:shape="rectangle">
 
             <padding
                 android:bottom="@dimen/img_btn_padding"
@@ -11,11 +12,13 @@
             <size
                 android:width="@dimen/add_guide_media_btn"
                 android:height="@dimen/add_guide_media_btn" />
-            <solid android:color="@android:color/holo_red_dark" />
+            <solid android:color="@color/off_white" />
+            <corners android:radius="@dimen/corner_radius" />
 
         </shape>
     </item>
 
-    <item android:drawable="@drawable/ic_baseline_play_arrow_24" />
+
+    <item android:drawable="@drawable/ic_baseline_search_24"/>
 
 </layer-list>

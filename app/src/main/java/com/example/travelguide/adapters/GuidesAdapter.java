@@ -99,6 +99,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
         holder.tvUsername.setText(guide.getAuthor().getUsername());
         holder.tvDetail.setText(guide.getText());
 
+        // if there is any media
         if (guide.getPhoto() != null || guide.getVideo() != null || guide.getAudio() != null) {
 
             holder.mediaLayout.setVisibility(View.VISIBLE);
@@ -106,7 +107,6 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
             if (guide.getPhoto() != null) {
 
                 String photoUrl = guide.getPhoto().getUrl();
-
                 if (photoUrl != null) {
 
                     // sets view to be not visible
@@ -127,10 +127,10 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
                 });
             }
 
+            // if there is audio or video
             if (guide.getVideo() != null || guide.getAudio() != null) {
 
                 Uri mediaUri;
-
                 // shows the media view
                 holder.epPlayerView.setVisibility(View.VISIBLE);
 

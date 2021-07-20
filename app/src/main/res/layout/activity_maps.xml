@@ -34,6 +34,7 @@
         android:fitsSystemWindows="true">
 
         <SearchView
+            android:id="@+id/searchView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
@@ -42,10 +43,12 @@
             android:iconifiedByDefault="true"
             android:layoutDirection="rtl"
             android:queryHint="@string/search"
-            android:queryBackground="@color/white" />
+            android:searchIcon="@drawable/search_icon"
+            android:queryBackground="@color/white"
+            android:layout_marginTop="10dp"/>
+
 
     </FrameLayout>
-
 
     <ProgressBar
         android:id="@+id/pbMaps"
