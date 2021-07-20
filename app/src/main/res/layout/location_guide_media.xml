@@ -2,9 +2,10 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mediaLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/mediaLayout">
+    android:layout_height="wrap_content">
+    <!--    android:visibility="gone">-->
 
     <ImageButton
         android:id="@+id/ibThumb"
@@ -13,5 +14,16 @@
         android:padding="0dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:srcCompat="@tools:sample/avatars" />
+        tools:srcCompat="@tools:sample/avatars"
+        android:visibility="gone"/>
+
+    <com.google.android.exoplayer2.ui.PlayerView
+        android:id="@+id/epPlayer"
+        android:layout_width="match_parent"
+        android:layout_height="500dp"
+        android:background="@color/black"
+        app:controller_layout_id="@layout/player_view"
+        android:visibility="gone"/>
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

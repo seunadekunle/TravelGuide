@@ -82,6 +82,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // The entry point to the Fused Location Provider.
     private FusedLocationProviderClient fusedLocationProviderClient;
     private CameraPosition cameraPosition;
+    private SupportMapFragment mapFragment;
 
     // A default location (Sydney, Australia) and default zoom to use when location permission is
     // not granted.
@@ -147,6 +148,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View v) {
 
+
                 // Begin the transaction
                 FragmentTransaction ft = fragmentManager.beginTransaction();
 
@@ -167,7 +169,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) fragmentManager.findFragmentById(R.id.map);
+        mapFragment = (SupportMapFragment) fragmentManager.findFragmentById(R.id.map);
 
         // if the fragment is available call onMapReady function
         if (mapFragment != null) {

@@ -6,7 +6,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/off_white"
-    tools:context=".fragments.LocationGuide">
+    tools:context=".fragments.LocationGuide"
+    android:clickable="true"
+    android:focusable="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -46,7 +48,8 @@
         android:id="@+id/imgExpanded"
         layout="@layout/image_expanded"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:visibility="visible"/>
 
     <ProgressBar
         android:id="@+id/pbLoading"

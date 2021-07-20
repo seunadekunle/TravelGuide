@@ -67,6 +67,8 @@ public class Guide extends ParseObject {
         return getParseFile(KEY_VIDEO);
     }
 
+    public ParseFile getAudio() { return getParseFile(KEY_AUDIO); }
+
     public static String getKeyCreationDate() {
         return KEY_CREATION_DATE;
     }

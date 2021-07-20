@@ -41,9 +41,11 @@
             android:fitsSystemWindows="false"
             android:iconifiedByDefault="true"
             android:layoutDirection="rtl"
-            android:queryHint="@string/search"/>
+            android:queryHint="@string/search"
+            android:queryBackground="@color/white" />
 
     </FrameLayout>
+
 
     <ProgressBar
         android:id="@+id/pbMaps"

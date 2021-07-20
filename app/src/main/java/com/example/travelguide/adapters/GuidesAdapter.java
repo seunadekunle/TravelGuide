@@ -8,6 +8,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,7 +26,14 @@ import com.example.travelguide.R;
 import com.example.travelguide.activities.MapsActivity;
 import com.example.travelguide.classes.Guide;
 import com.example.travelguide.databinding.LocationGuideBinding;
+import com.example.travelguide.helpers.DeviceDimenHelper;
 import com.example.travelguide.helpers.HelperClass;
+import com.google.android.exoplayer2.C;
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.audio.AudioAttributes;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.ui.PlayerView;
 import com.parse.ParseFile;
 
 import java.util.List;
@@ -45,18 +53,23 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
     private ImageView expandedImageView;
     private View expandedImageViewBG;
     private Activity activity;
+    private SimpleExoPlayer exoPlayer;
 
     // Hold a reference to the current animator
     private Animator currentAnimator;
     // The system "short" animation time duration, in milliseconds.
-    private int shortAnimationDuration;
+    private int shortAnimationDuration = 100;
+    private int playerHeightMult = 12;
 
-    public GuidesAdapter(List<Guide> items, Context context, ImageView expandedImageView, View expandedImageViewBG, Activity activity) {
+
+    public GuidesAdapter(List<Guide> items, Context context, ImageView expandedImageView, View expandedImageViewBG, Activity activity, SimpleExoPlayer exoPlayer) {
         this.context = context;
         this.expandedImageView = expandedImageView;
         guides = items;
         this.expandedImageViewBG = expandedImageViewBG;
         this.activity = activity;
+
+        this.exoPlayer = exoPlayer;
     }
 
     @Override
@@ -65,32 +78,12 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
         return new ViewHolder(LocationGuideBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
     }
 
+    // fills ui elements with information from the guide
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
 
-        // fills ui elements with information from the guide
+        // get current guide at positoin
         Guide guide = guides.get(position);
-
-        holder.tvUsername.setText(guide.getAuthor().getUsername());
-        holder.tvDetail.setText(guide.getText());
-
-        if (guide.getPhoto() != null) {
-
-            String photoUrl = guide.getPhoto().getUrl();
-            Glide.with(context)
-                    .load(photoUrl).centerCrop().override(HelperClass.detailImgDimen, HelperClass.detailImgDimen)
-                    .transform(new RoundedCornersTransformation(HelperClass.picRadius, 0)).into(holder.ibThumb);
-
-            holder.ibThumb.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                    // hide add button and zoom image
-                    ((MapsActivity) activity).hideAddBtn();
-                    zoomImageFromThumb(holder.ibThumb, photoUrl);
-                }
-            });
-        }
 
         // loads user profile image on timeline
         ParseFile profileImg = guide.getAuthor().getParseFile("avatar");
@@ -101,6 +94,91 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
                     .override(100, 40).into(holder.ivAvatar);
         else
             (holder.ivAvatar).setVisibility(View.GONE);
+
+
+        holder.tvUsername.setText(guide.getAuthor().getUsername());
+        holder.tvDetail.setText(guide.getText());
+
+        if (guide.getPhoto() != null || guide.getVideo() != null || guide.getAudio() != null) {
+
+            holder.mediaLayout.setVisibility(View.VISIBLE);
+
+            if (guide.getPhoto() != null) {
+
+                String photoUrl = guide.getPhoto().getUrl();
+
+                if (photoUrl != null) {
+
+                    // sets view to be not visible
+                    holder.ibThumb.setVisibility(View.VISIBLE);
+                    Glide.with(context)
+                            .load(photoUrl).centerCrop().override(HelperClass.detailImgDimen, HelperClass.detailImgDimen)
+                            .transform(new RoundedCornersTransformation(HelperClass.picRadius, 0)).into(holder.ibThumb);
+                }
+
+                holder.ibThumb.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        // hide add button and zoom image
+                        ((MapsActivity) activity).hideAddBtn();
+                        zoomImageFromThumb(holder.ibThumb, photoUrl, expandedImageView);
+                    }
+                });
+            }
+
+            if (guide.getVideo() != null || guide.getAudio() != null) {
+
+                Uri mediaUri;
+
+                // shows the media view
+                holder.epPlayerView.setVisibility(View.VISIBLE);
+
+                // creates a track selector an pick media that is only sd quality or lower
+                DefaultTrackSelector trackSelector = new DefaultTrackSelector(context);
+                trackSelector.setParameters(
+                        trackSelector
+                                .buildUponParameters()
+                                .setMaxVideoSizeSd());
+
+
+                // creates new exo player
+                exoPlayer = new SimpleExoPlayer.Builder(context)
+                        .setTrackSelector(trackSelector)
+                        .build();
+
+                if (guide.getAudio() != null) {
+                    // shortens the player height if it is video
+                    holder.epPlayerView.getLayoutParams().height = DeviceDimenHelper.getDisplayHeight(context) / playerHeightMult;
+
+                    mediaUri = Uri.parse(guide.getAudio().getUrl());
+                    holder.epPlayerView.setShutterBackgroundColor(R.color.black);
+
+                    // set audio attributes for guide audio
+                    AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                            .setUsage(C.USAGE_MEDIA)
+                            .setContentType(C.CONTENT_TYPE_MUSIC)
+                            .build();
+
+                    exoPlayer.setAudioAttributes(audioAttributes);
+                } else {
+                    mediaUri = Uri.parse(guide.getVideo().getUrl());
+                }
+
+                // creates a new MediaItem
+                MediaItem mediaItem = MediaItem.fromUri(mediaUri);
+
+                // sets exoPlayer media item
+                exoPlayer.setMediaItem(mediaItem);
+
+                // sets playerView player
+                holder.epPlayerView.setPlayer(exoPlayer);
+
+                // prepares the media
+                exoPlayer.prepare();
+                exoPlayer.setPlayWhenReady(false);
+            }
+        }
     }
 
     // clear all elements of the RecyclerView
@@ -128,6 +206,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
 
         private ConstraintLayout mediaLayout;
         private ImageButton ibThumb;
+        public PlayerView epPlayerView;
 
         public ViewHolder(LocationGuideBinding binding) {
             super(binding.getRoot());
@@ -139,6 +218,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
 
             mediaLayout = binding.mediaContainer.mediaLayout;
             ibThumb = binding.mediaContainer.ibThumb;
+            epPlayerView = binding.mediaContainer.epPlayer;
         }
     }
 
@@ -146,7 +226,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
     /* creates an expanded view after clicking on thumbnail
      * ref: https://developer.android.com/training/animation/zoom.html
      */
-    private void zoomImageFromThumb(final View thumbView, String imgUrl) {
+    private void zoomImageFromThumb(final View thumbView, String imgUrl, ImageView expandedImageView) {
         // If there's an animation in progress, cancel it
         // immediately and proceed with this one.
         if (currentAnimator != null) {
@@ -271,14 +351,14 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         thumbView.setAlpha(1f);
-                        expandedImageView.setVisibility(View.GONE);
+                        expandedImageView.setVisibility(View.INVISIBLE);
                         currentAnimator = null;
                     }
 
                     @Override
                     public void onAnimationCancel(Animator animation) {
                         thumbView.setAlpha(1f);
-                        expandedImageView.setVisibility(View.GONE);
+                        expandedImageView.setVisibility(View.INVISIBLE);
                         currentAnimator = null;
                     }
                 });
