@@ -26,4 +26,5 @@
     <string name="sign_up_failed">Sorry, the Sign Up Failed</string>
     <string name="error_invalid_credentials">Invalid username/password.</string>
     <string name="delete_media">delete media</string>
+    <string name="search">Search..</string>
 </resources>
