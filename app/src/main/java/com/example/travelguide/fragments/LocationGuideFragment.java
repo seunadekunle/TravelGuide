@@ -48,6 +48,7 @@ public class LocationGuideFragment extends Fragment {
     private ProgressBar pbLoading;
     protected SwipeRefreshLayout swipeContainer;
     private ImageView expandedImgView;
+    private ImageView ivExpandIndicator;
     private SimpleExoPlayer globalPlayer;
 
     private static final String ARG_LAT = "lat";
@@ -99,6 +100,7 @@ public class LocationGuideFragment extends Fragment {
         pbLoading = view.findViewById(R.id.pbLoading);
         tvEmptyList = view.findViewById(R.id.tvEmptyList);
         swipeContainer = view.findViewById(R.id.swipeContainer);
+        ivExpandIndicator = view.findViewById(R.id.ivExpandIndicator);
 
         // Set the adapter of the recycler view
         adapter = new GuidesAdapter(guideList, context, view.findViewById(R.id.expandedImgView), view.findViewById(R.id.expandedImgViewBG), getActivity(), globalPlayer);
@@ -172,7 +174,6 @@ public class LocationGuideFragment extends Fragment {
 
     }
 
-
     @Override
     public void onDestroy() {
 
@@ -181,5 +182,9 @@ public class LocationGuideFragment extends Fragment {
             globalPlayer.release();
 
         super.onDestroy();
+    }
+
+    public void setIndicatorOpacity(int opacity){
+        ivExpandIndicator.setImageAlpha(opacity);
     }
 }

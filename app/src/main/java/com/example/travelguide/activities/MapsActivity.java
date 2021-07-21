@@ -162,7 +162,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             @Override
             public void onSlide(@NonNull @NotNull View bottomSheet, float slideOffset) {
-
+                // shows expansion indicator
+                modalLocationGuideFragment.setIndicatorOpacity(255 - ((int) slideOffset * 255));
             }
         });
 

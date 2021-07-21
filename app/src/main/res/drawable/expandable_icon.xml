@@ -9,7 +9,7 @@
         android:top="@dimen/img_btn_padding" />
     <size
         android:width="250dp"
-        android:height="4.5dp" />
+        android:height="5dp" />
     <solid android:color="@color/black" />
 
     <corners android:radius="200dp" />

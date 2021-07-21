@@ -79,12 +79,11 @@
                 android:id="@+id/modalLocationView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:behavior_hideable="false"
                 android:elevation="50dp"
+                android:visibility="invisible"
+                app:behavior_hideable="false"
                 app:behavior_peekHeight="125dp"
-                app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
-                android:visibility="invisible">
-            </FrameLayout>
+                app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior" />
 
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
