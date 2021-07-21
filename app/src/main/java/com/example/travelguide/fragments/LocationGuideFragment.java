@@ -21,7 +21,6 @@ import com.example.travelguide.R;
 import com.example.travelguide.adapters.GuidesAdapter;
 import com.example.travelguide.classes.Guide;
 import com.example.travelguide.helpers.HelperClass;
-import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.parse.FindCallback;
 import com.parse.ParseException;
@@ -36,15 +35,16 @@ import java.util.List;
 /**
  * A fragment representing a list of Items.
  */
-public class LocationGuide extends Fragment {
+public class LocationGuideFragment extends Fragment {
 
-    public static final String TAG = "LocationGuide";
+    public static final String TAG = "LocationGuideFragment";
 
     private Context context;
     private RecyclerView rvGuides;
     private List<Guide> guideList;
     private GuidesAdapter adapter;
     private TextView tvAddress;
+    private TextView tvEmptyList;
     private ProgressBar pbLoading;
     protected SwipeRefreshLayout swipeContainer;
     private ImageView expandedImgView;
@@ -56,12 +56,12 @@ public class LocationGuide extends Fragment {
     private ParseGeoPoint parseLocation;
 
     // Mandatory empty constructor for the fragment manager
-    public LocationGuide() {
+    public LocationGuideFragment() {
     }
 
     @SuppressWarnings("unused")
-    public static LocationGuide newInstance(Double latCoord, Double longCoord) {
-        LocationGuide fragment = new LocationGuide();
+    public static LocationGuideFragment newInstance(Double latCoord, Double longCoord) {
+        LocationGuideFragment fragment = new LocationGuideFragment();
         Bundle args = new Bundle();
 
         args.putDouble(ARG_LAT, latCoord);
@@ -97,6 +97,7 @@ public class LocationGuide extends Fragment {
         rvGuides = view.findViewById(R.id.rvGuides);
         tvAddress = view.findViewById(R.id.tvAddress);
         pbLoading = view.findViewById(R.id.pbLoading);
+        tvEmptyList = view.findViewById(R.id.tvEmptyList);
         swipeContainer = view.findViewById(R.id.swipeContainer);
 
         // Set the adapter of the recycler view
@@ -108,6 +109,7 @@ public class LocationGuide extends Fragment {
         tvAddress.setText(HelperClass.getAddress(context, parseLocation.getLatitude(), parseLocation.getLongitude()));
 
         pbLoading.setVisibility(View.VISIBLE);
+        tvEmptyList.setVisibility(View.INVISIBLE);
 
         // Setup refresh listener which triggers new data loading
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -122,7 +124,6 @@ public class LocationGuide extends Fragment {
 
     private void fetchListAsync(int i) {
         queryGuides();
-
         // sets refreshing state to false
         swipeContainer.setRefreshing(false);
     }
@@ -158,6 +159,13 @@ public class LocationGuide extends Fragment {
                 adapter.addAll(guides);
                 adapter.notifyDataSetChanged();
 
+                // shows empty guide text
+                if (adapter.getItemCount() == 0)
+                    tvEmptyList.setVisibility(View.VISIBLE);
+                else
+                    tvEmptyList.setVisibility(View.INVISIBLE);
+
+
                 pbLoading.setVisibility(View.INVISIBLE);
             }
         });
@@ -169,7 +177,7 @@ public class LocationGuide extends Fragment {
     public void onDestroy() {
 
         // release the media player for the list
-        if(globalPlayer != null)
+        if (globalPlayer != null)
             globalPlayer.release();
 
         super.onDestroy();

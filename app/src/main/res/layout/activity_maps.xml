@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:map="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -40,13 +41,13 @@
             android:layout_marginLeft="16.5dp"
             android:layout_marginTop="10dp"
             android:layout_marginRight="10dp"
-            android:padding="0dp"
             android:clickable="true"
             android:elevation="50dp"
             android:fitsSystemWindows="false"
             android:focusable="true"
             android:iconifiedByDefault="true"
             android:layoutDirection="rtl"
+            android:padding="0dp"
             android:queryBackground="@color/white"
             android:queryHint="@string/search"
             android:searchIcon="@drawable/search_icon"
@@ -67,6 +68,25 @@
             android:visibility="visible"
             map:layout_constraintTop_toBottomOf="@+id/searchView"
             tools:layout_editor_absoluteX="20dp" />
+
+        <androidx.coordinatorlayout.widget.CoordinatorLayout
+
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="visible">
+
+            <FrameLayout
+                android:id="@+id/modalLocationView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:behavior_hideable="false"
+                android:elevation="50dp"
+                app:behavior_peekHeight="125dp"
+                app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+                android:visibility="invisible">
+            </FrameLayout>
+
+        </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
         <ProgressBar
             android:id="@+id/pbMaps"

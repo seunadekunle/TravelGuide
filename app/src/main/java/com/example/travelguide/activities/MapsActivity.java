@@ -26,7 +26,7 @@ import com.example.travelguide.adapters.SearchListAdapter;
 import com.example.travelguide.classes.Guide;
 import com.example.travelguide.databinding.ActivityMapsBinding;
 import com.example.travelguide.fragments.ComposeFragment;
-import com.example.travelguide.fragments.LocationGuide;
+import com.example.travelguide.fragments.LocationGuideFragment;
 import com.example.travelguide.helpers.DeviceDimenHelper;
 import com.example.travelguide.helpers.HelperClass;
 import com.google.android.gms.common.api.ApiException;
@@ -47,6 +47,7 @@ import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.FetchPlaceRequest;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.parse.FindCallback;
 import com.parse.ParseException;
@@ -63,7 +64,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private static final String TAG = MapsActivity.class.getSimpleName();
     private int fragmentsFrameId;
-
+    private int modalFrameId;
 
     // Ui elements
     private GoogleMap map;
@@ -76,10 +77,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private SearchListAdapter adapter;
     private List<AutocompletePrediction> predictions;
+    private BottomSheetBehavior sheetBehavior;
 
     // different fragments
     private ComposeFragment composeFragment;
-    private LocationGuide locationGuide;
+    private LocationGuideFragment locationGuideFragment;
+    private LocationGuideFragment modalLocationGuideFragment;
     private SupportMapFragment mapFragment;
 
     // The entry point to the Fused Location Provider.
@@ -126,14 +129,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Prompt the user for permission.
         getLocationPermission();
 
-
         // bind ui element to variable
         addGuide = binding.addGuide;
         pbMaps = binding.pbMaps;
         searchView = binding.searchView;
         rvSearchList = binding.rvSearchList;
+        sheetBehavior = BottomSheetBehavior.from(findViewById(R.id.modalLocationView));
 
         fragmentsFrameId = R.id.fragmentsFrame;
+        modalFrameId = R.id.modalLocationView;
+
         fragmentManager = getSupportFragmentManager();
 
         height = DeviceDimenHelper.getDisplayHeight(this);
@@ -144,13 +149,29 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // creates new instance of the different fragments
         composeFragment = new ComposeFragment();
 
+        sheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull @NotNull View bottomSheet, int newState) {
+
+                // toggle searchview if view is expanded
+                if(newState == BottomSheetBehavior.STATE_EXPANDED)
+                    searchView.setVisibility(View.INVISIBLE);
+                if(newState == BottomSheetBehavior.STATE_COLLAPSED)
+                    searchView.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onSlide(@NonNull @NotNull View bottomSheet, float slideOffset) {
+
+            }
+        });
+
         // elements needed for the search recyclerview
         predictions = new ArrayList<>();
         adapter = new SearchListAdapter(predictions, this, new SearchListAdapter.onItemClickListener() {
             @Override
             public void onItemClick(AutocompletePrediction prediction) {
                 String placeId = prediction.getPlaceId();
-
                 // Construct a request object, passing the place ID and fields array.
                 final FetchPlaceRequest request = FetchPlaceRequest.newInstance(placeId, HelperClass.placesFields);
 
@@ -159,9 +180,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     Place place = response.getPlace();
                     closeSearchView();
 
+                    addGuide.setVisibility(View.INVISIBLE);
+
                     // zooms out and zooms to location
                     map.animateCamera(CameraUpdateFactory.zoomTo(20), 3000, null);
                     zoomToLocation(place.getLatLng());
+
+                    findViewById(modalFrameId).setVisibility(View.VISIBLE);
+
+                    // shows modal view of location being selected
+                    modalLocationGuideFragment = LocationGuideFragment.newInstance(place.getLatLng().latitude, place.getLatLng().longitude);
+                    // Begin the transaction
+                    FragmentTransaction ft = fragmentManager.beginTransaction();
+                    // add fragment to container
+                    ft.replace(modalFrameId, modalLocationGuideFragment);
+
+                    // complete the transaction
+                    ft.show(modalLocationGuideFragment);
+                    // Complete the changes added above
+                    ft.commit();
 
                 }).addOnFailureListener((exception) -> {
                     if (exception instanceof ApiException) {
@@ -215,10 +252,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         adapter.clear();
                         adapter.addAll(predictions);
 
-                        for (AutocompletePrediction prediction : predictions) {
-                            Log.i(TAG, prediction.getPlaceId());
-                            Log.i(TAG, prediction.getPrimaryText(null).toString());
-                        }
                     }).addOnFailureListener((exception) -> {
                         if (exception instanceof ApiException) {
                             ApiException apiException = (ApiException) exception;
@@ -277,7 +310,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         map.getUiSettings().setScrollGesturesEnabled(true);
 
         // sets padding to change position of map controls
-        map.setPadding(0, (int) (height / 1.45), 0, 0);
+        map.setPadding(0, (int) (height / 1.25), 0, 0);
 
         // Prompt the user for permission.
         getLocationPermission();
@@ -297,16 +330,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Double latitude = ((ParseGeoPoint) marker.getTag()).getLatitude();
                 Double longitude = ((ParseGeoPoint) marker.getTag()).getLongitude();
 
-                locationGuide = LocationGuide.newInstance(latitude, longitude);
+                locationGuideFragment = LocationGuideFragment.newInstance(latitude, longitude);
 
                 // Begin the transaction
                 FragmentTransaction ft = fragmentManager.beginTransaction();
 
                 // add fragment to container
-                ft.replace(fragmentsFrameId, locationGuide);
+                ft.replace(fragmentsFrameId, locationGuideFragment);
 
                 // complete the transaction
-                HelperClass.finishTransaction(ft, LocationGuide.TAG, (Fragment) locationGuide);
+                HelperClass.finishTransaction(ft, LocationGuideFragment.TAG, (Fragment) locationGuideFragment);
                 hideOverlayBtns();
 
                 return true;
@@ -474,6 +507,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // handles the back press based what is showing
     @Override
     public void onBackPressed() {
+
+        // if the modal fragment is visible
+        if(modalLocationGuideFragment != null && modalLocationGuideFragment.isVisible()){
+
+            // resets the modal state
+            sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
+            // adjust the ui accordingly
+            getSupportFragmentManager().beginTransaction().remove(modalLocationGuideFragment).commit();
+            findViewById(modalFrameId).setVisibility(View.INVISIBLE);
+            showOverlayBtns();
+
+            return;
+        }
 
         if (!(searchView.isIconified())) {
             closeSearchView();

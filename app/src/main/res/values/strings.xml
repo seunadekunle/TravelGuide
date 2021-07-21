@@ -27,4 +27,5 @@
     <string name="error_invalid_credentials">Invalid username/password.</string>
     <string name="delete_media">delete media</string>
     <string name="search">Search..</string>
+    <string name="no_guide_added">No guide has been added \n click the Add button</string>
 </resources>

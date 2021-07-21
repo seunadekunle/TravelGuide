@@ -14,4 +14,5 @@
     <color name="light_blue_A400">#FF00B0FF</color>
     <color name="black_overlay">#66000000</color>
     <color name="media_button_selected">#CCCCCC</color>
+    <color name="hint_color">#A2A2A2</color>
 </resources>
