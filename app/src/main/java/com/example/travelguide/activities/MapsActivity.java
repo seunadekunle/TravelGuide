@@ -154,9 +154,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onStateChanged(@NonNull @NotNull View bottomSheet, int newState) {
 
                 // toggle searchview if view is expanded
-                if(newState == BottomSheetBehavior.STATE_EXPANDED)
+                if (newState == BottomSheetBehavior.STATE_EXPANDED)
                     searchView.setVisibility(View.INVISIBLE);
-                if(newState == BottomSheetBehavior.STATE_COLLAPSED)
+                if (newState == BottomSheetBehavior.STATE_COLLAPSED)
                     searchView.setVisibility(View.VISIBLE);
             }
 
@@ -184,22 +184,42 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     addGuide.setVisibility(View.INVISIBLE);
 
                     // zooms out and zooms to location
-                    map.animateCamera(CameraUpdateFactory.zoomTo(20), 3000, null);
-                    zoomToLocation(place.getLatLng());
+                    map.animateCamera(CameraUpdateFactory.zoomTo(20), 3000, new GoogleMap.CancelableCallback() {
+                        @Override
+                        public void onFinish() {
 
-                    findViewById(modalFrameId).setVisibility(View.VISIBLE);
+                            GoogleMap.CancelableCallback callback = new GoogleMap.CancelableCallback() {
+                                @Override
+                                public void onFinish() {
+                                    findViewById(modalFrameId).setVisibility(View.VISIBLE);
 
-                    // shows modal view of location being selected
-                    modalLocationGuideFragment = LocationGuideFragment.newInstance(place.getLatLng().latitude, place.getLatLng().longitude);
-                    // Begin the transaction
-                    FragmentTransaction ft = fragmentManager.beginTransaction();
-                    // add fragment to container
-                    ft.replace(modalFrameId, modalLocationGuideFragment);
+                                    // shows modal view of location being selected
+                                    modalLocationGuideFragment = LocationGuideFragment.newInstance(place.getLatLng().latitude, place.getLatLng().longitude);
+                                    // Begin the transaction
+                                    FragmentTransaction ft = fragmentManager.beginTransaction();
+                                    // add fragment to container
+                                    ft.replace(modalFrameId, modalLocationGuideFragment);
 
-                    // complete the transaction
-                    ft.show(modalLocationGuideFragment);
-                    // Complete the changes added above
-                    ft.commit();
+                                    // complete the transaction
+                                    ft.show(modalLocationGuideFragment);
+                                    // Complete the changes added above
+                                    ft.commit();
+                                }
+
+                                @Override
+                                public void onCancel() {
+
+                                }
+                            };
+
+                            zoomToLocation(place.getLatLng(), callback);
+                        }
+
+                        @Override
+                        public void onCancel() {
+
+                        }
+                    });
 
                 }).addOnFailureListener((exception) -> {
                     if (exception instanceof ApiException) {
@@ -346,7 +366,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 return true;
             }
         });
-
     }
 
 
@@ -510,7 +529,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onBackPressed() {
 
         // if the modal fragment is visible
-        if(modalLocationGuideFragment != null && modalLocationGuideFragment.isVisible()){
+        if (modalLocationGuideFragment != null && modalLocationGuideFragment.isVisible()) {
 
             // resets the modal state
             sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
@@ -563,6 +582,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // TODO: add zoom when navigating from adding new guide
     public void zoomToLocation(LatLng location) {
         map.animateCamera(CameraUpdateFactory.newLatLngZoom(location, DEFAULT_ZOOM));
+    }
+
+    // overloaded function with callback
+    public void zoomToLocation(LatLng location, GoogleMap.CancelableCallback callback) {
+        map.animateCamera(CameraUpdateFactory.newLatLngZoom(location, DEFAULT_ZOOM), callback);
     }
 
     /// close the searchview element

@@ -112,6 +112,7 @@ public class LocationGuideFragment extends Fragment {
 
         pbLoading.setVisibility(View.VISIBLE);
         tvEmptyList.setVisibility(View.INVISIBLE);
+        ivExpandIndicator.setVisibility(View.INVISIBLE);
 
         // Setup refresh listener which triggers new data loading
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {

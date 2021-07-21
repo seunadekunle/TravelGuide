@@ -101,6 +101,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
 
         holder.tvUsername.setText(guide.getAuthor().getUsername());
         holder.tvDetail.setText(guide.getText());
+        holder.tvCreatedAt.setText(guide.getTimeStamp());
 
         // if there is any media
         if (guide.getPhoto() != null || guide.getVideo() != null || guide.getAudio() != null) {
@@ -206,6 +207,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
         public TextView tvUsername;
         public TextView tvDetail;
         public ImageView ivAvatar;
+        public TextView tvCreatedAt;
 
         private ConstraintLayout mediaLayout;
         private ImageButton ibThumb;
@@ -218,6 +220,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
             tvUsername = binding.tvUsername;
             tvDetail = binding.tvDetail;
             ivAvatar = binding.ivAvatar;
+            tvCreatedAt = binding.tvCreatedAt;
 
             mediaLayout = binding.mediaContainer.mediaLayout;
             ibThumb = binding.mediaContainer.ibThumb;
