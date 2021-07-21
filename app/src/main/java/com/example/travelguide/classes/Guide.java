@@ -47,6 +47,10 @@ public class Guide extends ParseObject {
         put(KEY_AUDIO, newAudio);
     }
 
+    public void setLikes(int newLikes) {
+        put(KEY_LIKES, newLikes);
+    }
+
     public LatLng getLocation() {
         return (new LatLng(getParseGeoPoint(KEY_LOCATION).getLatitude(), getParseGeoPoint(KEY_LOCATION).getLongitude()));
     }

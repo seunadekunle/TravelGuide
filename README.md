@@ -30,18 +30,17 @@ A way for individuals to learn information about locations that they are traveli
 * User can create an account
 * User can login/signup
 * User can post a travel post for a location
-    * can edit
 * User can search for a location
-* User can see others profile and see what posts they created
 * Like travel guide
-
+* User can see others profile and see what posts they created
 
 **Optional Nice-to-have Stories**
-* Trending locations
-* User can "follow" a location in case of updates and get notifications
 * User can add a profile photo
-* Buddy feature for users
+* Ui is more centralized
+* Trending locations
 * Users can add replies to a travel post
+* Buddy feature for users
+* User can "follow" a location in case of updates and get notifications
 
 ### 2. Screen Archetypes
 

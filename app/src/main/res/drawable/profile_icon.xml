@@ -14,10 +14,10 @@
                 android:height="@dimen/add_guide_media_btn" />
             <solid android:color="@color/off_white" />
             <corners android:radius="@dimen/corner_radius" />
+
         </shape>
     </item>
 
 
-    <item android:drawable="@drawable/ic_baseline_search_24" />
-
+    <item android:drawable="@drawable/ic_user"/>
 </layer-list>

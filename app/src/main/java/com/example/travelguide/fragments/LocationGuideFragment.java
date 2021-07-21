@@ -185,7 +185,11 @@ public class LocationGuideFragment extends Fragment {
         super.onDestroy();
     }
 
-    public void setIndicatorOpacity(int opacity){
+    public void setIndicatorOpacity(int opacity) {
         ivExpandIndicator.setImageAlpha(opacity);
+    }
+
+    public void makeIndicatorVisible() {
+        ivExpandIndicator.setVisibility(View.VISIBLE);
     }
 }

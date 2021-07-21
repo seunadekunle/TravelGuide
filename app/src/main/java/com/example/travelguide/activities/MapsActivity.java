@@ -59,6 +59,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -149,6 +150,102 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // creates new instance of the different fragments
         composeFragment = new ComposeFragment();
 
+        setupSheetBehavior();
+
+        // elements needed for the search recyclerview
+        SearchListAdapter.onItemClickListener onItemClickListener = new SearchListAdapter.onItemClickListener() {
+            @Override
+            public void onItemClick(AutocompletePrediction prediction) {
+                showPredictionInfo(prediction);
+            }
+        };
+        predictions = new ArrayList<>();
+        adapter = new SearchListAdapter(predictions, this, onItemClickListener);
+        setupSearchView();
+
+        // add button on click listener
+        addGuide.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                // Begin the transaction
+                FragmentTransaction ft = fragmentManager.beginTransaction();
+
+                // add fragment to container
+                if (!composeFragment.isAdded())
+                    ft.add(fragmentsFrameId, composeFragment);
+
+                HelperClass.finishTransaction(ft, ComposeFragment.TAG, (Fragment) composeFragment);
+                hideOverlayBtns();
+            }
+        });
+
+        hideOverlayBtns();
+    }
+
+    // show prediction info
+    private void showPredictionInfo(AutocompletePrediction prediction) {
+
+        String placeId = prediction.getPlaceId();
+        // Construct a request object, passing the place ID and fields array.
+        final FetchPlaceRequest request = FetchPlaceRequest.newInstance(placeId, HelperClass.placesFields);
+
+        HelperClass.getPlacesClient().fetchPlace(request).addOnSuccessListener((response) -> {
+
+            Place place = response.getPlace();
+            closeSearchView();
+
+            addGuide.setVisibility(View.INVISIBLE);
+
+            // zooms out and zooms to location
+            map.animateCamera(CameraUpdateFactory.zoomTo(20), 3000, new GoogleMap.CancelableCallback() {
+                @Override
+                public void onFinish() {
+
+                    GoogleMap.CancelableCallback callback = new GoogleMap.CancelableCallback() {
+                        @Override
+                        public void onFinish() {
+
+                            // shows modal view of location being selected
+                            findViewById(modalFrameId).setVisibility(View.VISIBLE);
+                            modalLocationGuideFragment = LocationGuideFragment.newInstance(Objects.requireNonNull(place.getLatLng()).latitude, place.getLatLng().longitude);
+
+                            // Begin the transaction
+                            FragmentTransaction ft = fragmentManager.beginTransaction();
+                            // add fragment to container
+                            ft.replace(modalFrameId, modalLocationGuideFragment);
+                            // complete the transaction
+                            ft.show(modalLocationGuideFragment);
+                            // Complete the changes added above
+                            ft.commit();
+                        }
+
+                        @Override
+                        public void onCancel() {
+
+                        }
+                    };
+
+                    zoomToLocation(place.getLatLng(), callback);
+                }
+
+                @Override
+                public void onCancel() {
+
+                }
+            });
+
+        }).addOnFailureListener((exception) -> {
+            if (exception instanceof ApiException) {
+
+                final ApiException apiException = (ApiException) exception;
+                Log.e(TAG, "Place not found: " + exception.getMessage());
+            }
+        });
+    }
+
+    // sets up modal sheetBehavior
+    private void setupSheetBehavior() {
         sheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull @NotNull View bottomSheet, int newState) {
@@ -156,8 +253,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 // toggle searchview if view is expanded
                 if (newState == BottomSheetBehavior.STATE_EXPANDED)
                     searchView.setVisibility(View.INVISIBLE);
-                if (newState == BottomSheetBehavior.STATE_COLLAPSED)
+                if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
                     searchView.setVisibility(View.VISIBLE);
+                    modalLocationGuideFragment.makeIndicatorVisible();
+                }
             }
 
             @Override
@@ -166,70 +265,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 modalLocationGuideFragment.setIndicatorOpacity(255 - ((int) slideOffset * 255));
             }
         });
+    }
 
-        // elements needed for the search recyclerview
-        predictions = new ArrayList<>();
-        adapter = new SearchListAdapter(predictions, this, new SearchListAdapter.onItemClickListener() {
-            @Override
-            public void onItemClick(AutocompletePrediction prediction) {
-                String placeId = prediction.getPlaceId();
-                // Construct a request object, passing the place ID and fields array.
-                final FetchPlaceRequest request = FetchPlaceRequest.newInstance(placeId, HelperClass.placesFields);
-
-                HelperClass.getPlacesClient().fetchPlace(request).addOnSuccessListener((response) -> {
-
-                    Place place = response.getPlace();
-                    closeSearchView();
-
-                    addGuide.setVisibility(View.INVISIBLE);
-
-                    // zooms out and zooms to location
-                    map.animateCamera(CameraUpdateFactory.zoomTo(20), 3000, new GoogleMap.CancelableCallback() {
-                        @Override
-                        public void onFinish() {
-
-                            GoogleMap.CancelableCallback callback = new GoogleMap.CancelableCallback() {
-                                @Override
-                                public void onFinish() {
-                                    findViewById(modalFrameId).setVisibility(View.VISIBLE);
-
-                                    // shows modal view of location being selected
-                                    modalLocationGuideFragment = LocationGuideFragment.newInstance(place.getLatLng().latitude, place.getLatLng().longitude);
-                                    // Begin the transaction
-                                    FragmentTransaction ft = fragmentManager.beginTransaction();
-                                    // add fragment to container
-                                    ft.replace(modalFrameId, modalLocationGuideFragment);
-
-                                    // complete the transaction
-                                    ft.show(modalLocationGuideFragment);
-                                    // Complete the changes added above
-                                    ft.commit();
-                                }
-
-                                @Override
-                                public void onCancel() {
-
-                                }
-                            };
-
-                            zoomToLocation(place.getLatLng(), callback);
-                        }
-
-                        @Override
-                        public void onCancel() {
-
-                        }
-                    });
-
-                }).addOnFailureListener((exception) -> {
-                    if (exception instanceof ApiException) {
-
-                        final ApiException apiException = (ApiException) exception;
-                        Log.e(TAG, "Place not found: " + exception.getMessage());
-                    }
-                });
-            }
-        });
+    private void setupSearchView() {
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         // creates divider for recyclerview
@@ -284,27 +322,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 return false;
             }
         });
-
-
-        // add button on click listener
-        addGuide.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-
-                // Begin the transaction
-                FragmentTransaction ft = fragmentManager.beginTransaction();
-
-                // add fragment to container
-                if (!composeFragment.isAdded())
-                    ft.add(fragmentsFrameId, composeFragment);
-
-                HelperClass.finishTransaction(ft, ComposeFragment.TAG, (Fragment) composeFragment);
-                hideOverlayBtns();
-            }
-        });
-
-        hideOverlayBtns();
     }
 
     private void initializeMap() {
