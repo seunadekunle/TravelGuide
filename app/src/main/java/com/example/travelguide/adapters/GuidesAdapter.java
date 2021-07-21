@@ -114,7 +114,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
                 String photoUrl = guide.getPhoto().getUrl();
                 if (photoUrl != null) {
 
-                    // sets view to be not visible
+                    // sets view to be visible
                     holder.ibThumb.setVisibility(View.VISIBLE);
                     Glide.with(context)
                             .load(photoUrl).centerCrop().override(HelperClass.detailImgDimen, HelperClass.detailImgDimen)

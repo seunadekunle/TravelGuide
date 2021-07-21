@@ -1,11 +1,14 @@
 package com.example.travelguide.fragments;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -89,6 +92,7 @@ public class LocationGuideFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_location_guide_list, container, false);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onViewCreated(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -131,6 +135,13 @@ public class LocationGuideFragment extends Fragment {
         swipeContainer.setRefreshing(false);
     }
 
+    private void disableTouchEvents(ViewParent v){
+        if (v.getParent() == null)
+            return;
+
+        v.requestDisallowInterceptTouchEvent(true);
+        disableTouchEvents(v.getParent());
+    }
 
     // get list of guides from post server
     protected void queryGuides() {

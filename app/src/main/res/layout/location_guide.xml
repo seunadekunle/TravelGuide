@@ -56,12 +56,12 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_marginEnd="10dp"
+                    android:layout_weight="2"
                     android:fontFamily="sans-serif-medium"
                     android:gravity="right"
                     android:text="10d"
                     android:textColor="@color/quantum_grey"
-                    android:textSize="12sp"
-                    android:layout_weight="2"/>
+                    android:textSize="12sp" />
 
             </LinearLayout>
 
@@ -87,18 +87,38 @@
                 android:layout_marginBottom="@dimen/text_margin" />
 
 
-            <TextView
-                android:id="@+id/tvLikes"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/guide_content_margin"
-                android:layout_marginTop="10dp"
-                android:layout_marginEnd="@dimen/guide_content_margin"
-                android:layout_marginBottom="@dimen/text_margin"
-                android:text="1"
-                android:textColor="@color/black"
-                android:textSize="13sp"
-                android:textAlignment="textEnd"/>
+                android:layout_height="match_parent"
+                android:layout_gravity="end"
+                android:layout_marginBottom="10dp"
+                android:orientation="horizontal">
+
+                <View
+                    android:id="@+id/view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <ImageButton
+                    android:id="@+id/imageButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:background="@drawable/like_btn" />
+
+                <TextView
+                    android:id="@+id/tvLikes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="@dimen/guide_content_margin"
+
+                    android:layout_marginEnd="@dimen/guide_content_margin"
+                    android:text="1"
+                    android:textColor="@color/black"
+                    android:textSize="13sp" />
+            </LinearLayout>
 
         </LinearLayout>
 
