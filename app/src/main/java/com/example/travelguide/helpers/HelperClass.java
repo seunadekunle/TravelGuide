@@ -15,11 +15,18 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.example.travelguide.R;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import static com.parse.Parse.getApplicationContext;
 
 // helper functions used multiple times in the project
 public class HelperClass {
@@ -29,6 +36,12 @@ public class HelperClass {
     public static int picRadius = 25;
     public static int resizedImgDimen = 650;
     public static int detailImgDimen = 475;
+
+    private static PlacesClient placesClient;
+
+    // Set the fields to specify which types of place data to return
+    // for Google places API
+    public static List<Place.Field> placesFields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.PHOTO_METADATAS);
 
     // gets location info from coordinates
     public static String getAddress(Context context, Double latitude, Double longitude) {
@@ -99,5 +112,15 @@ public class HelperClass {
         button.setSelected(!button.isSelected());
     }
 
+    // Initialize places client sdk
+    public static void initPlacesSDK(Context context) {
+        // Initialize Places SDK
+        Places.initialize(context.getApplicationContext(), context.getResources().getString(R.string.google_maps_key));
+        // Create a new PlacesClient instance
+        placesClient = Places.createClient(context);
+    }
 
+    public static PlacesClient getPlacesClient() {
+        return placesClient;
+    }
 }

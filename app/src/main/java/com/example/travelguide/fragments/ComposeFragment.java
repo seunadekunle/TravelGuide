@@ -299,11 +299,8 @@ public class ComposeFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
-                // Set the fields to specify which types of place data to return
-                List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.PHOTO_METADATAS);
-
                 // Start the autocomplete intent.
-                Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fields)
+                Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, HelperClass.placesFields)
                         .build(getContext());
 
                 searchActivityLauncher.launch(intent);

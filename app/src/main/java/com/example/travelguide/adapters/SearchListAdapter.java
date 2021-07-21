@@ -1,21 +1,15 @@
 package com.example.travelguide.adapters;
 
 import android.content.Context;
-import android.text.style.CharacterStyle;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.travelguide.classes.Guide;
-import com.example.travelguide.databinding.LocationGuideBinding;
 import com.example.travelguide.databinding.SearchviewItemBinding;
-import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.libraries.places.api.model.AutocompletePrediction;
 
 import org.jetbrains.annotations.NotNull;
@@ -27,14 +21,20 @@ import java.util.List;
  */
 public class SearchListAdapter extends RecyclerView.Adapter<SearchListAdapter.ViewHolder> {
 
+    public interface onItemClickListener {
+        void onItemClick(AutocompletePrediction prediction);
+    }
+
     private static final String TAG = "SearchListAdapter";
 
     private List<AutocompletePrediction> locationPredictions;
     private Context context;
+    private SearchListAdapter.onItemClickListener onItemClickListener;
 
-    public SearchListAdapter(List<AutocompletePrediction> locationPredictions, Context context) {
+    public SearchListAdapter(List<AutocompletePrediction> locationPredictions, Context context, onItemClickListener onItemClickListener) {
         this.locationPredictions = locationPredictions;
         this.context = context;
+        this.onItemClickListener = onItemClickListener;
     }
 
     @NonNull
@@ -49,6 +49,18 @@ public class SearchListAdapter extends RecyclerView.Adapter<SearchListAdapter.Vi
 
         AutocompletePrediction prediction = locationPredictions.get(position);
         holder.tvPlace.setText(prediction.getPrimaryText(null));
+
+        holder.searchViewLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                // if the click was a valid part of the ui
+                if(position != RecyclerView.NO_POSITION) {
+                    onItemClickListener.onItemClick(locationPredictions.get(position));
+                }
+
+            }
+        });
     }
 
     // clear all elements of the RecyclerView
@@ -70,12 +82,14 @@ public class SearchListAdapter extends RecyclerView.Adapter<SearchListAdapter.Vi
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         public TextView tvPlace;
+        public View searchViewLayout;
 
         public ViewHolder(SearchviewItemBinding binding) {
             super(binding.getRoot());
 
             // binds ui elements to variables
             tvPlace = binding.tvPlace;
+            searchViewLayout = binding.searchViewLayout;
         }
     }
 }

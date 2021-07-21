@@ -42,11 +42,11 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.AutocompletePrediction;
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.FetchPlaceRequest;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
-import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.parse.FindCallback;
 import com.parse.ParseException;
@@ -82,10 +82,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LocationGuide locationGuide;
     private SupportMapFragment mapFragment;
 
-
     // The entry point to the Fused Location Provider.
     private FusedLocationProviderClient fusedLocationProviderClient;
-    private CameraPosition cameraPosition;
 
     // A default location (Sydney, Australia) and default zoom to use when location permission is
     // not granted.
@@ -114,7 +112,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Retrieve location and camera position from saved instance state.
         if (savedInstanceState != null) {
             lastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION);
-            cameraPosition = savedInstanceState.getParcelable(KEY_CAMERA_POSITION);
+            CameraPosition cameraPosition = savedInstanceState.getParcelable(KEY_CAMERA_POSITION);
         }
 
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
@@ -122,14 +120,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // verify that we have permissions
         HelperClass.verifyPermissions(this);
+        // init Places SDK
+        HelperClass.initPlacesSDK(this);
 
         // Prompt the user for permission.
         getLocationPermission();
 
-        // Initialize Places SDK
-        Places.initialize(getApplicationContext(), getResources().getString(R.string.google_maps_key));
-        // Create a new PlacesClient instance
-        PlacesClient placesClient = Places.createClient(this);
 
         // bind ui element to variable
         addGuide = binding.addGuide;
@@ -150,8 +146,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // elements needed for the search recyclerview
         predictions = new ArrayList<>();
-        adapter = new SearchListAdapter(predictions, this);
+        adapter = new SearchListAdapter(predictions, this, new SearchListAdapter.onItemClickListener() {
+            @Override
+            public void onItemClick(AutocompletePrediction prediction) {
+                String placeId = prediction.getPlaceId();
+
+                // Construct a request object, passing the place ID and fields array.
+                final FetchPlaceRequest request = FetchPlaceRequest.newInstance(placeId, HelperClass.placesFields);
+
+                HelperClass.getPlacesClient().fetchPlace(request).addOnSuccessListener((response) -> {
+
+                    Place place = response.getPlace();
+                    closeSearchView();
+
+                    // zooms out and zooms to location
+                    map.animateCamera(CameraUpdateFactory.zoomTo(20), 3000, null);
+                    zoomToLocation(place.getLatLng());
+
+                }).addOnFailureListener((exception) -> {
+                    if (exception instanceof ApiException) {
+
+                        final ApiException apiException = (ApiException) exception;
+                        Log.e(TAG, "Place not found: " + exception.getMessage());
+                    }
+                });
+            }
+        });
+
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        // creates divider for recyclerview
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(rvSearchList.getContext()
                 , linearLayoutManager.getOrientation());
 
@@ -169,6 +192,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public boolean onQueryTextSubmit(String query) {
 
+                // clears focus and hides keyboard
                 searchView.clearFocus();
                 hideKeyboard();
 
@@ -178,15 +202,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public boolean onQueryTextChange(String newText) {
 
-
                 if (lastKnownLocation != null) {
                     FindAutocompletePredictionsRequest request = FindAutocompletePredictionsRequest.builder()
                             .setOrigin(new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()))
                             .setSessionToken(token).setQuery(newText).build();
 
-                    placesClient.findAutocompletePredictions(request).addOnSuccessListener((response) -> {
+                    HelperClass.getPlacesClient().findAutocompletePredictions(request).addOnSuccessListener((response) -> {
 
                         predictions = response.getAutocompletePredictions();
+
+                        // updates the recyclerview
                         adapter.clear();
                         adapter.addAll(predictions);
 
@@ -476,12 +501,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void hideOverlayBtns() {
         addGuide.setVisibility(View.INVISIBLE);
         searchView.setVisibility(View.INVISIBLE);
+        rvSearchList.setVisibility(View.INVISIBLE);
     }
 
     // sets the view state for the addGuide Button
     public void showOverlayBtns() {
         addGuide.setVisibility(View.VISIBLE);
         searchView.setVisibility(View.VISIBLE);
+        rvSearchList.setVisibility(View.VISIBLE);
+
     }
 
     // TODO: add zoom when navigating from adding new guide
@@ -490,7 +518,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     /// close the searchview element
-    private void closeSearchView() {
+    public void closeSearchView() {
         searchView.clearFocus();
         searchView.setQuery("", false);
         searchView.setIconified(true);

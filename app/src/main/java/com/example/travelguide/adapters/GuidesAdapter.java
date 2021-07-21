@@ -81,6 +81,10 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
 
+        // if the click doesn't relate to an item
+        if (position == RecyclerView.NO_POSITION)
+            return;
+
         // get current guide at positoin
         Guide guide = guides.get(position);
 
