@@ -573,7 +573,7 @@ public class ComposeFragment extends Fragment {
             try {
                 InputStream inputStream = getContext().getContentResolver().openInputStream(Uri.fromFile(audio));
                 soundBytes = new byte[inputStream.available()];
-                soundBytes = toByteArray(inputStream);
+//                soundBytes = toByteArray(inputStream);
                 guide.setAudio(new ParseFile("audio.mp4", soundBytes));
 
             } catch (Exception e) {

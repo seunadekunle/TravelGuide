@@ -9,6 +9,7 @@ import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,7 +35,13 @@ import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.audio.AudioAttributes;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.ui.PlayerView;
+import com.parse.FindCallback;
+import com.parse.ParseException;
 import com.parse.ParseFile;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
+import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
 import java.util.List;
 
@@ -47,18 +54,18 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
 
     private static final String TAG = "GuidesAdapter";
 
-    private List<Guide> guides;
-    private Context context;
-    private ImageView expandedImageView;
-    private View expandedImageViewBG;
-    private Activity activity;
+    private final List<Guide> guides;
+    private final Context context;
+    private final ImageView expandedImageView;
+    private final View expandedImageViewBG;
+    private final Activity activity;
     private SimpleExoPlayer exoPlayer;
 
     // Hold a reference to the current animator
     private Animator currentAnimator;
     // The system "short" animation time duration, in milliseconds.
-    private int shortAnimationDuration = 100;
-    private int playerHeightMult = 12;
+    private final int shortAnimationDuration = 100;
+    private final int playerHeightMult = 12;
 
 
     public GuidesAdapter(List<Guide> items, Context context, ImageView expandedImageView, View expandedImageViewBG, Activity activity, SimpleExoPlayer exoPlayer) {
@@ -105,6 +112,51 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
         holder.tvLikes.setText(String.valueOf(guide.getLikes()));
 
         // if there is any media
+        fillMediaLayout(holder, guide);
+
+//        Log.i(TAG, String.valueOf(isGuideLiked(guide)));
+//        holder.ibLikes.setSelected(isGuideLiked(guide));
+
+        FindCallback<ParseObject> findCallback = new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> objects, ParseException e) {
+
+                if (objects.size() >= 1) {
+                    guide.setGuideLiked(true);
+                    holder.ibLikes.setSelected(guide.isGuideLiked());
+                }
+            }
+        };
+
+        isGuideLiked(guide, findCallback);
+
+
+        // click listener for like button
+        holder.ibLikes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                holder.ibLikes.setSelected(!holder.ibLikes.isSelected());
+
+                // creates a like row and updates Guide text
+                ParseObject likeActivity = new ParseObject("Activity");
+                likeActivity.put("userID", ParseUser.getCurrentUser());
+                likeActivity.put("guideID", guide);
+                likeActivity.saveInBackground(new SaveCallback() {
+                    @Override
+                    public void done(ParseException e) {
+                        if (e != null)
+                            Log.i(TAG, e.getMessage());
+                        else {
+                            guide.setLikes(guide.getLikes() + 1);
+                            guide.saveInBackground();
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    private void fillMediaLayout(ViewHolder holder, Guide guide) {
         if (guide.getPhoto() != null || guide.getVideo() != null || guide.getAudio() != null) {
 
             holder.mediaLayout.setVisibility(View.VISIBLE);
@@ -186,6 +238,15 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
         }
     }
 
+    private void isGuideLiked(Guide guide, FindCallback<ParseObject> findCallback) {
+
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Activity");
+        query.whereEqualTo("userID", ParseUser.getCurrentUser());
+        query.whereEqualTo("guideID", guide);
+
+        query.findInBackground(findCallback);
+    }
+
     // clear all elements of the RecyclerView
     public void clear() {
         guides.clear();
@@ -210,9 +271,12 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
         public ImageView ivAvatar;
         public TextView tvCreatedAt;
         public TextView tvLikes;
+        public ImageButton ibLikes;
 
-        private ConstraintLayout mediaLayout;
-        private ImageButton ibThumb;
+
+        // media ui elements
+        private final ConstraintLayout mediaLayout;
+        private final ImageButton ibThumb;
         public PlayerView epPlayerView;
 
         public ViewHolder(LocationGuideBinding binding) {
@@ -224,6 +288,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
             ivAvatar = binding.ivAvatar;
             tvCreatedAt = binding.tvCreatedAt;
             tvLikes = binding.tvLikes;
+            ibLikes = binding.ibLikes;
 
             mediaLayout = binding.mediaContainer.mediaLayout;
             ibThumb = binding.mediaContainer.ibThumb;

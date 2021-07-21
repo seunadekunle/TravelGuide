@@ -9,10 +9,16 @@ import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.util.Date;
+import java.util.List;
 
 @ParseClassName("Guide")
 public class Guide extends ParseObject {
+
+    private static final String TAG = "Guide";
 
     private static final String KEY_CREATION_DATE = "createdAt";
     private static final String KEY_AUTHOR = "author";
@@ -22,6 +28,17 @@ public class Guide extends ParseObject {
     private static final String KEY_AUDIO = "audio";
     private static final String KEY_VIDEO = "video";
     private static final String KEY_LIKES = "likes";
+
+    private boolean guideLiked = false;
+
+    // set the guide likes
+    public void setGuideLiked(boolean liked){
+
+        if (!liked && getLikes() > 0){
+            setLikes(getLikes() - 1);
+        }
+        guideLiked = liked;
+    }
 
     public void setAuthor(ParseUser user) {
         put(KEY_AUTHOR, user);
@@ -71,9 +88,14 @@ public class Guide extends ParseObject {
         return getParseFile(KEY_VIDEO);
     }
 
-    public ParseFile getAudio() { return getParseFile(KEY_AUDIO); }
+    public ParseFile getAudio() {
+        return getParseFile(KEY_AUDIO);
+    }
 
-    public int getLikes() { return getInt(KEY_LIKES); }
+    public int getLikes() {
+        return getInt(KEY_LIKES);
+    }
+
 
     public static String getKeyCreationDate() {
         return KEY_CREATION_DATE;
@@ -105,6 +127,10 @@ public class Guide extends ParseObject {
 
     public static String getKeyLikes() {
         return KEY_LIKES;
+    }
+
+    public boolean isGuideLiked() {
+        return guideLiked;
     }
 
     // returns the timestamp as a string
