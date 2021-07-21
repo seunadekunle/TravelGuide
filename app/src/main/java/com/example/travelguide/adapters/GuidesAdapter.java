@@ -106,22 +106,25 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
             (holder.ivAvatar).setVisibility(View.GONE);
 
 
-        holder.tvUsername.setText(guide.getAuthor().getUsername());
-        holder.tvDetail.setText(guide.getText());
-        holder.tvCreatedAt.setText(guide.getTimeStamp());
-        holder.tvLikes.setText(String.valueOf(guide.getLikes()));
+        setTextViewText(holder.tvUsername, guide.getAuthor().getUsername());
+        setTextViewText(holder.tvDetail, guide.getText());
+        setTextViewText(holder.tvCreatedAt, guide.getTimeStamp());
+        setTextViewText(holder.tvLikes, String.valueOf(guide.getLikes()));
 
         // if there is any media
         fillMediaLayout(holder, guide);
+        handleLikeButton(holder, guide);
+    }
 
-//        Log.i(TAG, String.valueOf(isGuideLiked(guide)));
-//        holder.ibLikes.setSelected(isGuideLiked(guide));
+    // handle click for like button
+    private void handleLikeButton(ViewHolder holder, Guide guide) {
 
+        // call back for getting like data
         FindCallback<ParseObject> findCallback = new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> objects, ParseException e) {
 
-                if (objects.size() >= 1) {
+                if (!guide.isGuideLiked() && e == null && objects.size() >= 1) {
                     guide.setGuideLiked(true);
                     holder.ibLikes.setSelected(guide.isGuideLiked());
                 }
@@ -130,30 +133,71 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
 
         isGuideLiked(guide, findCallback);
 
+        // callback for deleting like data
+        FindCallback<ParseObject> deleteCallback = new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> objects, ParseException e) {
+
+                if (guide.isGuideLiked() && e == null && objects.size() >= 1) {
+
+                    for (ParseObject object : objects) {
+                        try {
+                            object.delete();
+                        } catch (ParseException parseException) {
+                            parseException.printStackTrace();
+                        }
+                        object.saveInBackground();
+                    }
+
+                    guide.setGuideLiked(false);
+                    guide.saveInBackground();
+                    setTextViewText(holder.tvLikes, String.valueOf(guide.getLikes()));
+                }
+            }
+        };
 
         // click listener for like button
         holder.ibLikes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                holder.ibLikes.setSelected(!holder.ibLikes.isSelected());
 
-                // creates a like row and updates Guide text
-                ParseObject likeActivity = new ParseObject("Activity");
-                likeActivity.put("userID", ParseUser.getCurrentUser());
-                likeActivity.put("guideID", guide);
-                likeActivity.saveInBackground(new SaveCallback() {
-                    @Override
-                    public void done(ParseException e) {
-                        if (e != null)
-                            Log.i(TAG, e.getMessage());
-                        else {
-                            guide.setLikes(guide.getLikes() + 1);
-                            guide.saveInBackground();
+                if (holder.ibLikes.isSelected()) {
+                    isGuideLiked(guide, deleteCallback);
+                } else {
+                    // creates a like row and updates Guide text
+                    ParseObject likeActivity = new ParseObject("Activity");
+                    likeActivity.put("userID", ParseUser.getCurrentUser());
+                    likeActivity.put("guideID", guide);
+                    likeActivity.saveInBackground(new SaveCallback() {
+                        @Override
+                        public void done(ParseException e) {
+                            if (e != null)
+                                Log.i(TAG, e.getMessage());
+                            else {
+
+                                // if guide isn't liked
+                                if (!guide.isGuideLiked()) {
+
+                                    // update ui state and save like
+                                    guide.setGuideLiked(true);
+                                    guide.setLikes(guide.getLikes() + 1);
+                                    guide.saveInBackground();
+
+                                    setTextViewText(holder.tvLikes, String.valueOf(guide.getLikes()));
+                                }
+                            }
                         }
-                    }
-                });
+                    });
+                }
+
+                // toggle view state
+                holder.ibLikes.setSelected(!holder.ibLikes.isSelected());
             }
         });
+    }
+
+    private void setTextViewText(TextView tvChanged, String s) {
+        tvChanged.setText(s);
     }
 
     private void fillMediaLayout(ViewHolder holder, Guide guide) {
@@ -238,6 +282,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
         }
     }
 
+    // uses a join table to check if the user likes the post
     private void isGuideLiked(Guide guide, FindCallback<ParseObject> findCallback) {
 
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Activity");
