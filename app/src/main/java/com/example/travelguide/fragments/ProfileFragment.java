@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -38,8 +39,6 @@ public class ProfileFragment extends Fragment {
     private ProfilePagerAdapter profilePagerAdapter;
     private ViewPager2 viewPager2;
     private TabLayout tabLayout;
-
-    private String[] tabTitles = {"Guides", "Liked"};
 
     @Nullable
     @Override
@@ -76,11 +75,11 @@ public class ProfileFragment extends Fragment {
         viewPager2 = view.findViewById(R.id.viewPager);
         tabLayout = view.findViewById(R.id.tabLayout);
 
-        profilePagerAdapter = new ProfilePagerAdapter(getActivity());
+        profilePagerAdapter = new ProfilePagerAdapter(getActivity(), R.id.expandedImgView, R.id.expandedImgViewBG);
         viewPager2.setAdapter(profilePagerAdapter);
 
         new TabLayoutMediator(tabLayout, viewPager2,
-                (tab, position) -> tab.setText(tabTitles[position])
+                (tab, position) -> tab.setText(HelperClass.profileTabTitles[position])
         ).attach();
     }
 

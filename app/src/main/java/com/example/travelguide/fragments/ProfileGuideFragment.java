@@ -11,15 +11,15 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.travelguide.R;
+import com.example.travelguide.classes.Activity;
 import com.example.travelguide.classes.Guide;
-import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.parse.FindCallback;
-import com.parse.ParseException;
+import com.example.travelguide.helpers.HelperClass;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -29,36 +29,38 @@ import java.util.List;
  */
 public class ProfileGuideFragment extends LocationGuideFragment {
 
-    // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private static final String ARG_PAGE_TYPE = "type";
+    private static final String ARG_IMG_ID = "expandedIv";
+    private static final String ARG_IMG_BG_ID = "expandedBg";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private String type = "";
 
-    private SimpleExoPlayer globalPlayer;
+    private List<Guide> guideList;
 
+    private int expandedIv = 0;
+    private int expandedBg = 0;
 
     public ProfileGuideFragment() {
         // Required empty public constructor
     }
 
     /**
-     * Use this factory method to create a new instance of
+     * factory method to create a new instance of
      * this fragment using the provided parameters.
      *
      * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
      * @return A new instance of fragment ProfileGuideFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static ProfileGuideFragment newInstance(String param1, String param2) {
+    public static ProfileGuideFragment newInstance(String param1, int imageViewID, int imageBgID) {
         ProfileGuideFragment fragment = new ProfileGuideFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+
+        args.putString(ARG_PAGE_TYPE, param1);
+        args.putInt(ARG_IMG_ID, imageViewID);
+        args.putInt(ARG_IMG_BG_ID, imageBgID);
+
         fragment.setArguments(args);
         return fragment;
     }
@@ -67,8 +69,9 @@ public class ProfileGuideFragment extends LocationGuideFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            type = getArguments().getString(ARG_PAGE_TYPE);
+            expandedIv = getArguments().getInt(ARG_IMG_ID);
+            expandedBg = getArguments().getInt(ARG_IMG_BG_ID);
         }
     }
 
@@ -82,14 +85,26 @@ public class ProfileGuideFragment extends LocationGuideFragment {
     @Override
     public void onViewCreated(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
 
+
+        guideList = new ArrayList<>();
+
         // set up the guide list
-        setupGuideList(view, view.getContext(), globalPlayer);
+        setupGuideList(view, view.getContext(), view.findViewById(R.id.expandedImgView), view.findViewById(R.id.expandedImgViewBG));
         queryGuides();
     }
 
     @Override
     protected void queryGuides() {
-        // specify what type of data we want to query - Post.class
+
+        if (type.equals(HelperClass.profileTabTitles[0])) {
+            queryCreatedGuides();
+        } else if (type.equals(HelperClass.profileTabTitles[1])) {
+            queryLikedGuides();
+        }
+    }
+
+    private void queryCreatedGuides() {
+        // specify what type of data we want to query - Guide.class
         ParseQuery<Guide> query = ParseQuery.getQuery(Guide.class);
         // include data referred by user key
         query.include(Guide.getKeyAuthor());
@@ -101,23 +116,54 @@ public class ProfileGuideFragment extends LocationGuideFragment {
         query.addDescendingOrder("createdAt");
 
         // start an asynchronous call for posts
-        query.findInBackground(new FindCallback<Guide>() {
-            @Override
-            public void done(List<Guide> guides, ParseException e) {
-                // check for errors
-                if (e != null) {
-                    Log.e(TAG, "Issue with getting guides", e);
-                    return;
-                }
-
-                // clears the adapter
-                adapter.clear();
-                // save received posts to list and notify adapter of new data
-                adapter.addAll(guides);
-                adapter.notifyDataSetChanged();
-
-                showEmptyListText();
+        query.findInBackground((guides, e) -> {
+            // check for errors
+            if (e != null) {
+                Log.e(TAG, "Issue with getting guides", e);
+                return;
             }
+
+            // clears the adapter
+            adapter.clear();
+            // save received posts to list and notify adapter of new data
+            adapter.addAll(guides);
+            adapter.notifyDataSetChanged();
+
+            showEmptyListText();
+        });
+    }
+
+
+    // gets guides that user liked
+    private void queryLikedGuides() {
+        // specify what type of data we want to query - Guide.class
+        ParseQuery<Activity> query = ParseQuery.getQuery(Activity.class);
+        //  where the author is the logged in user
+        query.whereEqualTo(Activity.getKeyUserId(), ParseUser.getCurrentUser());
+        query.include(Activity.getKeyGuideId());
+        // order posts by creation date (newest first)
+        query.addDescendingOrder("createdAt");
+
+        // start an asynchronous call for posts
+        query.findInBackground((activities, e) -> {
+            // check for errors
+            if (e != null) {
+                Log.e(TAG, "Issue with getting guides", e);
+                return;
+            }
+
+            // get guides that have been liked
+            for (Activity activity : activities) {
+                guideList.add((Guide) activity.get(Activity.getKeyGuideId()));
+            }
+
+            // clears the adapter
+            adapter.clear();
+            // save received posts to list and notify adapter of new data
+            adapter.addAll(guideList);
+            adapter.notifyDataSetChanged();
+
+            showEmptyListText();
         });
     }
 }

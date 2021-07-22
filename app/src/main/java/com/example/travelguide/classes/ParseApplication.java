@@ -15,6 +15,7 @@ public class ParseApplication extends Application {
 
         // Register parse models
         ParseObject.registerSubclass(Guide.class);
+        ParseObject.registerSubclass(Activity.class);
 
         Parse.initialize(new Parse.Configuration.Builder(this)
                 .applicationId("LehUdwXhP2IpTN6Tnu7gXIayECJALrtOKyEao0N5")

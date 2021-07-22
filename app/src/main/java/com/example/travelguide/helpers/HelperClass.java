@@ -38,13 +38,13 @@ import static com.parse.Parse.getApplicationContext;
 // helper functions used multiple times in the project
 public class HelperClass {
 
-    private static String TAG = "HelperClass";
+    private static final String TAG = "HelperClass";
+    private static PlacesClient placesClient;
 
     public static int picRadius = 25;
     public static int resizedImgDimen = 650;
     public static int detailImgDimen = 475;
-
-    private static PlacesClient placesClient;
+    public static String[] profileTabTitles = {"Guides", "Liked"};
 
     // Set the fields to specify which types of place data to return
     // for Google places API

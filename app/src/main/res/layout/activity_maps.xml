@@ -52,6 +52,21 @@
             android:searchIcon="@drawable/search_icon"
             android:visibility="visible" />
 
+        <ImageButton
+            android:id="@+id/ibProfile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="50dp"
+            android:layout_marginTop="50dp"
+            android:background="@drawable/profile_icon_bg"
+            android:contentDescription="@string/profile_icon"
+            android:fitsSystemWindows="false"
+            android:focusable="true"
+            android:visibility="visible"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="MissingConstraints" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvSearchList"
             android:layout_width="match_parent"
@@ -88,22 +103,6 @@
                 app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior" />
 
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
-
-        <ImageButton
-            android:id="@+id/ibProfile"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="50dp"
-            android:layout_marginTop="50dp"
-            android:background="@drawable/profile_icon_bg"
-            android:contentDescription="@string/profile_icon"
-            android:fitsSystemWindows="false"
-            android:focusable="true"
-            android:visibility="visible"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="MissingConstraints" />
-
 
     </FrameLayout>
 

@@ -33,13 +33,6 @@
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    <include
-        android:id="@+id/imgExpanded"
-        layout="@layout/image_expanded"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="visible" />
-
     <ProgressBar
         android:id="@+id/pbLoading"
         style="?android:attr/progressBarStyle"

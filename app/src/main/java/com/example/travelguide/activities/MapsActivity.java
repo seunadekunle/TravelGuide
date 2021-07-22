@@ -424,27 +424,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Guide");
         query.whereExists(Guide.getKeyLocation());
-        query.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> locations, ParseException e) {
+        query.findInBackground((locations, e) -> {
 
-                if (e == null) {
-                    for (int i = 0; i < locations.size(); i++) {
+            if (e == null) {
+                for (int i = 0; i < locations.size(); i++) {
 
-                        // retrieves geo point from database and converts it to a LatLng Object
-                        ParseGeoPoint locationData = locations.get(i).getParseGeoPoint(Guide.getKeyLocation());
-                        LatLng location = new LatLng(locationData.getLatitude(), locationData.getLongitude());
+                    // retrieves geo point from database and converts it to a LatLng Object
+                    ParseGeoPoint locationData = locations.get(i).getParseGeoPoint(Guide.getKeyLocation());
+                    LatLng location = new LatLng(locationData.getLatitude(), locationData.getLongitude());
 
-                        // adds a new marker with the LatLng object
-                        addMarker(new MarkerOptions().position(location), locations.get(i).getParseGeoPoint(Guide.getKeyLocation()));
-                    }
-
-                    // hides progress bar
-                    pbMaps.setVisibility(View.INVISIBLE);
-                    showOverlayBtns();
-                } else {
-                    Log.e(TAG, "Not getting guides", e);
+                    // adds a new marker with the LatLng object
+                    addMarker(new MarkerOptions().position(location), locations.get(i).getParseGeoPoint(Guide.getKeyLocation()));
                 }
+
+                // hides progress bar
+                pbMaps.setVisibility(View.INVISIBLE);
+                showOverlayBtns();
+            } else {
+                Log.e(TAG, "Not getting guides", e);
             }
         });
         ParseQuery.clearAllCachedResults();

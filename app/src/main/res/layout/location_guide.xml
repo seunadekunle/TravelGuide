@@ -5,8 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="15dp"
-    android:background="@color/white">
+    android:layout_marginBottom="15dp">
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
@@ -16,7 +15,7 @@
         android:layout_marginEnd="7.5dp"
         android:layout_marginBottom="7.5dp"
         app:cardCornerRadius="@dimen/corner_radius"
-        app:cardElevation="0dp"
+        app:cardElevation="1dp"
         tools:ignore="MissingConstraints">
 
 

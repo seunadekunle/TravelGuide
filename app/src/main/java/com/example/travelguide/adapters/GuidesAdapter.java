@@ -42,6 +42,7 @@ import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
+import java.io.File;
 import java.util.List;
 
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
@@ -94,7 +95,13 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
         Guide guide = guides.get(position);
 
         // loads user profile image on timeline
-        ParseFile profileImg = guide.getAuthor().getParseFile("avatar");
+        ParseFile profileImg = new ParseFile(new File(""));
+        try {
+            profileImg = guide.getAuthor().fetchIfNeeded().getParseFile("avatar");
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
         // handles if image gotten from database
         if (profileImg != null)
             HelperClass.loadProfileImage(context, profileImg, 100, 40, holder.ivAvatar);
@@ -111,6 +118,68 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
         fillMediaLayout(holder, guide);
         handleLikeButton(holder, guide);
     }
+
+    // clear all elements of the RecyclerView
+    public void clear() {
+        guides.clear();
+        notifyDataSetChanged();
+    }
+
+    // Add a list of items to the list
+    public void addAll(List<Guide> list) {
+        guides.addAll(list);
+        notifyDataSetChanged();
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return position;
+    }
+
+
+    // return size of lists for the lcoation
+    @Override
+    public int getItemCount() {
+        return guides.size();
+    }
+
+
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        public TextView tvUsername;
+        public TextView tvDetail;
+        public ImageView ivAvatar;
+        public TextView tvCreatedAt;
+        public TextView tvLikes;
+        public ImageButton ibLikes;
+
+
+        // media ui elements
+        private final ConstraintLayout mediaLayout;
+        private final ImageButton ibThumb;
+        public PlayerView epPlayerView;
+
+        public ViewHolder(LocationGuideBinding binding) {
+            super(binding.getRoot());
+
+            // binds ui elements to variables
+            tvUsername = binding.tvUsername;
+            tvDetail = binding.tvDetail;
+            ivAvatar = binding.ivAvatar;
+            tvCreatedAt = binding.tvCreatedAt;
+            tvLikes = binding.tvLikes;
+            ibLikes = binding.ibLikes;
+
+            mediaLayout = binding.mediaContainer.mediaLayout;
+            ibThumb = binding.mediaContainer.ibThumb;
+            epPlayerView = binding.mediaContainer.epPlayer;
+        }
+    }
+
 
     // handle click for like button
     private void handleLikeButton(ViewHolder holder, Guide guide) {
@@ -198,6 +267,8 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
 
     private void fillMediaLayout(ViewHolder holder, Guide guide) {
         if (guide.getPhoto() != null || guide.getVideo() != null || guide.getAudio() != null) {
+
+            Log.i(TAG, guide.getText());
 
             holder.mediaLayout.setVisibility(View.VISIBLE);
 
@@ -289,56 +360,6 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
 
         query.findInBackground(findCallback);
     }
-
-    // clear all elements of the RecyclerView
-    public void clear() {
-        guides.clear();
-        notifyDataSetChanged();
-    }
-
-    // Add a list of items to the list
-    public void addAll(List<Guide> list) {
-        guides.addAll(list);
-        notifyDataSetChanged();
-    }
-
-    // return size of lists for the lcoation
-    @Override
-    public int getItemCount() {
-        return guides.size();
-    }
-
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        public TextView tvUsername;
-        public TextView tvDetail;
-        public ImageView ivAvatar;
-        public TextView tvCreatedAt;
-        public TextView tvLikes;
-        public ImageButton ibLikes;
-
-
-        // media ui elements
-        private final ConstraintLayout mediaLayout;
-        private final ImageButton ibThumb;
-        public PlayerView epPlayerView;
-
-        public ViewHolder(LocationGuideBinding binding) {
-            super(binding.getRoot());
-
-            // binds ui elements to variables
-            tvUsername = binding.tvUsername;
-            tvDetail = binding.tvDetail;
-            ivAvatar = binding.ivAvatar;
-            tvCreatedAt = binding.tvCreatedAt;
-            tvLikes = binding.tvLikes;
-            ibLikes = binding.ibLikes;
-
-            mediaLayout = binding.mediaContainer.mediaLayout;
-            ibThumb = binding.mediaContainer.ibThumb;
-            epPlayerView = binding.mediaContainer.epPlayer;
-        }
-    }
-
 
     /* creates an expanded view after clicking on thumbnail
      * ref: https://developer.android.com/training/animation/zoom.html
