@@ -22,7 +22,6 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.travelguide.R;
 import com.example.travelguide.activities.MapsActivity;
 import com.example.travelguide.classes.Guide;
@@ -99,9 +98,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
         ParseFile profileImg = guide.getAuthor().getParseFile("avatar");
         // handles if image gotten from database
         if (profileImg != null)
-            Glide.with(context)
-                    .load(profileImg.getUrl()).fitCenter().transform(new CircleCrop())
-                    .override(100, 40).into(holder.ivAvatar);
+            HelperClass.loadProfileImage(context, profileImg, 100, 40, holder.ivAvatar);
         else
             (holder.ivAvatar).setVisibility(View.GONE);
 

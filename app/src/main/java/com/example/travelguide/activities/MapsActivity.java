@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
 
@@ -27,6 +29,7 @@ import com.example.travelguide.classes.Guide;
 import com.example.travelguide.databinding.ActivityMapsBinding;
 import com.example.travelguide.fragments.ComposeFragment;
 import com.example.travelguide.fragments.LocationGuideFragment;
+import com.example.travelguide.fragments.ProfileFragment;
 import com.example.travelguide.helpers.DeviceDimenHelper;
 import com.example.travelguide.helpers.HelperClass;
 import com.google.android.gms.common.api.ApiException;
@@ -61,6 +64,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private static final String TAG = MapsActivity.class.getSimpleName();
@@ -75,7 +79,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private ProgressBar pbMaps;
     private SearchView searchView;
     private RecyclerView rvSearchList;
+    private ImageButton ibProfile;
 
+    // search ui elements
     private SearchListAdapter adapter;
     private List<AutocompletePrediction> predictions;
     private BottomSheetBehavior sheetBehavior;
@@ -84,6 +90,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private ComposeFragment composeFragment;
     private LocationGuideFragment locationGuideFragment;
     private LocationGuideFragment modalLocationGuideFragment;
+    private ProfileFragment profileFragment;
     private SupportMapFragment mapFragment;
 
     // The entry point to the Fused Location Provider.
@@ -135,6 +142,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         pbMaps = binding.pbMaps;
         searchView = binding.searchView;
         rvSearchList = binding.rvSearchList;
+        ibProfile = binding.ibProfile;
         sheetBehavior = BottomSheetBehavior.from(findViewById(R.id.modalLocationView));
 
         fragmentsFrameId = R.id.fragmentsFrame;
@@ -149,6 +157,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // creates new instance of the different fragments
         composeFragment = new ComposeFragment();
+        profileFragment = new ProfileFragment();
 
         setupSheetBehavior();
 
@@ -162,6 +171,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         predictions = new ArrayList<>();
         adapter = new SearchListAdapter(predictions, this, onItemClickListener);
         setupSearchView();
+
+        ibProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i(TAG, "clicked");
+
+                // Begin the transaction
+                FragmentTransaction ft = fragmentManager.beginTransaction();
+
+                // add fragment to container
+                if (!profileFragment.isAdded())
+                    ft.add(fragmentsFrameId, profileFragment);
+
+                HelperClass.finishTransaction(ft, ProfileFragment.TAG, (Fragment) profileFragment);
+                hideOverlayBtns();
+            }
+        });
 
         // add button on click listener
         addGuide.setOnClickListener(new View.OnClickListener() {
@@ -586,6 +612,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         addGuide.setVisibility(View.INVISIBLE);
         searchView.setVisibility(View.INVISIBLE);
         rvSearchList.setVisibility(View.INVISIBLE);
+        ibProfile.setVisibility(View.INVISIBLE);
     }
 
     // sets the view state for the addGuide Button
@@ -593,7 +620,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         addGuide.setVisibility(View.VISIBLE);
         searchView.setVisibility(View.VISIBLE);
         rvSearchList.setVisibility(View.VISIBLE);
-
+        ibProfile.setVisibility(View.VISIBLE);
     }
 
     // TODO: add zoom when navigating from adding new guide
