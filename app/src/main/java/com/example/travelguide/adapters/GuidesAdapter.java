@@ -73,7 +73,6 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
         guides = items;
         this.expandedImageViewBG = expandedImageViewBG;
         this.activity = activity;
-
         this.exoPlayer = exoPlayer;
     }
 
@@ -223,6 +222,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
                         zoomImageFromThumb(holder.ibThumb, photoUrl, expandedImageView);
                     }
                 });
+                return;
             }
 
             // if there is audio or video
@@ -275,6 +275,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
                 // prepares the media
                 exoPlayer.prepare();
                 exoPlayer.setPlayWhenReady(false);
+                return;
             }
         }
     }

@@ -6,18 +6,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import androidx.fragment.app.Fragment;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.travelguide.R;
 import com.example.travelguide.activities.EntryActivity;
-import com.example.travelguide.activities.MapsActivity;
+import com.example.travelguide.adapters.ProfilePagerAdapter;
 import com.example.travelguide.helpers.HelperClass;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 import com.parse.LogOutCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
@@ -27,11 +29,18 @@ import org.jetbrains.annotations.NotNull;
 
 public class ProfileFragment extends Fragment {
 
+    public static final String TAG = "ProfileFragment";
+
     private ImageButton ibAvatar;
     private TextView tvProfile;
     private Button logOutBtn;
 
-    public static final String TAG = "ProfileFragment";
+    private ProfilePagerAdapter profilePagerAdapter;
+    private ViewPager2 viewPager2;
+    private TabLayout tabLayout;
+
+    private String[] tabTitles = {"Guides", "Liked"};
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -42,7 +51,6 @@ public class ProfileFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
 
         ibAvatar = view.findViewById(R.id.ibAvatar);
         tvProfile = view.findViewById(R.id.tvProfile);
@@ -53,24 +61,37 @@ public class ProfileFragment extends Fragment {
 
         // gets profile image and load it
         ParseFile profileImg = ParseUser.getCurrentUser().getParseFile("avatar");
-        HelperClass.loadProfileImage(getContext(), profileImg, 500, 500, ibAvatar);
 
+        if(profileImg != null)
+            HelperClass.loadProfileImage(getContext(), profileImg, 500, 500, ibAvatar);
+
+        // handles logout button click
         logOutBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 logOutUser();
             }
         });
+
+        viewPager2 = view.findViewById(R.id.viewPager);
+        tabLayout = view.findViewById(R.id.tabLayout);
+
+        profilePagerAdapter = new ProfilePagerAdapter(getActivity());
+        viewPager2.setAdapter(profilePagerAdapter);
+
+        new TabLayoutMediator(tabLayout, viewPager2,
+                (tab, position) -> tab.setText(tabTitles[position])
+        ).attach();
     }
 
     // logs out the user
-    private void logOutUser(){
+    private void logOutUser() {
 
         ParseUser.logOutInBackground(new LogOutCallback() {
             @Override
             public void done(ParseException e) {
 
-                // creates new intent to start page and clears history
+                // creates new intent to entry page and clears history
                 Intent toEntry = new Intent(getContext(), EntryActivity.class);
                 startActivity(toEntry);
                 getActivity().finish();

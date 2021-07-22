@@ -31,6 +31,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
+
 import static com.parse.Parse.getApplicationContext;
 
 // helper functions used multiple times in the project
@@ -134,5 +136,12 @@ public class HelperClass {
         Glide.with(context)
                 .load(profileImg.getUrl()).fitCenter().transform(new CircleCrop())
                 .override(width, height).into(imageView);
+    }
+
+    // loads profile image for image button
+    public static void loadProfileImage(Context context, ParseFile profileImg, int width, int height, ImageButton imageButton) {
+        Glide.with(context)
+                .load(profileImg.getUrl()).fitCenter().transform((new CircleCrop()))
+                .override(width, height).into(imageButton);
     }
 }

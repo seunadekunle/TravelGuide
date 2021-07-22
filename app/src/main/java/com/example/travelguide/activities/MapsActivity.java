@@ -99,7 +99,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // A default location (Sydney, Australia) and default zoom to use when location permission is
     // not granted.
     private final LatLng defaultLocation = new LatLng(-33.8523341, 151.2106085);
-    private static final int DEFAULT_ZOOM = 20;
+    private static final int DEFAULT_ZOOM = 17;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean locationPermissionGranted;
 
@@ -224,7 +224,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             addGuide.setVisibility(View.INVISIBLE);
 
             // zooms out and zooms to location
-            map.animateCamera(CameraUpdateFactory.zoomTo(20), 3000, new GoogleMap.CancelableCallback() {
+            map.animateCamera(CameraUpdateFactory.zoomTo(DEFAULT_ZOOM), 3000, new GoogleMap.CancelableCallback() {
                 @Override
                 public void onFinish() {
 
@@ -372,6 +372,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         map = googleMap;
         map.getUiSettings().setMapToolbarEnabled(false);
         map.getUiSettings().setScrollGesturesEnabled(true);
+        // TODO: add map versions
 
         // sets padding to change position of map controls
         map.setPadding(0, (int) (height / 1.25), 0, 0);

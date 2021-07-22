@@ -58,8 +58,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.List;
 
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
@@ -472,7 +470,7 @@ public class ComposeFragment extends Fragment {
 
                 // if no location is selected
                 if (location == null) {
-                    Snackbar emptyLocation = Snackbar.make(etText, R.string.no_locattion, Snackbar.LENGTH_SHORT);
+                    Snackbar emptyLocation = Snackbar.make(etText, R.string.no_location, Snackbar.LENGTH_SHORT);
                     HelperClass.displaySnackBarWithBottomMargin(emptyLocation, 80, getActivity());
                     return;
                 }
@@ -572,8 +570,8 @@ public class ComposeFragment extends Fragment {
             byte[] soundBytes;
             try {
                 InputStream inputStream = getContext().getContentResolver().openInputStream(Uri.fromFile(audio));
-                soundBytes = new byte[inputStream.available()];
-//                soundBytes = toByteArray(inputStream);
+//                soundBytes = new byte[inputStream.available()];
+                soundBytes = toByteArray(inputStream);
                 guide.setAudio(new ParseFile("audio.mp4", soundBytes));
 
             } catch (Exception e) {

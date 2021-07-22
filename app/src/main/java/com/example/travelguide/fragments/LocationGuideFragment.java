@@ -5,10 +5,8 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -24,14 +22,12 @@ import com.example.travelguide.R;
 import com.example.travelguide.adapters.GuidesAdapter;
 import com.example.travelguide.classes.Guide;
 import com.example.travelguide.helpers.HelperClass;
+import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
-import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.parse.ParseRelation;
-import com.parse.ParseUser;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -45,17 +41,17 @@ public class LocationGuideFragment extends Fragment {
 
     public static final String TAG = "LocationGuideFragment";
 
-    private Context context;
-    private RecyclerView rvGuides;
-    private List<Guide> guideList;
-    private GuidesAdapter adapter;
-    private TextView tvAddress;
-    private TextView tvEmptyList;
-    private ProgressBar pbLoading;
+    protected Context context;
+    protected RecyclerView rvGuides;
+    protected List<Guide> guideList;
+    protected GuidesAdapter adapter;
+    protected ProgressBar pbLoading;
     protected SwipeRefreshLayout swipeContainer;
-    private ImageView expandedImgView;
-    private ImageView ivExpandIndicator;
+    protected TextView tvEmptyList;
+
     private SimpleExoPlayer globalPlayer;
+    private TextView tvAddress;
+    private ImageView ivExpandIndicator;
 
     private static final String ARG_LAT = "lat";
     private static final String ARG_LONG = "long";
@@ -100,26 +96,33 @@ public class LocationGuideFragment extends Fragment {
     public void onViewCreated(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+
+        tvAddress = view.findViewById(R.id.tvAddress);
+        ivExpandIndicator = view.findViewById(R.id.ivExpandIndicator);
+
         context = view.getContext();
+
+        setupGuideList(view, context, globalPlayer);
+
+        // sets text of header
+        tvAddress.setText(HelperClass.getAddress(context, parseLocation.getLatitude(), parseLocation.getLongitude()));
+        ivExpandIndicator.setVisibility(View.INVISIBLE);
+
+        queryGuides();
+    }
+
+    protected void setupGuideList(@NotNull View view, Context context, SimpleExoPlayer globalPlayer) {
+
         guideList = new ArrayList<>();
         rvGuides = view.findViewById(R.id.rvGuides);
-        tvAddress = view.findViewById(R.id.tvAddress);
         pbLoading = view.findViewById(R.id.pbLoading);
         tvEmptyList = view.findViewById(R.id.tvEmptyList);
         swipeContainer = view.findViewById(R.id.swipeContainer);
-        ivExpandIndicator = view.findViewById(R.id.ivExpandIndicator);
 
         // Set the adapter of the recycler view
         adapter = new GuidesAdapter(guideList, context, view.findViewById(R.id.expandedImgView), view.findViewById(R.id.expandedImgViewBG), getActivity(), globalPlayer);
         rvGuides.setAdapter(adapter);
         rvGuides.setLayoutManager(new LinearLayoutManager(context));
-
-        // sets text of header
-        tvAddress.setText(HelperClass.getAddress(context, parseLocation.getLatitude(), parseLocation.getLongitude()));
-
-        pbLoading.setVisibility(View.VISIBLE);
-        tvEmptyList.setVisibility(View.INVISIBLE);
-        ivExpandIndicator.setVisibility(View.INVISIBLE);
 
         // Setup refresh listener which triggers new data loading
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -129,21 +132,14 @@ public class LocationGuideFragment extends Fragment {
             }
         });
 
-        queryGuides();
+        pbLoading.setVisibility(View.VISIBLE);
+        tvEmptyList.setVisibility(View.INVISIBLE);
     }
 
-    private void fetchListAsync(int i) {
+    protected void fetchListAsync(int i) {
         queryGuides();
         // sets refreshing state to false
         swipeContainer.setRefreshing(false);
-    }
-
-    private void disableTouchEvents(ViewParent v){
-        if (v.getParent() == null)
-            return;
-
-        v.requestDisallowInterceptTouchEvent(true);
-        disableTouchEvents(v.getParent());
     }
 
     // get list of guides from post server
@@ -155,7 +151,7 @@ public class LocationGuideFragment extends Fragment {
         query.include(Guide.getKeyAuthor());
         // limit query to latest 20 items
         query.setLimit(20);
-        // get posts that were created by the user
+        // get posts that are specific to the location
         query.whereEqualTo(Guide.getKeyLocation(), parseLocation);
         // order posts by creation date (newest first)
         query.addDescendingOrder("createdAt");
@@ -176,17 +172,20 @@ public class LocationGuideFragment extends Fragment {
                 adapter.addAll(guides);
                 adapter.notifyDataSetChanged();
 
-                // shows empty guide text
-                if (adapter.getItemCount() == 0)
-                    tvEmptyList.setVisibility(View.VISIBLE);
-                else
-                    tvEmptyList.setVisibility(View.INVISIBLE);
-
-
-                pbLoading.setVisibility(View.INVISIBLE);
+                showEmptyListText();
             }
         });
+    }
 
+    // shows empty guide text and removes progress bar
+    protected void showEmptyListText() {
+
+        if (adapter.getItemCount() == 0)
+            tvEmptyList.setVisibility(View.VISIBLE);
+        else
+            tvEmptyList.setVisibility(View.INVISIBLE);
+
+        pbLoading.setVisibility(View.INVISIBLE);
     }
 
     @Override
