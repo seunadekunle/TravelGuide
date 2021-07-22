@@ -16,9 +16,9 @@ import com.example.travelguide.fragments.EntryFormFragment;
 import com.example.travelguide.helpers.HelperClass;
 import com.parse.ParseUser;
 
-public class StartActivity extends AppCompatActivity {
+public class EntryActivity extends AppCompatActivity {
 
-    private static final String TAG = StartActivity.class.getSimpleName();
+    private static final String TAG = EntryActivity.class.getSimpleName();
 
     private ActivityStartBinding binding;
 
@@ -78,7 +78,7 @@ public class StartActivity extends AppCompatActivity {
 
     // navigates to the Map Stream view
     public void navigateToMapView() {
-        Intent toMap = new Intent(StartActivity.this, MapsActivity.class);
+        Intent toMap = new Intent(EntryActivity.this, MapsActivity.class);
         startActivity(toMap);
         finish();
     }

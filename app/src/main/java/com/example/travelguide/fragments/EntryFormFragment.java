@@ -15,7 +15,7 @@ import androidx.annotation.StringRes;
 import androidx.fragment.app.Fragment;
 
 import com.example.travelguide.R;
-import com.example.travelguide.activities.StartActivity;
+import com.example.travelguide.activities.EntryActivity;
 import com.example.travelguide.databinding.FragmentEntryBinding;
 import com.example.travelguide.helpers.HelperClass;
 import com.google.android.material.snackbar.Snackbar;
@@ -138,7 +138,7 @@ public class EntryFormFragment extends Fragment {
                         return;
                     }
 
-                    ((StartActivity) getActivity()).navigateToMapView();
+                    ((EntryActivity) getActivity()).navigateToMapView();
                 }
             });
 
@@ -162,7 +162,7 @@ public class EntryFormFragment extends Fragment {
                 public void done(ParseException e) {
                     if (e == null) {
                         // goes to map activity
-                        ((StartActivity) getActivity()).navigateToMapView();
+                        ((EntryActivity) getActivity()).navigateToMapView();
                     } else {
                         // Sign up didn't succeed. stay on page and show message
                         showSignUpState(R.string.sign_up_failed);

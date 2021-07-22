@@ -38,7 +38,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.TravelGuide">
-        <activity android:name=".activities.StartActivity">
+        <activity android:name=".activities.EntryActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -1,9 +1,11 @@
 package com.example.travelguide.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -13,7 +15,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.travelguide.R;
+import com.example.travelguide.activities.EntryActivity;
+import com.example.travelguide.activities.MapsActivity;
 import com.example.travelguide.helpers.HelperClass;
+import com.parse.LogOutCallback;
+import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseUser;
 
@@ -23,6 +29,7 @@ public class ProfileFragment extends Fragment {
 
     private ImageButton ibAvatar;
     private TextView tvProfile;
+    private Button logOutBtn;
 
     public static final String TAG = "ProfileFragment";
     @Nullable
@@ -39,12 +46,35 @@ public class ProfileFragment extends Fragment {
 
         ibAvatar = view.findViewById(R.id.ibAvatar);
         tvProfile = view.findViewById(R.id.tvProfile);
+        logOutBtn = view.findViewById(R.id.logOutBtn);
 
         // sets username
         tvProfile.setText(ParseUser.getCurrentUser().getUsername());
 
+        // gets profile image and load it
         ParseFile profileImg = ParseUser.getCurrentUser().getParseFile("avatar");
+        HelperClass.loadProfileImage(getContext(), profileImg, 500, 500, ibAvatar);
 
-        HelperClass.loadProfileImage(getContext(), profileImg, 500, 5000, ibAvatar);
+        logOutBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                logOutUser();
+            }
+        });
+    }
+
+    // logs out the user
+    private void logOutUser(){
+
+        ParseUser.logOutInBackground(new LogOutCallback() {
+            @Override
+            public void done(ParseException e) {
+
+                // creates new intent to start page and clears history
+                Intent toEntry = new Intent(getContext(), EntryActivity.class);
+                startActivity(toEntry);
+                getActivity().finish();
+            }
+        });
     }
 }

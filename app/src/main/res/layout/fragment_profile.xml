@@ -27,6 +27,12 @@
         android:textSize="17.5sp"
         android:layout_margin="15dp"/>
 
+    <Button
+        android:id="@+id/logOutBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Log Out" />
+
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
