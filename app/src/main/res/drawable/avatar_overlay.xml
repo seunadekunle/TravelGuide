@@ -4,22 +4,18 @@
     <item>
         <shape>
 
-            <size android:height="50dp" />
-            <padding
-                android:left="50dp"
-                android:right="50dp" />
-
             <gradient
                 android:angle="90"
-                android:centerColor="#A6FFFFFF"
+                android:centerColor="#B3FFFFFF"
                 android:endColor="#00FFFFFF"
                 android:startColor="@color/white" />
         </shape>
     </item>
 
     <item
-        android:bottom="45dp"
-        android:drawable="@drawable/ic_baseline_camera_alt_24"
-        android:top="150dp"
-        android:left="20dp" android:right="20dp"/>
+        android:bottom="20dp"
+        android:drawable="@drawable/ic_baseline_camera_alt_24_profile"
+        android:left="65dp"
+        android:right="65dp"
+        android:top="110dp" />
 </layer-list>

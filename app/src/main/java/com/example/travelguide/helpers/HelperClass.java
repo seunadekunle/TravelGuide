@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.ImageDecoder;
+import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.net.Uri;
@@ -17,15 +18,26 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
+import androidx.core.graphics.drawable.RoundedBitmapDrawable;
+import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.BitmapImageViewTarget;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.example.travelguide.R;
+import com.example.travelguide.classes.GlideApp;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
@@ -44,15 +56,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
+
 // helper functions used multiple times in the project
 public class HelperClass {
 
     private static final String TAG = "HelperClass";
     private static PlacesClient placesClient;
 
-    public static int picRadius = 25;
+    public static int picRadius = 45;
     public static int resizedImgDimen = 650;
     public static int detailImgDimen = 475;
+
+    public static final int AVATAR_IMG_DIMEN = 1000;
+
     public static String[] profileTabTitles = {"Guides", "Liked"};
 
     public static final String videoFileName = "video.mp4";
@@ -158,17 +175,39 @@ public class HelperClass {
     public static void loadProfileImage(Context context, int width, int height, ImageView imageView) {
 
         // gets profile image and load it
-
-        Glide.with(context)
+        GlideApp.with(context)
                 .load(getProfileUrl()).fitCenter().transform(new CircleCrop())
                 .override(width, height).into(imageView);
     }
 
     // loads profile image for image button
     public static void loadProfileImage(Context context, int width, int height, ImageButton imageButton) {
-        Glide.with(context)
+        GlideApp.with(context)
                 .load(getProfileUrl()).fitCenter().transform((new CircleCrop()))
                 .override(width, height).into(imageButton);
+    }
+
+    // loads profile image for image button
+    public static void loadCircularImage(String imgUrl, Context context, int width, int height, ImageView imageView) {
+        GlideApp.with(context)
+                .load(imgUrl).fitCenter().transform((new CircleCrop()))
+                .override(width, height).into(imageView);
+    }
+
+    // loads profile image for image button
+    public static void loadProfileImage(Bitmap bitmap, Context context, int width, int height, ImageView imageView) {
+
+        // loads bitmap into image preview
+        GlideApp.with(context).asBitmap().override(width, height).load(bitmap)
+                .into(new BitmapImageViewTarget(imageView) {
+                    @Override
+                    protected void setResource(Bitmap resource) {
+                        super.setResource(resource);
+                        RoundedBitmapDrawable circularBitmapDrawable = RoundedBitmapDrawableFactory.create(context.getResources(), resource);
+                        circularBitmapDrawable.setCircular(true);
+                        imageView.setImageDrawable(circularBitmapDrawable);
+                    }
+                });
     }
 
     // return url of profile img
@@ -188,6 +227,7 @@ public class HelperClass {
         return new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
     }
 
+    // returns Uri given a File
     public static Uri getUriForFile(Context context, File photoFile) {
         return FileProvider.getUriForFile(context, "com.travelguide.fileprovider", photoFile);
     }
@@ -202,9 +242,9 @@ public class HelperClass {
 
     // creates an intent to choose the photo or camera intent
     @NotNull
-    public static Intent getChooserIntent(Intent takePictureIntent, Intent takeVideoIntent, String title) {
-        Intent chooserIntent = Intent.createChooser(takePictureIntent, title);
-        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{takeVideoIntent});
+    public static Intent getChooserIntent(Intent firstChoice, Intent secondChoice, String title) {
+        Intent chooserIntent = Intent.createChooser(firstChoice, title);
+        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{secondChoice});
         return chooserIntent;
     }
 
@@ -218,11 +258,29 @@ public class HelperClass {
      * reference: https://guides.codepath.com/android/Accessing-the-Camera-and-Stored-Media#accessing-stored-media
      */
     @NotNull
-    public static File getResizedImg(Uri takenPhotoUri, Context context, String photoFileName) {
+    public static File getResizedImg(Uri takenPhotoUri, Context context, String photoFileName, ImageView imageView, Boolean inProfile) {
 
         // get image from disk
         Bitmap rawTakenImage = loadFromUri(takenPhotoUri, context);
         Bitmap resizedBitmap = BitmapScaler.scaleToFitWidth(rawTakenImage, HelperClass.resizedImgDimen);
+
+        // loads the image differently depending on if image is rendered in profile view
+        if (!inProfile) {
+            // loads bitmap into image preview
+            GlideApp.with(context).asBitmap().override(HelperClass.resizedImgDimen, HelperClass.resizedImgDimen).load(resizedBitmap)
+                    .into(new BitmapImageViewTarget(imageView) {
+                        @Override
+                        protected void setResource(Bitmap resource) {
+                            super.setResource(resource);
+                            RoundedBitmapDrawable circularBitmapDrawable = RoundedBitmapDrawableFactory.create(context.getResources(), resource);
+                            circularBitmapDrawable.setCornerRadius(HelperClass.picRadius);
+                            imageView.setImageDrawable(circularBitmapDrawable);
+                        }
+                    });
+        }
+        else {
+            loadProfileImage(resizedBitmap, context, AVATAR_IMG_DIMEN, AVATAR_IMG_DIMEN, imageView);
+        }
 
         // Configure byte output stream
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -253,6 +311,7 @@ public class HelperClass {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         return resizedFile;
     }
 
@@ -294,9 +353,8 @@ public class HelperClass {
         }
 
         // Return the file target for the photo based on filename
-        File file = new File(mediaStorageDir.getPath() + File.separator + fileName);
 
-        return file;
+        return new File(mediaStorageDir.getPath() + File.separator + fileName);
     }
 
 }

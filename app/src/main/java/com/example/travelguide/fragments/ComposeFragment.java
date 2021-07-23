@@ -224,8 +224,7 @@ public class ComposeFragment extends Fragment {
                             Uri takenPhotoUri = Uri.fromFile(HelperClass.getMediaFileUri(photoFileName, Environment.DIRECTORY_PICTURES, requireContext()));
 
                             // updates value of photoFile
-                            photoFile = HelperClass.getResizedImg(takenPhotoUri, getContext(), photoFileName);
-                            loadImgIntoPreview(photoFile);
+                            photoFile = HelperClass.getResizedImg(takenPhotoUri, getContext(), photoFileName, ivPreview, false);
 
                             // Bitmap takenImage = BitmapFactory.decodeFile(resizedFile.getAbsolutePath());
                             // sets other buttons to be not clickable
@@ -262,9 +261,7 @@ public class ComposeFragment extends Fragment {
                         // gets image data from gallery
                         Uri photoUri = result.getData().getData();
 
-                        Log.i(TAG, String.valueOf(photoUri));
-                        photoFile = HelperClass.getResizedImg(photoUri, getContext(), photoFileName);
-                        loadImgIntoPreview(photoFile);
+                        photoFile = HelperClass.getResizedImg(photoUri, getContext(), photoFileName, ivPreview, false);
 
                         showImgView();
                     } else {
@@ -556,18 +553,17 @@ public class ComposeFragment extends Fragment {
         videoFile = null;
     }
 
-    // load image into preview ui element
-    private void loadImgIntoPreview(File photoFile) {
-
-        ivPreview.setImageResource(0);
-
-        // Load the taken image into a preview
-        Glide.with(requireContext())
-                .load(photoFile)
-                .override(HelperClass.resizedImgDimen, HelperClass.resizedImgDimen)
-                .transform(new RoundedCornersTransformation(HelperClass.picRadius, 0))
-                .into(ivPreview);
-    }
+//    // load image into preview ui element
+//    private void loadImgIntoPreview(File photoFile) {
+//
+//        ivPreview.setImageResource(0);
+//
+//        // Load the taken image into a preview
+//        Glide.with(requireContext())
+//                .load(photoFile)
+//
+//                .into(ivPreview);
+//    }
 
     // plays video that has been recorded
     public void playbackRecordedVideo(Uri videoUri) {

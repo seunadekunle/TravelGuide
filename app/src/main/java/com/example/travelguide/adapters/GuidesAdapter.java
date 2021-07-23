@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.travelguide.R;
 import com.example.travelguide.activities.MapsActivity;
+import com.example.travelguide.classes.GlideApp;
 import com.example.travelguide.classes.Guide;
 import com.example.travelguide.databinding.LocationGuideBinding;
 import com.example.travelguide.helpers.DeviceDimenHelper;
@@ -288,7 +289,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
                     holder.ibThumb.setVisibility(View.VISIBLE);
                     holder.epPlayerView.setVisibility(View.GONE);
 
-                    Glide.with(context)
+                    GlideApp.with(context)
                             .load(photoUrl).centerCrop().override(HelperClass.detailImgDimen, HelperClass.detailImgDimen)
                             .transform(new RoundedCornersTransformation(HelperClass.picRadius, 0)).into(holder.ibThumb);
 
@@ -392,7 +393,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
         }
 
         // Load the high-resolution "zoomed-in" image.
-        Glide.with(context).load(imgUrl).into(expandedImageView);
+        GlideApp.with(context).load(imgUrl).into(expandedImageView);
 
         // Calculate the starting and ending bounds for the zoomed-in image.
         // This step involves lots of math. Yay, math.
