@@ -60,6 +60,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
     private final View expandedImageViewBG;
     private final Activity activity;
     private SimpleExoPlayer exoPlayer;
+    private boolean inProfile;
 
     // Hold a reference to the current animator
     private Animator currentAnimator;
@@ -68,13 +69,14 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
     private final int playerHeightMult = 12;
 
 
-    public GuidesAdapter(List<Guide> items, Context context, ImageView expandedImageView, View expandedImageViewBG, Activity activity, SimpleExoPlayer exoPlayer) {
+    public GuidesAdapter(List<Guide> items, Context context, ImageView expandedImageView, View expandedImageViewBG, Activity activity, SimpleExoPlayer exoPlayer, boolean inProfile) {
         this.context = context;
         this.expandedImageView = expandedImageView;
         guides = items;
         this.expandedImageViewBG = expandedImageViewBG;
         this.activity = activity;
         this.exoPlayer = exoPlayer;
+        this.inProfile = inProfile;
     }
 
     @Override
@@ -116,7 +118,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
 
         // if there is any media
         fillMediaLayout(holder, guide);
-        handleLikeButton(holder, guide);
+        handleLikeButton(holder, guide, position);
     }
 
     // clear all elements of the RecyclerView
@@ -182,7 +184,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
 
 
     // handle click for like button
-    private void handleLikeButton(ViewHolder holder, Guide guide) {
+    private void handleLikeButton(ViewHolder holder, Guide guide, int pos) {
 
         // call back for getting like data
         FindCallback<ParseObject> findCallback = new FindCallback<ParseObject>() {
@@ -217,6 +219,11 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
                     guide.setGuideLiked(false);
                     guide.saveInBackground();
                     setTextViewText(holder.tvLikes, String.valueOf(guide.getLikes()));
+
+                    // if list is in profile update liked list
+                    if (inProfile) {
+                        guides.remove(pos);
+                    }
                 }
             }
         };
@@ -230,9 +237,11 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
                     isGuideLiked(guide, deleteCallback);
                 } else {
                     // creates a like row and updates Guide text
-                    ParseObject likeActivity = new ParseObject("Activity");
+                    com.example.travelguide.classes.Activity likeActivity = new com.example.travelguide.classes.Activity();
+
                     likeActivity.put("userID", ParseUser.getCurrentUser());
                     likeActivity.put("guideID", guide);
+
                     likeActivity.saveInBackground(new SaveCallback() {
                         @Override
                         public void done(ParseException e) {
@@ -290,7 +299,9 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
 
                         // hide add button and zoom image
                         ((MapsActivity) activity).hideOverlayBtns();
-                        zoomImageFromThumb(holder.ibThumb, photoUrl, expandedImageView);
+                        // shows background
+                        expandedImageViewBG.setVisibility(View.VISIBLE);
+                        zoomImageFromThumb(holder.ibThumb, photoUrl, expandedImageView, expandedImageViewBG);
                     }
                 });
                 return;
@@ -364,11 +375,17 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
     /* creates an expanded view after clicking on thumbnail
      * ref: https://developer.android.com/training/animation/zoom.html
      */
-    private void zoomImageFromThumb(final View thumbView, String imgUrl, ImageView expandedImageView) {
+    private void zoomImageFromThumb(final View thumbView, String imgUrl, ImageView expandedImageView, View expandedImageViewBG) {
+
         // If there's an animation in progress, cancel it
         // immediately and proceed with this one.
         if (currentAnimator != null) {
             currentAnimator.cancel();
+        }
+
+        // shows background if it isn't in profile
+        if (!inProfile) {
+            expandedImageViewBG.setVisibility(View.VISIBLE);
         }
 
         // Load the high-resolution "zoomed-in" image.
@@ -442,9 +459,6 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
             @Override
             public void onAnimationEnd(Animator animation) {
                 currentAnimator = null;
-
-                // shows background
-                expandedImageViewBG.setVisibility(View.VISIBLE);
             }
 
             @Override
@@ -462,49 +476,56 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
         expandedImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (currentAnimator != null) {
-                    currentAnimator.cancel();
+
+                // if it isn't in profile
+                if (!inProfile) {
+                    if (currentAnimator != null) {
+                        currentAnimator.cancel();
+                    }
+
+                    // removes background
+                    expandedImageViewBG.setVisibility(View.INVISIBLE);
+
+                    // Animate the four positioning/sizing properties in parallel,
+                    // back to their original values.
+                    AnimatorSet set = new AnimatorSet();
+                    set.play(ObjectAnimator
+                            .ofFloat(expandedImageView, View.X, startBounds.left))
+                            .with(ObjectAnimator
+                                    .ofFloat(expandedImageView,
+                                            View.Y, startBounds.top))
+                            .with(ObjectAnimator
+                                    .ofFloat(expandedImageView,
+                                            View.SCALE_X, startScaleFinal))
+                            .with(ObjectAnimator
+                                    .ofFloat(expandedImageView,
+                                            View.SCALE_Y, startScaleFinal));
+                    set.setDuration(shortAnimationDuration);
+                    set.setInterpolator(new DecelerateInterpolator());
+                    set.addListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            thumbView.setAlpha(1f);
+                            expandedImageView.setVisibility(View.INVISIBLE);
+                            currentAnimator = null;
+                        }
+
+                        @Override
+                        public void onAnimationCancel(Animator animation) {
+                            thumbView.setAlpha(1f);
+                            expandedImageView.setVisibility(View.INVISIBLE);
+                            currentAnimator = null;
+                        }
+                    });
+                    set.start();
+                    currentAnimator = set;
+                } else {
+                    thumbView.setAlpha(1f);
+                    expandedImageView.setVisibility(View.INVISIBLE);
                 }
 
-                // removes background
-                expandedImageViewBG.setVisibility(View.GONE);
-
-                // Animate the four positioning/sizing properties in parallel,
-                // back to their original values.
-                AnimatorSet set = new AnimatorSet();
-                set.play(ObjectAnimator
-                        .ofFloat(expandedImageView, View.X, startBounds.left))
-                        .with(ObjectAnimator
-                                .ofFloat(expandedImageView,
-                                        View.Y, startBounds.top))
-                        .with(ObjectAnimator
-                                .ofFloat(expandedImageView,
-                                        View.SCALE_X, startScaleFinal))
-                        .with(ObjectAnimator
-                                .ofFloat(expandedImageView,
-                                        View.SCALE_Y, startScaleFinal));
-                set.setDuration(shortAnimationDuration);
-                set.setInterpolator(new DecelerateInterpolator());
-                set.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        thumbView.setAlpha(1f);
-                        expandedImageView.setVisibility(View.INVISIBLE);
-                        currentAnimator = null;
-                    }
-
-                    @Override
-                    public void onAnimationCancel(Animator animation) {
-                        thumbView.setAlpha(1f);
-                        expandedImageView.setVisibility(View.INVISIBLE);
-                        currentAnimator = null;
-                    }
-                });
-                set.start();
-                currentAnimator = set;
-
-                // show add button
-                ((MapsActivity) activity).showOverlayBtns();
+//                // show add button
+//                ((MapsActivity) activity).showOverlayBtns();
             }
         });
     }

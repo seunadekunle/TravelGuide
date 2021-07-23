@@ -1,6 +1,7 @@
 package com.example.travelguide.fragments;
 
 import android.content.Intent;
+import android.media.Image;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,6 +30,10 @@ import com.parse.ParseUser;
 import org.jetbrains.annotations.NotNull;
 
 public class ProfileFragment extends Fragment {
+
+    interface sendImage {
+        void sendImage(ImageView message);
+    }
 
     public static final String TAG = "ProfileFragment";
 
@@ -75,9 +80,10 @@ public class ProfileFragment extends Fragment {
         viewPager2 = view.findViewById(R.id.viewPager);
         tabLayout = view.findViewById(R.id.tabLayout);
 
-        profilePagerAdapter = new ProfilePagerAdapter(getActivity(), R.id.expandedImgView, R.id.expandedImgViewBG);
+        profilePagerAdapter = new ProfilePagerAdapter(getActivity(), view.findViewById(R.id.expandedImgView), view.findViewById(R.id.expandedImgViewBG));
         viewPager2.setAdapter(profilePagerAdapter);
 
+        // sets title of viewpager
         new TabLayoutMediator(tabLayout, viewPager2,
                 (tab, position) -> tab.setText(HelperClass.profileTabTitles[position])
         ).attach();

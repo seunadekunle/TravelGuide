@@ -1,6 +1,8 @@
 package com.example.travelguide.adapters;
 
+import android.media.Image;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +15,9 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.lifecycle.Lifecycle;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.adapter.FragmentViewHolder;
 
 import com.example.travelguide.R;
 import com.example.travelguide.fragments.ProfileGuideFragment;
@@ -21,12 +25,16 @@ import com.example.travelguide.helpers.HelperClass;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 public class ProfilePagerAdapter extends FragmentStateAdapter {
 
-    private int expandedImgViewID;
-    private int expandedImgViewBgID;
+    private static final String TAG = "ProfilePagerAdapter";
 
-    public ProfilePagerAdapter(@NonNull @NotNull FragmentActivity fragmentActivity, int expandedImgViewID, int expandedImgViewBgID) {
+    private ImageView expandedImgViewID;
+    private View expandedImgViewBgID;
+
+    public ProfilePagerAdapter(@NonNull @NotNull FragmentActivity fragmentActivity, ImageView expandedImgViewID, View expandedImgViewBgID) {
         super(fragmentActivity);
 
         this.expandedImgViewID = expandedImgViewID;
@@ -37,7 +45,9 @@ public class ProfilePagerAdapter extends FragmentStateAdapter {
     @NotNull
     @Override
     public Fragment createFragment(int position) {
-        return ProfileGuideFragment.newInstance(HelperClass.profileTabTitles[position], expandedImgViewID, expandedImgViewBgID);
+        ProfileGuideFragment profileGuideFragment = ProfileGuideFragment.newInstance(HelperClass.profileTabTitles[position], 0, 0);
+        profileGuideFragment.setExpandedElements(expandedImgViewID, expandedImgViewBgID);
+        return profileGuideFragment;
     }
 
     @Override

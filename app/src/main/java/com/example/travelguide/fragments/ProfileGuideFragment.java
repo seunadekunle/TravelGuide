@@ -1,10 +1,12 @@
 package com.example.travelguide.fragments;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -37,9 +39,15 @@ public class ProfileGuideFragment extends LocationGuideFragment {
     private String type = "";
 
     private List<Guide> guideList;
+    private ImageView imageView;
+    private View view;
 
     private int expandedIv = 0;
     private int expandedBg = 0;
+
+    final Handler handler = new Handler();
+    final int delay = 1000; // 1000 milliseconds == 1 second
+
 
     public ProfileGuideFragment() {
         // Required empty public constructor
@@ -89,8 +97,14 @@ public class ProfileGuideFragment extends LocationGuideFragment {
         guideList = new ArrayList<>();
 
         // set up the guide list
-        setupGuideList(view, view.getContext(), view.findViewById(R.id.expandedImgView), view.findViewById(R.id.expandedImgViewBG));
+        setupGuideList(view, view.getContext(), imageView, view, true);
         queryGuides();
+
+        handler.postDelayed(new Runnable() {
+            public void run() {
+                System.out.println("visibility " + rvGuides.getVisibility());
+            }
+        }, delay);
     }
 
     @Override
@@ -152,18 +166,25 @@ public class ProfileGuideFragment extends LocationGuideFragment {
                 return;
             }
 
+            guideList = new ArrayList<>();
+
             // get guides that have been liked
             for (Activity activity : activities) {
-                guideList.add((Guide) activity.get(Activity.getKeyGuideId()));
+                guideList.add(activity.getGuide());
             }
 
             // clears the adapter
             adapter.clear();
             // save received posts to list and notify adapter of new data
             adapter.addAll(guideList);
-            adapter.notifyDataSetChanged();
 
+            adapter.notifyDataSetChanged();
             showEmptyListText();
         });
+    }
+
+    public void setExpandedElements(ImageView expandedImgViewID, View expandedImgViewBgID) {
+        imageView = expandedImgViewID;
+        view = expandedImgViewBgID;
     }
 }

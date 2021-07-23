@@ -101,7 +101,7 @@ public class LocationGuideFragment extends Fragment {
 
         context = view.getContext();
 
-        setupGuideList(view, context, view.findViewById(R.id.expandedImgView), view.findViewById(R.id.expandedImgViewBG));
+        setupGuideList(view, context, view.findViewById(R.id.expandedImgView), view.findViewById(R.id.expandedImgViewBG), false);
 
         // sets text of header
         tvAddress.setText(HelperClass.getAddress(context, parseLocation.getLatitude(), parseLocation.getLongitude()));
@@ -110,7 +110,7 @@ public class LocationGuideFragment extends Fragment {
         queryGuides();
     }
 
-    protected void setupGuideList(@NotNull View view, Context context, ImageView expandedImgView, View expandedImgViewBG) {
+    protected void setupGuideList(@NotNull View view, Context context, ImageView expandedImgView, View expandedImgViewBG, boolean inProfile) {
 
         guideList = new ArrayList<>();
         rvGuides = view.findViewById(R.id.rvGuides);
@@ -119,7 +119,7 @@ public class LocationGuideFragment extends Fragment {
         swipeContainer = view.findViewById(R.id.swipeContainer);
 
         // Set the adapter of the recycler view
-        adapter = new GuidesAdapter(guideList, context, expandedImgView, expandedImgViewBG, getActivity(), globalPlayer);
+        adapter = new GuidesAdapter(guideList, context, expandedImgView, expandedImgViewBG, getActivity(), globalPlayer, inProfile);
         rvGuides.setAdapter(adapter);
         rvGuides.setLayoutManager(new LinearLayoutManager(context));
 

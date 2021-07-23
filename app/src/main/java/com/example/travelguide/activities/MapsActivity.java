@@ -175,7 +175,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         ibProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.i(TAG, "clicked");
 
                 // Begin the transaction
                 FragmentTransaction ft = fragmentManager.beginTransaction();
