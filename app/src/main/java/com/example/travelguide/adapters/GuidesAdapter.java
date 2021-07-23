@@ -21,7 +21,6 @@ import android.widget.TextView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.example.travelguide.R;
 import com.example.travelguide.activities.MapsActivity;
 import com.example.travelguide.classes.GlideApp;
@@ -37,13 +36,11 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.parse.FindCallback;
 import com.parse.ParseException;
-import com.parse.ParseFile;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
-import java.io.File;
 import java.util.List;
 
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
@@ -97,19 +94,17 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
         // get current guide at positoin
         Guide guide = guides.get(position);
 
-        // loads user profile image on timeline
-        ParseFile profileImg = new ParseFile(new File(""));
+
+        // loads profile image
+        HelperClass.loadProfileImage(context, 100, 50, holder.ivAvatar);
+
+
         try {
-            profileImg = guide.getAuthor().fetchIfNeeded().getParseFile("avatar");
+            setTextViewText(holder.tvUsername, guide.getAuthor().fetchIfNeeded().getUsername());
         } catch (ParseException e) {
+            setTextViewText(holder.tvUsername, "");
             e.printStackTrace();
         }
-
-            // loads profile image
-            HelperClass.loadProfileImage(context, 100, 40, holder.ivAvatar);
-
-
-        setTextViewText(holder.tvUsername, guide.getAuthor().getUsername());
         setTextViewText(holder.tvDetail, guide.getText());
         setTextViewText(holder.tvCreatedAt, guide.getTimeStamp());
         setTextViewText(holder.tvLikes, String.valueOf(guide.getLikes()));

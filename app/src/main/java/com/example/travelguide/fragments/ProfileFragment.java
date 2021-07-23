@@ -1,9 +1,7 @@
 package com.example.travelguide.fragments;
 
 import android.content.Intent;
-import android.media.Image;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.travelguide.R;
@@ -26,12 +25,9 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.parse.LogOutCallback;
 import com.parse.ParseException;
-import com.parse.ParseFile;
 import com.parse.ParseUser;
 
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Objects;
 
 public class ProfileFragment extends Fragment {
 
@@ -40,8 +36,10 @@ public class ProfileFragment extends Fragment {
     private ImageButton ibAvatar;
     private TextView tvProfile;
     private Button logOutBtn;
+    private ImageView ivExpanded;
+    private View imageBG;
 
-    private int fragmentID;
+    private int frameID;
     private FragmentManager fragmentManager;
     private ChangeAvatarFragment changeAvatarFragment;
 
@@ -76,7 +74,7 @@ public class ProfileFragment extends Fragment {
         if (getArguments() != null){
 
             // sets entry state depending on instance variable
-            fragmentID = getArguments().getInt(ARG_ID);
+            frameID = getArguments().getInt(ARG_ID);
         }
     }
 
@@ -86,19 +84,28 @@ public class ProfileFragment extends Fragment {
         ibAvatar = view.findViewById(R.id.ibAvatar);
         tvProfile = view.findViewById(R.id.tvProfile);
         logOutBtn = view.findViewById(R.id.logOutBtn);
+        ivExpanded = view.findViewById(R.id.expandedImgView);
+        imageBG = view.findViewById(R.id.expandedImgViewBG);
 
         fragmentManager = requireActivity().getSupportFragmentManager();
         changeAvatarFragment = new ChangeAvatarFragment();
         // sets username
         tvProfile.setText(ParseUser.getCurrentUser().getUsername());
 
-        // gets profile image and load it
-        HelperClass.loadProfileImage(getContext(), 500, 500, ibAvatar);
+        loadAvatar();
 
         ibAvatar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                HelperClass.showFragment(fragmentManager, fragmentID, changeAvatarFragment, changeAvatarFragment.TAG);
+//                HelperClass.showFragment(fragmentManager, fragmentID, changeAvatarFragment, changeAvatarFragment.TAG);
+
+                // Begin the transaction
+                FragmentTransaction ft = fragmentManager.beginTransaction();
+
+                // add fragment to container
+                ft.replace(frameID, changeAvatarFragment);
+
+                HelperClass.finishTransaction(ft, TAG, changeAvatarFragment);
             }
         });
 
@@ -113,13 +120,32 @@ public class ProfileFragment extends Fragment {
         viewPager2 = view.findViewById(R.id.viewPager);
         tabLayout = view.findViewById(R.id.tabLayout);
 
-        profilePagerAdapter = new ProfilePagerAdapter(requireActivity(), view.findViewById(R.id.expandedImgView), view.findViewById(R.id.expandedImgViewBG));
-        viewPager2.setAdapter(profilePagerAdapter);
+        loadViewPager();
 
         // sets title of viewpager
         new TabLayoutMediator(tabLayout, viewPager2,
                 (tab, position) -> tab.setText(HelperClass.profileTabTitles[position])
         ).attach();
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // reload data
+        loadAvatar();
+        loadViewPager();
+    }
+
+    public void loadViewPager() {
+        profilePagerAdapter = new ProfilePagerAdapter(requireActivity(), ivExpanded, imageBG);
+        viewPager2.setAdapter(profilePagerAdapter);
+    }
+
+    public void loadAvatar() {
+        // gets profile image and load it
+        HelperClass.loadProfileImage(getContext(), 500, 500, ibAvatar);
     }
 
     // logs out the user
