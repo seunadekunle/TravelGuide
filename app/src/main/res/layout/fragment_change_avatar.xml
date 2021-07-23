@@ -6,8 +6,8 @@
     android:background="@color/white"
     android:clickable="true"
     android:focusable="true"
-    tools:context=".fragments.ChangeAvatarFragment">
-
+    tools:context=".fragments.ChangeAvatarFragment"
+    android:fitsSystemWindows="true">
 
     <LinearLayout
         android:layout_width="match_parent"

@@ -142,6 +142,18 @@ public class HelperClass {
         finishTransaction(ft, tag, fragment);
     }
 
+    // shows fragment in container
+    public static void replaceFragment(FragmentManager fragmentManager, int fragmentsFrameId, Fragment fragment, String tag) {
+        // Begin the transaction
+        FragmentTransaction ft = fragmentManager.beginTransaction();
+
+        // replace fragment in container
+        ft.replace(fragmentsFrameId, fragment);
+
+        finishTransaction(ft, tag, fragment);
+    }
+
+
     // completes fragment transaction
     public static void finishTransaction(FragmentTransaction ft, String name, Fragment fragment) {
 

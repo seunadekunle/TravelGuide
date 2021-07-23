@@ -20,17 +20,15 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.travelguide.R;
+import com.example.travelguide.activities.EntryActivity;
 import com.example.travelguide.activities.MapsActivity;
 import com.example.travelguide.helpers.HelperClass;
-import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseUser;
-import com.parse.SaveCallback;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.io.IOException;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -41,12 +39,10 @@ public class ChangeAvatarFragment extends Fragment {
 
     public static final String TAG = "ChangeAvatarFragment";
 
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private static final String IN_PROFILE = "inProfile";
 
 
-    private String mParam1;
-    private String mParam2;
+    private Boolean inProfile;
 
     private String avatarPhotoName = "profile_photo.jpg";
     private ActivityResultLauncher<Intent> changAvatarLauncher;
@@ -66,16 +62,16 @@ public class ChangeAvatarFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
+     * @param inProfile Parameter 1.
      * @return A new instance of fragment ChangeAvatarFragment.
      */
-    public static ChangeAvatarFragment newInstance(String param1, String param2) {
+    public static ChangeAvatarFragment newInstance(Boolean inProfile) {
         ChangeAvatarFragment fragment = new ChangeAvatarFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+
+        args.putBoolean(IN_PROFILE, inProfile);
         fragment.setArguments(args);
+
         return fragment;
     }
 
@@ -83,8 +79,7 @@ public class ChangeAvatarFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            inProfile = getArguments().getBoolean(IN_PROFILE);
         }
     }
 
@@ -147,7 +142,13 @@ public class ChangeAvatarFragment extends Fragment {
         });
 
         discardBtn.setOnClickListener(v -> {
-            ((MapsActivity)getActivity()).onBackPressed();
+            if (inProfile)
+                ((MapsActivity) requireActivity()).onBackPressed();
+            else {
+                // goes to map activity
+                ((EntryActivity) requireActivity()).navigateToMapView();
+
+            }
         });
 
         useBtn.setOnClickListener(v -> {
@@ -157,11 +158,10 @@ public class ChangeAvatarFragment extends Fragment {
             currentUser.put("avatar", new ParseFile(avatarFile));
 
             currentUser.saveInBackground(e -> {
-                if (e != null){
-                    Log.i(TAG, "there was an error saving photos");
-                }
-                else {
-                    ((MapsActivity)getActivity()).onBackPressed();
+                if (e != null) {
+                    Log.i(TAG, "there was an error saving the profile photo");
+                } else {
+                    ((EntryActivity) requireActivity()).navigateToMapView();
                 }
             });
         });

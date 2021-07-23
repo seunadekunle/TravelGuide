@@ -47,7 +47,8 @@ public class ProfileFragment extends Fragment {
     private ViewPager2 viewPager2;
     private TabLayout tabLayout;
 
-    private static final String ARG_ID = "id";
+    private static final String ARG_ID = "fragment_id";
+    private static final String ARG_USER = "user_id";
 
     @Nullable
     @Override
@@ -57,10 +58,12 @@ public class ProfileFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_profile, container, false);
     }
 
-    public static ProfileFragment newInstance(int fragmentID) {
+    public static ProfileFragment newInstance(int fragmentID, String userID) {
 
         Bundle args = new Bundle();
+
         args.putInt(ARG_ID, fragmentID);
+        args.putInt(ARG_USER, userID);
 
         ProfileFragment fragment = new ProfileFragment();
         fragment.setArguments(args);
@@ -88,7 +91,7 @@ public class ProfileFragment extends Fragment {
         imageBG = view.findViewById(R.id.expandedImgViewBG);
 
         fragmentManager = requireActivity().getSupportFragmentManager();
-        changeAvatarFragment = new ChangeAvatarFragment();
+        changeAvatarFragment = ChangeAvatarFragment.newInstance(true);
         // sets username
         tvProfile.setText(ParseUser.getCurrentUser().getUsername());
 
@@ -97,15 +100,7 @@ public class ProfileFragment extends Fragment {
         ibAvatar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                HelperClass.showFragment(fragmentManager, fragmentID, changeAvatarFragment, changeAvatarFragment.TAG);
-
-                // Begin the transaction
-                FragmentTransaction ft = fragmentManager.beginTransaction();
-
-                // add fragment to container
-                ft.replace(frameID, changeAvatarFragment);
-
-                HelperClass.finishTransaction(ft, TAG, changeAvatarFragment);
+                HelperClass.replaceFragment(fragmentManager, frameID, changeAvatarFragment, changeAvatarFragment.TAG);
             }
         });
 

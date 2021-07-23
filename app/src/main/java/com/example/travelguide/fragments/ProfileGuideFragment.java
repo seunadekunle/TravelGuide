@@ -41,6 +41,7 @@ public class ProfileGuideFragment extends LocationGuideFragment {
     private List<Guide> guideList;
     private ImageView imageView;
     private View view;
+    private ParseUser user;
 
     private int expandedIv = 0;
     private int expandedBg = 0;
@@ -81,6 +82,8 @@ public class ProfileGuideFragment extends LocationGuideFragment {
             expandedIv = getArguments().getInt(ARG_IMG_ID);
             expandedBg = getArguments().getInt(ARG_IMG_BG_ID);
         }
+
+        user = ParseUser.getCurrentUser();
     }
 
     @Override
@@ -125,7 +128,7 @@ public class ProfileGuideFragment extends LocationGuideFragment {
         // limit query to latest 20 items
         query.setLimit(20);
         //  where the author is the logged in user
-        query.whereEqualTo("author", ParseUser.getCurrentUser());
+        query.whereEqualTo("author", user);
         // order posts by creation date (newest first)
         query.addDescendingOrder("createdAt");
 
@@ -153,7 +156,7 @@ public class ProfileGuideFragment extends LocationGuideFragment {
         // specify what type of data we want to query - Guide.class
         ParseQuery<Activity> query = ParseQuery.getQuery(Activity.class);
         //  where the author is the logged in user
-        query.whereEqualTo(Activity.getKeyUserId(), ParseUser.getCurrentUser());
+        query.whereEqualTo(Activity.getKeyUserId(), user);
         query.include(Activity.getKeyGuideId());
         // order posts by creation date (newest first)
         query.addDescendingOrder("createdAt");

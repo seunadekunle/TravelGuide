@@ -13,27 +13,30 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import com.example.travelguide.R;
 import com.example.travelguide.activities.EntryActivity;
 import com.example.travelguide.databinding.FragmentEntryBinding;
 import com.example.travelguide.helpers.HelperClass;
 import com.google.android.material.snackbar.Snackbar;
-import com.parse.ParseException;
 import com.parse.ParseUser;
-import com.parse.SignUpCallback;
 
 import java.util.Objects;
 
 public class EntryFormFragment extends Fragment {
 
-    private static final String TAG = "EntryFormFragment";
+    public static final String TAG = "EntryFormFragment";
+
     private static final String ARG_TYPE = "type";
+    private static final String ARG_ID = "id";
 
     private static final String INVALID_ENTRY_DATA_ERROR = "Invalid username/password.";
 
     private FragmentEntryBinding binding;
     private String entryState;
+    private ChangeAvatarFragment newUserAvatar;
+    FragmentManager fragmentManager;
 
     private ProgressBar loadingProgressBar;
     private EditText usernameEditText;
@@ -50,11 +53,12 @@ public class EntryFormFragment extends Fragment {
      * @param type Parameter 1.
      * @return A new instance of fragment ComposeFragment.
      */
-    public static EntryFormFragment newInstance(String type) {
+    public static EntryFormFragment newInstance(int frameID, String type) {
         EntryFormFragment fragment = new EntryFormFragment();
         Bundle args = new Bundle();
 
         args.putString(ARG_TYPE, type);
+        args.putInt(ARG_ID, frameID);
 
         fragment.setArguments(args);
         return fragment;
@@ -84,6 +88,8 @@ public class EntryFormFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        newUserAvatar = ChangeAvatarFragment.newInstance(false);
+
         usernameEditText = binding.username;
         passwordEditText = binding.password;
         loginButton = binding.login;
@@ -91,6 +97,7 @@ public class EntryFormFragment extends Fragment {
         loadingProgressBar = binding.loading;
 
 
+        Log.i(TAG, entryState);
         // changes the action button based on entry state
         if (entryState.equals("Signup")) {
             signUpButton.setVisibility(View.VISIBLE);
@@ -148,8 +155,12 @@ public class EntryFormFragment extends Fragment {
             user.signUpInBackground(e -> {
 
                 if (e == null) {
-                    // goes to map activity
-                    ((EntryActivity) requireActivity()).navigateToMapView();
+                    // goes to change avatar
+                    if (getArguments() != null) {
+                        HelperClass.replaceFragment(requireActivity().getSupportFragmentManager(),
+                                getArguments().getInt(ARG_ID), newUserAvatar, ChangeAvatarFragment.TAG);
+                    }
+
                 } else {
 
                     // Sign up didn't succeed. stay on page and show message

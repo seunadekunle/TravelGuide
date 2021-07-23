@@ -54,6 +54,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.parse.ParseUser;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -154,7 +155,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // creates new instance of the different fragments
         composeFragment = new ComposeFragment();
-        profileFragment = ProfileFragment.newInstance(fragmentsFrameId);
+        profileFragment = ProfileFragment.newInstance(fragmentsFrameId, ParseUser.getCurrentUser().getObjectId());
 
         setupSheetBehavior();
 

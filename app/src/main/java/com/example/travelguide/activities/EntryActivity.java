@@ -2,6 +2,7 @@ package com.example.travelguide.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -27,7 +28,7 @@ public class EntryActivity extends AppCompatActivity {
     private int entryFrameId;
 
     private FragmentManager fragmentManager;
-    private EntryFormFragment entryFormFragment;
+    private EntryFormFragment loginFormFragment;
     private EntryFormFragment signUpFragment;
 
     @Override
@@ -44,34 +45,32 @@ public class EntryActivity extends AppCompatActivity {
 
         getSupportActionBar().hide();
 
-        fragmentManager = getSupportFragmentManager();
-        entryFormFragment = EntryFormFragment.newInstance("Login");
-        signUpFragment = EntryFormFragment.newInstance("Signup");
-
         entryFrameId = R.id.entryForm;
         loginBtn = binding.loginBtn;
         signupBtn = binding.signupBtn;
+
+        fragmentManager = getSupportFragmentManager();
+        loginFormFragment = EntryFormFragment.newInstance(entryFrameId, "Login");
+        signUpFragment = EntryFormFragment.newInstance(entryFrameId, "Signup");
+
 
         // on click listener for login button
         loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-
+                Log.i(TAG, "login");
                 // goes to login fragment
-                FragmentTransaction ft = fragmentManager.beginTransaction();
-                ft.replace(entryFrameId, entryFormFragment);
-                HelperClass.finishTransaction(ft, TAG, (Fragment) entryFormFragment);
+                HelperClass.replaceFragment(fragmentManager, entryFrameId, loginFormFragment, loginFormFragment.TAG);
             }
         });
 
         signupBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // goes to login fragment
-                FragmentTransaction ft = fragmentManager.beginTransaction();
-                ft.replace(entryFrameId, signUpFragment);
-                HelperClass.finishTransaction(ft, TAG, (Fragment) entryFormFragment);
+
+                // goes to signup fragment
+                HelperClass.replaceFragment(fragmentManager, entryFrameId, signUpFragment, signUpFragment.TAG);
             }
         });
     }
