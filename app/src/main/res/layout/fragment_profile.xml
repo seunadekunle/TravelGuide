@@ -15,15 +15,23 @@
         android:orientation="vertical"
         tools:context=".fragments.ProfileFragment">
 
-        <ImageButton
-            android:id="@+id/ibAvatar"
+
+        <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_margin="10dp"
-            android:background="@color/white"
-            android:contentDescription="@string/profile_icon"
-            tools:src="@tools:sample/avatars" />
+            android:foreground="@drawable/avatar_overlay">
+
+            <ImageButton
+                android:id="@+id/ibAvatar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="10dp"
+                android:background="@color/white"
+                android:contentDescription="@string/profile_icon"
+                tools:src="@tools:sample/avatars" />
+        </FrameLayout>
 
         <TextView
             android:id="@+id/tvProfile"
@@ -46,12 +54,14 @@
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+             />
 
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/viewPager"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="0"
             android:clickable="true"
             android:focusable="true"
             android:nestedScrollingEnabled="true">

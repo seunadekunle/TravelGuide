@@ -104,11 +104,8 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
             e.printStackTrace();
         }
 
-        // handles if image gotten from database
-        if (profileImg != null)
-            HelperClass.loadProfileImage(context, profileImg, 100, 40, holder.ivAvatar);
-        else
-            (holder.ivAvatar).setVisibility(View.GONE);
+            // loads profile image
+            HelperClass.loadProfileImage(context, 100, 40, holder.ivAvatar);
 
 
         setTextViewText(holder.tvUsername, guide.getAuthor().getUsername());
@@ -284,26 +281,30 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
             if (guide.getPhoto() != null) {
 
                 String photoUrl = guide.getPhoto().getUrl();
+
                 if (photoUrl != null) {
 
                     // sets view to be visible
                     holder.ibThumb.setVisibility(View.VISIBLE);
+                    holder.epPlayerView.setVisibility(View.GONE);
+
                     Glide.with(context)
                             .load(photoUrl).centerCrop().override(HelperClass.detailImgDimen, HelperClass.detailImgDimen)
                             .transform(new RoundedCornersTransformation(HelperClass.picRadius, 0)).into(holder.ibThumb);
+
+                    holder.ibThumb.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+
+                            // hide add button and zoom image
+                            ((MapsActivity) activity).hideOverlayBtns();
+                            // shows background
+                            expandedImageViewBG.setVisibility(View.VISIBLE);
+                            zoomImageFromThumb(holder.ibThumb, photoUrl, expandedImageView, expandedImageViewBG);
+                        }
+                    });
                 }
 
-                holder.ibThumb.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-
-                        // hide add button and zoom image
-                        ((MapsActivity) activity).hideOverlayBtns();
-                        // shows background
-                        expandedImageViewBG.setVisibility(View.VISIBLE);
-                        zoomImageFromThumb(holder.ibThumb, photoUrl, expandedImageView, expandedImageViewBG);
-                    }
-                });
                 return;
             }
 
@@ -311,8 +312,10 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
             if (guide.getVideo() != null || guide.getAudio() != null) {
 
                 Uri mediaUri;
+
                 // shows the media view
                 holder.epPlayerView.setVisibility(View.VISIBLE);
+                holder.ibThumb.setVisibility(View.GONE);
 
                 // creates a track selector an pick media that is only sd quality or lower
                 DefaultTrackSelector trackSelector = new DefaultTrackSelector(context);

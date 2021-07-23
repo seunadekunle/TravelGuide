@@ -3,15 +3,22 @@ package com.example.travelguide.helpers;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
-import android.content.pm.PackageManager;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.ImageDecoder;
 import android.location.Address;
 import android.location.Geocoder;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -19,21 +26,23 @@ import androidx.fragment.app.FragmentTransaction;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.travelguide.R;
-import com.example.travelguide.adapters.GuidesAdapter;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.material.snackbar.Snackbar;
 import com.parse.ParseFile;
+import com.parse.ParseUser;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
-
-import static com.parse.Parse.getApplicationContext;
 
 // helper functions used multiple times in the project
 public class HelperClass {
@@ -45,6 +54,8 @@ public class HelperClass {
     public static int resizedImgDimen = 650;
     public static int detailImgDimen = 475;
     public static String[] profileTabTitles = {"Guides", "Liked"};
+
+    public static final String videoFileName = "video.mp4";
 
     // Set the fields to specify which types of place data to return
     // for Google places API
@@ -97,6 +108,23 @@ public class HelperClass {
         ActivityCompat.requestPermissions(activity, PERMISSIONS, PERMISSION_ALL);
     }
 
+    // if the fragment manager stack is empty
+    public static boolean emptyBackStack(FragmentManager fragmentManager) {
+        return fragmentManager.getBackStackEntryCount() == 0;
+    }
+
+    // shows fragment in container
+    public static void showFragment(FragmentManager fragmentManager, int fragmentsFrameId, Fragment fragment, String tag) {
+        // Begin the transaction
+        FragmentTransaction ft = fragmentManager.beginTransaction();
+
+        // add fragment to container
+        if (!fragment.isAdded())
+            ft.add(fragmentsFrameId, fragment);
+
+        finishTransaction(ft, tag, fragment);
+    }
+
     // completes fragment transaction
     public static void finishTransaction(FragmentTransaction ft, String name, Fragment fragment) {
 
@@ -107,11 +135,6 @@ public class HelperClass {
 
         // Complete the changes added above
         ft.commit();
-    }
-
-    // if the fragment manager stack is empty
-    public static boolean emptyBackStack(FragmentManager fragmentManager) {
-        return fragmentManager.getBackStackEntryCount() == 0;
     }
 
     // changes the ui state of button
@@ -132,16 +155,148 @@ public class HelperClass {
     }
 
     // loads profile image
-    public static void loadProfileImage(Context context, ParseFile profileImg, int width, int height, ImageView imageView) {
+    public static void loadProfileImage(Context context, int width, int height, ImageView imageView) {
+
+        // gets profile image and load it
+
         Glide.with(context)
-                .load(profileImg.getUrl()).fitCenter().transform(new CircleCrop())
+                .load(getProfileUrl()).fitCenter().transform(new CircleCrop())
                 .override(width, height).into(imageView);
     }
 
     // loads profile image for image button
-    public static void loadProfileImage(Context context, ParseFile profileImg, int width, int height, ImageButton imageButton) {
+    public static void loadProfileImage(Context context, int width, int height, ImageButton imageButton) {
         Glide.with(context)
-                .load(profileImg.getUrl()).fitCenter().transform((new CircleCrop()))
+                .load(getProfileUrl()).fitCenter().transform((new CircleCrop()))
                 .override(width, height).into(imageButton);
     }
+
+    // return url of profile img
+    private static String getProfileUrl() {
+
+        ParseFile profileImg = ParseUser.getCurrentUser().getParseFile("avatar");
+
+        if (profileImg != null) {
+            return profileImg.getUrl();
+        }
+
+        return "";
+    }
+
+    // Create intent for picking a photo from the gallery
+    public static Intent getGalleryIntent() {
+        return new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+    }
+
+    public static Uri getUriForFile(Context context, File photoFile) {
+        return FileProvider.getUriForFile(context, "com.travelguide.fileprovider", photoFile);
+    }
+
+    // Create intent for picking a photo from the gallery
+    public static Intent getPhotoIntent(Uri photoUri) {
+
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+        return takePictureIntent;
+    }
+
+    // creates an intent to choose the photo or camera intent
+    @NotNull
+    public static Intent getChooserIntent(Intent takePictureIntent, Intent takeVideoIntent, String title) {
+        Intent chooserIntent = Intent.createChooser(takePictureIntent, title);
+        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{takeVideoIntent});
+        return chooserIntent;
+    }
+
+    // intent to change avatar using photo or gallery
+    public static Intent getAvatarIntent(Uri photoUri) {
+        return getChooserIntent(getPhotoIntent(photoUri), getGalleryIntent(), "Choose new image");
+    }
+
+    /*
+     * returns a compressed, resized image
+     * reference: https://guides.codepath.com/android/Accessing-the-Camera-and-Stored-Media#accessing-stored-media
+     */
+    @NotNull
+    public static File getResizedImg(Uri takenPhotoUri, Context context, String photoFileName) {
+
+        // get image from disk
+        Bitmap rawTakenImage = loadFromUri(takenPhotoUri, context);
+        Bitmap resizedBitmap = BitmapScaler.scaleToFitWidth(rawTakenImage, HelperClass.resizedImgDimen);
+
+        // Configure byte output stream
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        // Compress the image further
+        resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 40, bytes);
+
+        // Create a new file for the resized bitmap (`getPhotoFileUri` defined above)
+        File resizedFile = getMediaFileUri("resized_" + photoFileName, Environment.DIRECTORY_PICTURES, context);
+        try {
+            resizedFile.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(resizedFile);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        // Write the bytes of the bitmap to file
+        try {
+            fos.write(bytes.toByteArray());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return resizedFile;
+    }
+
+
+    /* returns a Bitmap object given a Uri
+     *  reference: https://guides.codepath.com/android/Accessing-the-Camera-and-Stored-Media#accessing-stored-media
+     * */
+    private static Bitmap loadFromUri(Uri photoUri, Context context) {
+        Bitmap image = null;
+        try {
+            // check version of Android on device
+            if (Build.VERSION.SDK_INT > 27) {
+                // on newer versions of Android, use the new decodeBitmap method
+                ImageDecoder.Source source = ImageDecoder.createSource(context.getContentResolver(), photoUri);
+                image = ImageDecoder.decodeBitmap(source);
+            } else {
+                // support older versions of Android by using getBitmap
+                image = MediaStore.Images.Media.getBitmap(context.getContentResolver(), photoUri);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return image;
+    }
+
+    /*
+     * Returns the File for a photo stored on disk given the fileName
+     * reference - https://guides.codepath.com/android/Accessing-the-Camera-and-Stored-Media#accessing-stored-media
+     */
+    public static File getMediaFileUri(String fileName, String dir, Context context) {
+        // Get safe storage directory for photos
+        // Use `getExternalFilesDir` on Context to access package-specific directories.
+        // This way, we don't need to request external read/write runtime permissions.
+        File mediaStorageDir = new File(context.getExternalFilesDir(dir), TAG);
+
+        // Create the storage directory if it does not exist
+        if (!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()) {
+            Log.d(TAG, "failed to create directory");
+        }
+
+        // Return the file target for the photo based on filename
+        File file = new File(mediaStorageDir.getPath() + File.separator + fileName);
+
+        return file;
+    }
+
 }

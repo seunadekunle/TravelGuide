@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
@@ -52,8 +51,6 @@ import com.google.android.libraries.places.api.net.FetchPlaceRequest;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.parse.FindCallback;
-import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
@@ -157,7 +154,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // creates new instance of the different fragments
         composeFragment = new ComposeFragment();
-        profileFragment = new ProfileFragment();
+        profileFragment = ProfileFragment.newInstance(fragmentsFrameId);
 
         setupSheetBehavior();
 
@@ -172,41 +169,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         adapter = new SearchListAdapter(predictions, this, onItemClickListener);
         setupSearchView();
 
-        ibProfile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        ibProfile.setOnClickListener(v -> {
 
-                // Begin the transaction
-                FragmentTransaction ft = fragmentManager.beginTransaction();
-
-                // add fragment to container
-                if (!profileFragment.isAdded())
-                    ft.add(fragmentsFrameId, profileFragment);
-
-                HelperClass.finishTransaction(ft, ProfileFragment.TAG, (Fragment) profileFragment);
-                hideOverlayBtns();
-            }
+            HelperClass.showFragment(fragmentManager, fragmentsFrameId, profileFragment, ProfileFragment.TAG);
+            hideOverlayBtns();
         });
 
         // add button on click listener
-        addGuide.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        addGuide.setOnClickListener(v -> {
 
-                // Begin the transaction
-                FragmentTransaction ft = fragmentManager.beginTransaction();
-
-                // add fragment to container
-                if (!composeFragment.isAdded())
-                    ft.add(fragmentsFrameId, composeFragment);
-
-                HelperClass.finishTransaction(ft, ComposeFragment.TAG, (Fragment) composeFragment);
-                hideOverlayBtns();
-            }
+            HelperClass.showFragment(fragmentManager, fragmentsFrameId, composeFragment, ComposeFragment.TAG);
+            hideOverlayBtns();
         });
 
         hideOverlayBtns();
     }
+
 
     // show prediction info
     private void showPredictionInfo(AutocompletePrediction prediction) {

@@ -1,14 +1,12 @@
 package com.example.travelguide.fragments;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.ImageDecoder;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -24,8 +22,6 @@ import android.widget.LinearLayout;
 import android.widget.MediaController;
 import android.widget.VideoView;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -36,7 +32,6 @@ import androidx.fragment.app.Fragment;
 import com.bumptech.glide.Glide;
 import com.example.travelguide.R;
 import com.example.travelguide.classes.Guide;
-import com.example.travelguide.helpers.BitmapScaler;
 import com.example.travelguide.helpers.HelperClass;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.model.LatLng;
@@ -52,10 +47,7 @@ import com.parse.SaveCallback;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -78,8 +70,8 @@ public class ComposeFragment extends Fragment {
 
     public static final int AUTOCOMPLETE_REQUEST_CODE = 1;
 
-    private final String photoFileName = "photo.jpg";
-    private final String videoFileName = "video.mp4";
+    private String photoFileName = "photo.jpg";
+
     private File audioFile;
     private File photoFile;
     private File videoFile;
@@ -191,101 +183,94 @@ public class ComposeFragment extends Fragment {
 
 
     private void setActivityLaunchers() {
+
         // assignment for google places search activity
         searchActivityLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
-                new ActivityResultCallback<ActivityResult>() {
-                    @Override
-                    public void onActivityResult(ActivityResult result) {
+                result -> {
 
-                        // if result code is ok set the location for the new guide
-                        if (result.getResultCode() == getActivity().RESULT_OK) {
+                    // if result code is ok set the location for the new guide
+                    if (result.getResultCode() == requireActivity().RESULT_OK) {
 
-                            Place place = Autocomplete.getPlaceFromIntent(result.getData());
-                            setLocation(place);
-                        } else if (result.getResultCode() == AutocompleteActivity.RESULT_ERROR) {
+                        Place place = Autocomplete.getPlaceFromIntent(result.getData());
+                        setLocation(place);
+                    } else if (result.getResultCode() == AutocompleteActivity.RESULT_ERROR) {
 
-                            Status status = Autocomplete.getStatusFromIntent(result.getData());
-                            Log.i(TAG, status.getStatusMessage());
-                        } else if (result.getResultCode() == getActivity().RESULT_CANCELED) {
+                        Status status = Autocomplete.getStatusFromIntent(result.getData());
+                        Log.i(TAG, status.getStatusMessage());
+                    } else if (result.getResultCode() == requireActivity().RESULT_CANCELED) {
 
-                            if (getLocation() == null)
+                        if (getLocation() == null)
 
-                                // tell the user they didn't select a location
-                                Snackbar.make(addBtn, R.string.location_not_selected, Snackbar.LENGTH_SHORT).show();
-                        }
-                        return;
-
+                            // tell the user they didn't select a location
+                            Snackbar.make(addBtn, R.string.location_not_selected, Snackbar.LENGTH_SHORT).show();
                     }
+                    return;
+
                 });
 
         // set launcher for photo/video intent
         mediaActivityLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
-                new ActivityResultCallback<ActivityResult>() {
-                    @Override
-                    public void onActivityResult(ActivityResult result) {
+                result -> {
 
-                        if (result.getResultCode() == getActivity().RESULT_OK) {
+                    if (result.getResultCode() == getActivity().RESULT_OK) {
 
-                            if (result.getData().getData() == null) {
+                        // if an image object was passed
+                        assert result.getData() != null;
+                        if (result.getData().getData() == null) {
 
-                                // resize bitmap
-                                Uri takenPhotoUri = Uri.fromFile(getMediaFileUri(photoFileName, Environment.DIRECTORY_PICTURES));
-                                File resizedFile = getResizedImg(takenPhotoUri);
+                            // resize bitmap
+                            Uri takenPhotoUri = Uri.fromFile(HelperClass.getMediaFileUri(photoFileName, Environment.DIRECTORY_PICTURES, requireContext()));
 
-                                // updates value of photoFile
-                                photoFile = resizedFile;
-                                loadImgIntoPreview();
+                            // updates value of photoFile
+                            photoFile = HelperClass.getResizedImg(takenPhotoUri, getContext(), photoFileName);
+                            loadImgIntoPreview(photoFile);
 
-                                // Bitmap takenImage = BitmapFactory.decodeFile(resizedFile.getAbsolutePath());
-                                // sets other buttons to be not clickable
-                                showImgView();
+                            // Bitmap takenImage = BitmapFactory.decodeFile(resizedFile.getAbsolutePath());
+                            // sets other buttons to be not clickable
+                            showImgView();
 
-                            } else {
-                                // adjust view states to be visible
-                                vvPreview.setVisibility(View.VISIBLE);
-                                ivPreview.setVisibility(View.GONE);
-
-                                // sets other file to be null
-                                photoFile = null;
-
-                                // play recorded video
-                                playbackRecordedVideo(result.getData().getData());
-                            }
                         } else {
-                            Snackbar noMedia = Snackbar.make(mediaBtn, "Media wasn't taken", Snackbar.LENGTH_SHORT);
-                            HelperClass.displaySnackBarWithBottomMargin(noMedia, 50, getContext());
+                            // adjust view states to be visible
+                            vvPreview.setVisibility(View.VISIBLE);
+                            ivPreview.setVisibility(View.GONE);
 
-                            HelperClass.toggleButtonState(mediaBtn);
-                            setBtnState(true);
-                            clearMediaVariables();
+                            // sets other file to be null
+                            photoFile = null;
+
+                            // play recorded video
+                            playbackRecordedVideo(result.getData().getData());
                         }
+                    } else {
+                        Snackbar noMedia = Snackbar.make(mediaBtn, "Media wasn't taken", Snackbar.LENGTH_SHORT);
+                        HelperClass.displaySnackBarWithBottomMargin(noMedia, 50, getContext());
+
+                        HelperClass.toggleButtonState(mediaBtn);
+                        setBtnState(true);
+                        clearMediaVariables();
                     }
                 });
 
         // set launcher for gallery activity
         galleryActivityLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
-                new ActivityResultCallback<ActivityResult>() {
-                    @Override
-                    public void onActivityResult(ActivityResult result) {
+                result -> {
 
-                        if (result.getData() != null) {
+                    if (result.getData() != null) {
 
-                            // gets image data from gallery
-                            Uri photoUri = result.getData().getData();
+                        // gets image data from gallery
+                        Uri photoUri = result.getData().getData();
 
-                            Log.i(TAG, String.valueOf(photoUri));
-                            photoFile = getResizedImg(photoUri);
-                            loadImgIntoPreview();
+                        Log.i(TAG, String.valueOf(photoUri));
+                        photoFile = HelperClass.getResizedImg(photoUri, getContext(), photoFileName);
+                        loadImgIntoPreview(photoFile);
 
-                            showImgView();
-                        } else {
-                            HelperClass.toggleButtonState(galleryBtn);
-                            setBtnState(true);
-                            clearMediaVariables();
-                        }
+                        showImgView();
+                    } else {
+                        HelperClass.toggleButtonState(galleryBtn);
+                        setBtnState(true);
+                        clearMediaVariables();
                     }
                 });
     }
@@ -293,199 +278,169 @@ public class ComposeFragment extends Fragment {
     private void setClickListeners() {
 
         // button click listener to add new guide
-        locationBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        locationBtn.setOnClickListener(v -> {
 
-                // Start the autocomplete intent.
-                Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, HelperClass.placesFields)
-                        .build(getContext());
+            // Start the autocomplete intent.
+            Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, HelperClass.placesFields)
+                    .build(requireContext());
 
-                searchActivityLauncher.launch(intent);
-            }
+            searchActivityLauncher.launch(intent);
         });
 
 
         // add media button on click
-        mediaBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        mediaBtn.setOnClickListener(v -> {
 
-                HelperClass.toggleButtonState(mediaBtn);
-                toggleMediaBtns(mediaBtn);
+            HelperClass.toggleButtonState(mediaBtn);
+            toggleMediaBtns(mediaBtn);
 
+            // Create a File reference for future access
+            photoFile = HelperClass.getMediaFileUri(photoFileName, Environment.DIRECTORY_PICTURES, requireContext());
+            videoFile = getVideoFileUri(HelperClass.videoFileName);
 
-                // Create a File reference for future access
-                photoFile = getMediaFileUri(photoFileName, Environment.DIRECTORY_PICTURES);
-                videoFile = getVideoFileUri(videoFileName);
+            // wrap File object into a content provider
+            // required for API >= 24
+            // See https://guides.codepath.com/android/Sharing-Content-with-Intents#sharing-files-with-api-24-or-higher
+            Uri photoUri = HelperClass.getUriForFile(requireContext(), photoFile);
+            Uri videoUri = Uri.fromFile(videoFile);
 
-                // wrap File object into a content provider
-                // required for API >= 24
-                // See https://guides.codepath.com/android/Sharing-Content-with-Intents#sharing-files-with-api-24-or-higher
-                Uri photoUri = FileProvider.getUriForFile(getContext(), "com.travelguide.fileprovider", photoFile);
-                Uri videoUri = Uri.fromFile(videoFile);
-
-                onPickMedia(photoUri, videoUri);
-            }
+            onPickMedia(photoUri, videoUri);
         });
 
         // gallery button on click
-        galleryBtn.setOnClickListener(new View.OnClickListener() {
+        galleryBtn.setOnClickListener(v -> {
 
-            @Override
-            public void onClick(View v) {
+            HelperClass.toggleButtonState(galleryBtn);
+            toggleMediaBtns(galleryBtn);
 
-                HelperClass.toggleButtonState(galleryBtn);
-                toggleMediaBtns(galleryBtn);
-
-                onPickPhoto();
-            }
+            onPickPhoto();
         });
 
         // audio button on click
-        audioBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                toggleAudioView();
-                toggleMediaBtns(audioBtn);
+        audioBtn.setOnClickListener(v -> {
+            toggleAudioView();
+            toggleMediaBtns(audioBtn);
 
-                if (audioBtn.isSelected())
-                    setupRecorder();
-            }
+            if (audioBtn.isSelected())
+                setupRecorder();
         });
 
         // audio button on click
-        recordBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        recordBtn.setOnClickListener(v -> {
 
-                HelperClass.toggleButtonState(recordBtn);
+            HelperClass.toggleButtonState(recordBtn);
 
-                if (recordBtn.isSelected()) {
-                    // Start recording the audio
-                    try {
-                        mediaRecorder.prepare();
-                        mediaRecorder.start();
+            if (recordBtn.isSelected()) {
+                // Start recording the audio
+                try {
+                    mediaRecorder.prepare();
+                    mediaRecorder.start();
 
-                    } catch (IOException e) {
-                        Log.e(TAG, "prepare() failed", e);
-                    }
-                } else {
+                } catch (IOException e) {
+                    Log.e(TAG, "prepare() failed", e);
+                }
+            } else {
 
-                    Log.i(TAG, "recording stopped");
+                Log.i(TAG, "recording stopped");
 
-                    if (mediaRecorder != null) {
+                if (mediaRecorder != null) {
 
-                        // Stop recording the audio
-                        mediaRecorder.stop();
-                        mediaRecorder.reset();
-                        mediaRecorder.release();
+                    // Stop recording the audio
+                    mediaRecorder.stop();
+                    mediaRecorder.reset();
+                    mediaRecorder.release();
 
-                        // can't record again
-                        recordBtn.setClickable(false);
+                    // can't record again
+                    recordBtn.setClickable(false);
 
-                        // variables to play audio
-                        playerPos = 0;
-                        mediaPlayer = new MediaPlayer();
-                        // toggles button once audio is finished playing
-                        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                            @Override
-                            public void onCompletion(MediaPlayer mp) {
-                                HelperClass.toggleButtonState(playBtn);
-                            }
-                        });
+                    // variables to play audio
+                    playerPos = 0;
+                    mediaPlayer = new MediaPlayer();
+                    // toggles button once audio is finished playing
+                    mediaPlayer.setOnCompletionListener(mp -> HelperClass.toggleButtonState(playBtn));
 
-                        playLayout.setVisibility(View.VISIBLE);
-                    }
+                    playLayout.setVisibility(View.VISIBLE);
                 }
             }
         });
 
-        playBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        playBtn.setOnClickListener(v -> {
 
-                HelperClass.toggleButtonState(playBtn);
-                // plays or pause audio based on button state
-                if (mediaPlayer != null) {
-                    if (playBtn.isSelected()) {
-                        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                        try {
-                            mediaPlayer.reset();
-                            Log.i(TAG, audioFile.getAbsolutePath());
-                            mediaPlayer.setDataSource(audioFile.getAbsolutePath());
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        try {
-                            mediaPlayer.prepare();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-
-                        mediaPlayer.seekTo(playerPos);
-                        mediaPlayer.start();
-                    } else {
-                        playerPos = mediaPlayer.getCurrentPosition();
-                        mediaPlayer.pause();
+            HelperClass.toggleButtonState(playBtn);
+            // plays or pause audio based on button state
+            if (mediaPlayer != null) {
+                if (playBtn.isSelected()) {
+                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                    try {
+                        mediaPlayer.reset();
+                        Log.i(TAG, audioFile.getAbsolutePath());
+                        mediaPlayer.setDataSource(audioFile.getAbsolutePath());
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
+                    try {
+                        mediaPlayer.prepare();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    mediaPlayer.seekTo(playerPos);
+                    mediaPlayer.start();
+                } else {
+                    playerPos = mediaPlayer.getCurrentPosition();
+                    mediaPlayer.pause();
                 }
             }
         });
 
         // clears all the ui elements and associated variables
-        clearBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mediaBtn.setSelected(false);
-                galleryBtn.setSelected(false);
+        clearBtn.setOnClickListener(v -> {
+            mediaBtn.setSelected(false);
+            galleryBtn.setSelected(false);
 
-                if (audioBtn.isSelected()) {
-                    toggleAudioView();
-                }
-
-                // buttons are all clickable
-                setBtnState(true);
-
-                // media variables are null
-                clearMediaVariables();
-
-                ivPreview.setImageResource(0);
-                ivPreview.setVisibility(View.GONE);
-                vvPreview.setVisibility(View.GONE);
+            if (audioBtn.isSelected()) {
+                toggleAudioView();
             }
+
+            // buttons are all clickable
+            setBtnState(true);
+
+            // media variables are null
+            clearMediaVariables();
+
+            ivPreview.setImageResource(0);
+            ivPreview.setVisibility(View.GONE);
+            vvPreview.setVisibility(View.GONE);
         });
 
-        addBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String text = etText.getText().toString();
+        addBtn.setOnClickListener(v -> {
+            String text = etText.getText().toString();
 
-                // if the text field is empty
-                if (text.isEmpty()) {
-                    Snackbar emptyText = Snackbar.make(etText, empty_text, Snackbar.LENGTH_SHORT);
-                    HelperClass.displaySnackBarWithBottomMargin(emptyText, 80, getActivity());
-                    return;
-                }
-
-                // if no location is selected
-                if (location == null) {
-                    Snackbar emptyLocation = Snackbar.make(etText, R.string.no_location, Snackbar.LENGTH_SHORT);
-                    HelperClass.displaySnackBarWithBottomMargin(emptyLocation, 80, getActivity());
-                    return;
-                }
-
-                ParseUser user = ParseUser.getCurrentUser();
-                saveGuide(text, user, photoFile, videoFile, audioFile);
+            // if the text field is empty
+            if (text.isEmpty()) {
+                Snackbar emptyText = Snackbar.make(etText, empty_text, Snackbar.LENGTH_SHORT);
+                HelperClass.displaySnackBarWithBottomMargin(emptyText, 80, getActivity());
+                return;
             }
+
+            // if no location is selected
+            if (location == null) {
+                Snackbar emptyLocation = Snackbar.make(etText, R.string.no_location, Snackbar.LENGTH_SHORT);
+                HelperClass.displaySnackBarWithBottomMargin(emptyLocation, 80, getActivity());
+                return;
+            }
+
+            ParseUser user = ParseUser.getCurrentUser();
+            saveGuide(text, user, photoFile, videoFile, audioFile);
         });
 
     }
 
     private void setupRecorder() {
+
         // Verify that the device has a mic first
-        PackageManager pmanager = getContext().getPackageManager();
-        if (!pmanager.hasSystemFeature(PackageManager.FEATURE_MICROPHONE)) {
+        PackageManager packageManager = requireContext().getPackageManager();
+        if (!packageManager.hasSystemFeature(PackageManager.FEATURE_MICROPHONE)) {
 
             // no mic on device
             Snackbar emptyText = Snackbar.make(etText, R.string.no_recorder, Snackbar.LENGTH_SHORT);
@@ -498,7 +453,7 @@ public class ComposeFragment extends Fragment {
             mediaRecorder = new MediaRecorder();
 
             // creates audio file in podcast directory
-            audioFile = getMediaFileUri("audioguide.mp4", Environment.DIRECTORY_PODCASTS);
+            audioFile = HelperClass.getMediaFileUri("audioguide.mp4", Environment.DIRECTORY_PODCASTS, requireContext());
 
             // Set the audio format and encoder
             mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
@@ -522,32 +477,22 @@ public class ComposeFragment extends Fragment {
     // creates intent to create a new photo or video
     private void onPickMedia(Uri photoUri, Uri videoUri) {
 
-        // intent to take a photo
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
 
         // intent to take a video
         Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
         takeVideoIntent.putExtra(MediaStore.EXTRA_OUTPUT, videoUri);
 //                takeVideoIntent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, 30);
 
-        // creates an intent to choose the photo or camera intent
-        Intent chooserIntent = Intent.createChooser(takePictureIntent, "Capture Image or Video");
-        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{takeVideoIntent});
-
+        Intent chooserIntent = HelperClass.getChooserIntent(HelperClass.getPhotoIntent(photoUri), takeVideoIntent, "Capture Image or Video");
         mediaActivityLauncher.launch(chooserIntent);
     }
 
     // Trigger gallery selection for a photo
     public void onPickPhoto() {
 
-        // Create intent for picking a photo from the gallery
-        Intent intent = new Intent(Intent.ACTION_PICK,
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-
         // as long as intent isn't null
         // Bring up gallery to select a photo
-        galleryActivityLauncher.launch(intent);
+        galleryActivityLauncher.launch(HelperClass.getGalleryIntent());
     }
 
     // creates new Travel guide and updates it to the database
@@ -569,7 +514,7 @@ public class ComposeFragment extends Fragment {
             // ref: https://stackoverflow.com/questions/43350226/android-how-to-upload-an-audio-file-with-parse-sdk
             byte[] soundBytes;
             try {
-                InputStream inputStream = getContext().getContentResolver().openInputStream(Uri.fromFile(audio));
+                InputStream inputStream = requireContext().getContentResolver().openInputStream(Uri.fromFile(audio));
 //                soundBytes = new byte[inputStream.available()];
                 soundBytes = toByteArray(inputStream);
                 guide.setAudio(new ParseFile("audio.mp4", soundBytes));
@@ -590,57 +535,15 @@ public class ComposeFragment extends Fragment {
                 // clears guide and goes back to main fragment
                 guide.setText("");
                 ivPreview.setImageResource(0);
+                controller = null;
                 vvPreview.setVideoPath("");
                 photoFile = new File("");
                 videoFile = new File("");
                 audioFile = new File("");
 
-                getActivity().onBackPressed();
+                requireActivity().onBackPressed();
             }
         });
-    }
-
-    /*
-     * returns a compressed, resized image
-     * reference: https://guides.codepath.com/android/Accessing-the-Camera-and-Stored-Media#accessing-stored-media
-     */
-    @NotNull
-    private File getResizedImg(Uri takenPhotoUri) {
-
-        // get image from disk
-        Bitmap rawTakenImage = loadFromUri(takenPhotoUri);
-        Bitmap resizedBitmap = BitmapScaler.scaleToFitWidth(rawTakenImage, HelperClass.resizedImgDimen);
-
-        // Configure byte output stream
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        // Compress the image further
-        resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 40, bytes);
-
-        // Create a new file for the resized bitmap (`getPhotoFileUri` defined above)
-        File resizedFile = getMediaFileUri("resized_" + photoFileName, Environment.DIRECTORY_PICTURES);
-        try {
-            resizedFile.createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(resizedFile);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        // Write the bytes of the bitmap to file
-        try {
-            fos.write(bytes.toByteArray());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            fos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return resizedFile;
     }
 
     private void showImgView() {
@@ -654,13 +557,12 @@ public class ComposeFragment extends Fragment {
     }
 
     // load image into preview ui element
-    private void loadImgIntoPreview() {
+    private void loadImgIntoPreview(File photoFile) {
 
         ivPreview.setImageResource(0);
 
-
         // Load the taken image into a preview
-        Glide.with(getContext())
+        Glide.with(requireContext())
                 .load(photoFile)
                 .override(HelperClass.resizedImgDimen, HelperClass.resizedImgDimen)
                 .transform(new RoundedCornersTransformation(HelperClass.picRadius, 0))
@@ -714,26 +616,6 @@ public class ComposeFragment extends Fragment {
         locationBtn.setText(newText);
     }
 
-    /*
-     * Returns the File for a photo stored on disk given the fileName
-     * reference - https://guides.codepath.com/android/Accessing-the-Camera-and-Stored-Media#accessing-stored-media
-     */
-    public File getMediaFileUri(String fileName, String dir) {
-        // Get safe storage directory for photos
-        // Use `getExternalFilesDir` on Context to access package-specific directories.
-        // This way, we don't need to request external read/write runtime permissions.
-        File mediaStorageDir = new File(getContext().getExternalFilesDir(dir), TAG);
-
-        // Create the storage directory if it does not exist
-        if (!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()) {
-            Log.d(TAG, "failed to create directory");
-        }
-
-        // Return the file target for the photo based on filename
-        File file = new File(mediaStorageDir.getPath() + File.separator + fileName);
-
-        return file;
-    }
 
     /*
      * Returns the File for a video stored on disk given the fileName
@@ -744,26 +626,6 @@ public class ComposeFragment extends Fragment {
                 Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + fileName);
     }
 
-    /* returns a Bitmap object given a Uri
-     *  reference: https://guides.codepath.com/android/Accessing-the-Camera-and-Stored-Media#accessing-stored-media
-     * */
-    public Bitmap loadFromUri(Uri photoUri) {
-        Bitmap image = null;
-        try {
-            // check version of Android on device
-            if (Build.VERSION.SDK_INT > 27) {
-                // on newer versions of Android, use the new decodeBitmap method
-                ImageDecoder.Source source = ImageDecoder.createSource(getContext().getContentResolver(), photoUri);
-                image = ImageDecoder.decodeBitmap(source);
-            } else {
-                // support older versions of Android by using getBitmap
-                image = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), photoUri);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return image;
-    }
 
     // makes selected button the only one clickable
     public void toggleMediaBtns(ImageButton selected) {
@@ -787,5 +649,4 @@ public class ComposeFragment extends Fragment {
         mediaPlayer = null;
         mediaRecorder = null;
     }
-    //    TODO: add delete button for media
 }

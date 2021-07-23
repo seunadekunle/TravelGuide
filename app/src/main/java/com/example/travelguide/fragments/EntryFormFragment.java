@@ -19,7 +19,6 @@ import com.example.travelguide.activities.EntryActivity;
 import com.example.travelguide.databinding.FragmentEntryBinding;
 import com.example.travelguide.helpers.HelperClass;
 import com.google.android.material.snackbar.Snackbar;
-import com.parse.LogInCallback;
 import com.parse.ParseException;
 import com.parse.ParseUser;
 import com.parse.SignUpCallback;
@@ -64,8 +63,8 @@ public class EntryFormFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
 
+        if (getArguments() != null) {
             // sets entry state depending on instance variable
             entryState = getArguments().getString(ARG_TYPE);
         }
@@ -101,19 +100,11 @@ public class EntryFormFragment extends Fragment {
             loginButton.setVisibility(View.VISIBLE);
         }
 
-        signUpButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                signUpUser(usernameEditText.getText().toString(), passwordEditText.getText().toString());
-            }
-        });
+        signUpButton.setOnClickListener(v ->
+                signUpUser(usernameEditText.getText().toString(), passwordEditText.getText().toString()));
 
-        loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loginUser(usernameEditText.getText().toString(), passwordEditText.getText().toString());
-            }
-        });
+        loginButton.setOnClickListener(v ->
+                loginUser(usernameEditText.getText().toString(), passwordEditText.getText().toString()));
     }
 
     // logs in the user using Parse
@@ -124,22 +115,18 @@ public class EntryFormFragment extends Fragment {
         if (isInputValid(username, password)) {
 
             loadingProgressBar.setVisibility(View.VISIBLE);
-            ParseUser.logInInBackground(username, password, new LogInCallback() {
-                @Override
-                public void done(ParseUser user, ParseException e) {
-                    if (e != null) {
-
-                        // if the username or password is wrong
-                        if (Objects.equals(e.getMessage(), INVALID_ENTRY_DATA_ERROR)) {
-                            showSignUpState(R.string.error_invalid_credentials);
-                            loadingProgressBar.setVisibility(View.GONE);
-                        }
-                        Log.e(TAG, "Issue with login " + e.getMessage());
-                        return;
+            ParseUser.logInInBackground(username, password, (user, e) -> {
+                if (e != null) {
+                    // if the username or password is wrong
+                    if (Objects.equals(e.getMessage(), INVALID_ENTRY_DATA_ERROR)) {
+                        showSignUpState(R.string.error_invalid_credentials);
+                        loadingProgressBar.setVisibility(View.GONE);
                     }
-
-                    ((EntryActivity) getActivity()).navigateToMapView();
+                    Log.e(TAG, "Issue with login " + e.getMessage());
+                    return;
                 }
+
+                ((EntryActivity) requireActivity()).navigateToMapView();
             });
 
         }
@@ -156,18 +143,18 @@ public class EntryFormFragment extends Fragment {
             user.setPassword(password);
 
             loadingProgressBar.setVisibility(View.VISIBLE);
+
             // signs the user up in background
-            user.signUpInBackground(new SignUpCallback() {
-                @Override
-                public void done(ParseException e) {
-                    if (e == null) {
-                        // goes to map activity
-                        ((EntryActivity) getActivity()).navigateToMapView();
-                    } else {
-                        // Sign up didn't succeed. stay on page and show message
-                        showSignUpState(R.string.sign_up_failed);
-                        Log.e(TAG, "Issue with signup", e);
-                    }
+            user.signUpInBackground(e -> {
+
+                if (e == null) {
+                    // goes to map activity
+                    ((EntryActivity) requireActivity()).navigateToMapView();
+                } else {
+
+                    // Sign up didn't succeed. stay on page and show message
+                    showSignUpState(R.string.sign_up_failed);
+                    Log.e(TAG, "Issue with signup", e);
                 }
             });
         }
@@ -193,7 +180,7 @@ public class EntryFormFragment extends Fragment {
     // shows the sign up state
     private void showSignUpState(@StringRes Integer stateString) {
         Snackbar stateText = Snackbar.make(getView(), stateString, Snackbar.LENGTH_SHORT);
-        HelperClass.displaySnackBarWithBottomMargin(stateText, 500, getActivity());
+        HelperClass.displaySnackBarWithBottomMargin(stateText, 400, getActivity());
     }
 
     @Override
