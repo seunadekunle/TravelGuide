@@ -2,6 +2,7 @@ package com.example.travelguide.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +15,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.travelguide.R;
@@ -23,6 +23,7 @@ import com.example.travelguide.adapters.ProfilePagerAdapter;
 import com.example.travelguide.helpers.HelperClass;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.parse.GetCallback;
 import com.parse.LogOutCallback;
 import com.parse.ParseException;
 import com.parse.ParseUser;
@@ -42,6 +43,8 @@ public class ProfileFragment extends Fragment {
     private int frameID;
     private FragmentManager fragmentManager;
     private ChangeAvatarFragment changeAvatarFragment;
+    private ParseUser parseUser;
+    private String userID;
 
     private ProfilePagerAdapter profilePagerAdapter;
     private ViewPager2 viewPager2;
@@ -63,7 +66,18 @@ public class ProfileFragment extends Fragment {
         Bundle args = new Bundle();
 
         args.putInt(ARG_ID, fragmentID);
-        args.putInt(ARG_USER, userID);
+        args.putString(ARG_USER, userID);
+
+        ProfileFragment fragment = new ProfileFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static ProfileFragment newInstance(String userID) {
+
+        Bundle args = new Bundle();
+
+        args.putString(ARG_USER, userID);
 
         ProfileFragment fragment = new ProfileFragment();
         fragment.setArguments(args);
@@ -74,15 +88,45 @@ public class ProfileFragment extends Fragment {
     public void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getArguments() != null){
+        if (getArguments() != null) {
 
             // sets entry state depending on instance variable
             frameID = getArguments().getInt(ARG_ID);
+            userID = getArguments().getString(ARG_USER);
         }
+    }
+
+    // returns user based on ID
+    public void setParseUser(String userID) {
+
+        if (userID != null) {
+            if (ParseUser.getCurrentUser().getObjectId().equals(userID)) {
+                parseUser = ParseUser.getCurrentUser();
+                displayUserDetails();
+            } else {
+                HelperClass.fetchUser(userID, new GetCallback<ParseUser>() {
+                    @Override
+                    public void done(ParseUser object, ParseException e) {
+                        Log.i(TAG, object.getObjectId());
+                        parseUser = object;
+                        displayUserDetails();
+                    }
+                });
+            }
+        }
+    }
+
+    public void displayUserDetails() {
+
+        Log.i(TAG, parseUser.getUsername());
+        // sets username
+        tvProfile.setText(parseUser.getUsername());
+        loadAvatar();
     }
 
     @Override
     public void onViewCreated(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
+
 
         ibAvatar = view.findViewById(R.id.ibAvatar);
         tvProfile = view.findViewById(R.id.tvProfile);
@@ -92,36 +136,26 @@ public class ProfileFragment extends Fragment {
 
         fragmentManager = requireActivity().getSupportFragmentManager();
         changeAvatarFragment = ChangeAvatarFragment.newInstance(true);
-        // sets username
-        tvProfile.setText(ParseUser.getCurrentUser().getUsername());
 
-        loadAvatar();
 
-        ibAvatar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                HelperClass.replaceFragment(fragmentManager, frameID, changeAvatarFragment, changeAvatarFragment.TAG);
-            }
-        });
+        ibAvatar.setOnClickListener(v ->
+                HelperClass.replaceFragment(fragmentManager, frameID, changeAvatarFragment, changeAvatarFragment.TAG));
 
         // handles logout button click
-        logOutBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                logOutUser();
-            }
-        });
+        logOutBtn.setOnClickListener(v -> logOutUser());
 
         viewPager2 = view.findViewById(R.id.viewPager);
         tabLayout = view.findViewById(R.id.tabLayout);
 
+        setParseUser(userID);
         loadViewPager();
 
         // sets title of viewpager
         new TabLayoutMediator(tabLayout, viewPager2,
-                (tab, position) -> tab.setText(HelperClass.profileTabTitles[position])
+                (tab, position) -> {
+                    tab.setText(HelperClass.profileTabTitles[position]);
+                }
         ).attach();
-
     }
 
     @Override
@@ -129,18 +163,26 @@ public class ProfileFragment extends Fragment {
         super.onResume();
 
         // reload data
-        loadAvatar();
+        if (parseUser != null) {
+            displayUserDetails();
+        }
+
         loadViewPager();
     }
 
     public void loadViewPager() {
-        profilePagerAdapter = new ProfilePagerAdapter(requireActivity(), ivExpanded, imageBG);
+        profilePagerAdapter = new ProfilePagerAdapter(requireActivity(), ivExpanded, imageBG, userID);
         viewPager2.setAdapter(profilePagerAdapter);
     }
 
+    // loads the avatar for the profile image
     public void loadAvatar() {
+
+        String profileUrl = null;
+        profileUrl = parseUser.getParseFile("avatar").getUrl();
+
         // gets profile image and load it
-        HelperClass.loadProfileImage(getContext(), 500, 500, ibAvatar);
+        HelperClass.loadProfileImage(profileUrl, getContext(), 500, 500, ibAvatar);
     }
 
     // logs out the user

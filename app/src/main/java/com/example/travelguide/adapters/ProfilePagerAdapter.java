@@ -33,19 +33,22 @@ public class ProfilePagerAdapter extends FragmentStateAdapter {
 
     private ImageView expandedImgViewID;
     private View expandedImgViewBgID;
+    private String userID;
 
-    public ProfilePagerAdapter(@NonNull @NotNull FragmentActivity fragmentActivity, ImageView expandedImgViewID, View expandedImgViewBgID) {
+    public ProfilePagerAdapter(@NonNull @NotNull FragmentActivity fragmentActivity, ImageView expandedImgViewID, View expandedImgViewBgID, String userID) {
         super(fragmentActivity);
 
         this.expandedImgViewID = expandedImgViewID;
         this.expandedImgViewBgID = expandedImgViewBgID;
+        this.userID = userID;
     }
 
     @NonNull
     @NotNull
     @Override
     public Fragment createFragment(int position) {
-        ProfileGuideFragment profileGuideFragment = ProfileGuideFragment.newInstance(HelperClass.profileTabTitles[position], 0, 0);
+
+        ProfileGuideFragment profileGuideFragment = ProfileGuideFragment.newInstance(HelperClass.profileTabTitles[position], userID);
         profileGuideFragment.setExpandedElements(expandedImgViewID, expandedImgViewBgID);
         return profileGuideFragment;
     }

@@ -19,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.travelguide.R;
@@ -26,6 +27,7 @@ import com.example.travelguide.activities.MapsActivity;
 import com.example.travelguide.classes.GlideApp;
 import com.example.travelguide.classes.Guide;
 import com.example.travelguide.databinding.LocationGuideBinding;
+import com.example.travelguide.fragments.ProfileFragment;
 import com.example.travelguide.helpers.DeviceDimenHelper;
 import com.example.travelguide.helpers.HelperClass;
 import com.google.android.exoplayer2.C;
@@ -36,12 +38,14 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.parse.FindCallback;
 import com.parse.ParseException;
+import com.parse.ParseFile;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
 import java.util.List;
+import java.util.Objects;
 
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
@@ -59,6 +63,8 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
     private final Activity activity;
     private SimpleExoPlayer exoPlayer;
     private boolean inProfile;
+    private FragmentManager fragmentManager;
+    private int frameID;
 
     // Hold a reference to the current animator
     private Animator currentAnimator;
@@ -67,7 +73,8 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
     private final int playerHeightMult = 12;
 
 
-    public GuidesAdapter(List<Guide> items, Context context, ImageView expandedImageView, View expandedImageViewBG, Activity activity, SimpleExoPlayer exoPlayer, boolean inProfile) {
+    public GuidesAdapter(List<Guide> items, Context context, ImageView expandedImageView, View expandedImageViewBG, Activity activity, SimpleExoPlayer exoPlayer, boolean inProfile
+    , FragmentManager fragmentManager, int frameID) {
         this.context = context;
         this.expandedImageView = expandedImageView;
         guides = items;
@@ -75,6 +82,8 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
         this.activity = activity;
         this.exoPlayer = exoPlayer;
         this.inProfile = inProfile;
+        this.fragmentManager = fragmentManager;
+        this.frameID = frameID;
     }
 
     @Override
@@ -91,12 +100,19 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
         if (position == RecyclerView.NO_POSITION)
             return;
 
-        // get current guide at positoin
+        // get current guide at position
         Guide guide = guides.get(position);
 
 
-        // loads profile image
-        HelperClass.loadProfileImage(context, 100, 50, holder.ivAvatar);
+        String profileUrl = null;
+        try {
+            profileUrl = ((ParseFile) Objects.requireNonNull(guide.getAuthor().fetchIfNeeded().get("avatar"))).getUrl();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        if(profileUrl != null)
+            HelperClass.loadCircularImage(profileUrl, context, 100, 100, holder.ivAvatar);
 
 
         try {
@@ -109,9 +125,22 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
         setTextViewText(holder.tvCreatedAt, guide.getTimeStamp());
         setTextViewText(holder.tvLikes, String.valueOf(guide.getLikes()));
 
+        holder.tvUsername.setOnClickListener(v -> {
+                goToProfile(guide);
+        });
+
+        holder.ivAvatar.setOnClickListener(v -> {
+                goToProfile(guide);
+        });
+
         // if there is any media
         fillMediaLayout(holder, guide);
         handleLikeButton(holder, guide, position);
+    }
+
+    private void goToProfile(Guide guide) {
+        ProfileFragment userProfile = ProfileFragment.newInstance(guide.getAuthor().getObjectId());
+        HelperClass.showFragment(fragmentManager, frameID, userProfile, ProfileFragment.TAG);
     }
 
     // clear all elements of the RecyclerView
@@ -216,6 +245,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
                     // if list is in profile update liked list
                     if (inProfile) {
                         guides.remove(pos);
+                        notifyDataSetChanged();
                     }
                 }
             }
@@ -521,6 +551,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
                 } else {
                     thumbView.setAlpha(1f);
                     expandedImageView.setVisibility(View.INVISIBLE);
+                    expandedImageViewBG.setVisibility(View.INVISIBLE);
                 }
 
 //                // show add button

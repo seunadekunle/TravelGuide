@@ -51,9 +51,11 @@ public class LocationGuideFragment extends Fragment {
     private List<Guide> guideList;
     private TextView tvAddress;
     private ImageView ivExpandIndicator;
+    protected int frameParam;
 
     private static final String ARG_LAT = "lat";
     private static final String ARG_LONG = "long";
+    private static final String ARG_FRAME = "frame_ID";
 
     private ParseGeoPoint parseLocation;
 
@@ -62,12 +64,13 @@ public class LocationGuideFragment extends Fragment {
     }
 
     @SuppressWarnings("unused")
-    public static LocationGuideFragment newInstance(Double latCoord, Double longCoord) {
+    public static LocationGuideFragment newInstance(Double latCoord, Double longCoord, int frameParam) {
         LocationGuideFragment fragment = new LocationGuideFragment();
         Bundle args = new Bundle();
 
         args.putDouble(ARG_LAT, latCoord);
         args.putDouble(ARG_LONG, longCoord);
+        args.putInt(ARG_FRAME, frameParam);
 
         fragment.setArguments(args);
         return fragment;
@@ -81,6 +84,7 @@ public class LocationGuideFragment extends Fragment {
         if (getArguments() != null) {
             // initializes local Parse variable
             parseLocation = new ParseGeoPoint(getArguments().getDouble(ARG_LAT), getArguments().getDouble(ARG_LONG));
+            frameParam = getArguments().getInt(ARG_FRAME);
         }
     }
 
@@ -119,7 +123,9 @@ public class LocationGuideFragment extends Fragment {
         swipeContainer = view.findViewById(R.id.swipeContainer);
 
         // Set the adapter of the recycler view
-        adapter = new GuidesAdapter(guideList, context, expandedImgView, expandedImgViewBG, getActivity(), globalPlayer, inProfile);
+        adapter = new GuidesAdapter(guideList, context, expandedImgView, expandedImgViewBG, getActivity(), globalPlayer, inProfile
+                , requireActivity().getSupportFragmentManager(), frameParam);
+
         rvGuides.setAdapter(adapter);
         rvGuides.setLayoutManager(new LinearLayoutManager(context));
 

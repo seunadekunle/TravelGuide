@@ -212,7 +212,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                             // shows modal view of location being selected
                             findViewById(modalFrameId).setVisibility(View.VISIBLE);
-                            modalLocationGuideFragment = LocationGuideFragment.newInstance(Objects.requireNonNull(place.getLatLng()).latitude, place.getLatLng().longitude);
+                            modalLocationGuideFragment = LocationGuideFragment.newInstance(Objects.requireNonNull(place.getLatLng()).latitude, place.getLatLng().longitude, fragmentsFrameId);
 
                             // Begin the transaction
                             FragmentTransaction ft = fragmentManager.beginTransaction();
@@ -373,7 +373,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Double latitude = ((ParseGeoPoint) marker.getTag()).getLatitude();
                 Double longitude = ((ParseGeoPoint) marker.getTag()).getLongitude();
 
-                locationGuideFragment = LocationGuideFragment.newInstance(latitude, longitude);
+                locationGuideFragment = LocationGuideFragment.newInstance(latitude, longitude, fragmentsFrameId);
 
                 // Begin the transaction
                 FragmentTransaction ft = fragmentManager.beginTransaction();
@@ -528,7 +528,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // TODO: replace with place id
     private void addMarker(MarkerOptions newMarker, ParseGeoPoint objectId) {
         Marker marker = map.addMarker(newMarker);
-        marker.setTag(objectId);
+
+        if (marker != null) {
+            marker.setTag(objectId);
+        }
     }
 
     // saves map current location and camera position when activity is paused

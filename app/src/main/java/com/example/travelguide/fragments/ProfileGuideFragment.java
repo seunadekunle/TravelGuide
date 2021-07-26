@@ -1,7 +1,6 @@
 package com.example.travelguide.fragments;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +15,8 @@ import com.example.travelguide.R;
 import com.example.travelguide.classes.Activity;
 import com.example.travelguide.classes.Guide;
 import com.example.travelguide.helpers.HelperClass;
+import com.parse.GetCallback;
+import com.parse.ParseException;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
@@ -33,21 +34,15 @@ public class ProfileGuideFragment extends LocationGuideFragment {
 
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PAGE_TYPE = "type";
-    private static final String ARG_IMG_ID = "expandedIv";
-    private static final String ARG_IMG_BG_ID = "expandedBg";
+    private static final String ARG_USER_ID = "userID";
 
     private String type = "";
+    private String userID = "";
 
     private List<Guide> guideList;
     private ImageView imageView;
-    private View view;
-    private ParseUser user;
-
-    private int expandedIv = 0;
-    private int expandedBg = 0;
-
-    final Handler handler = new Handler();
-    final int delay = 1000; // 1000 milliseconds == 1 second
+    private View expandedView;
+    private ParseUser parseUser;
 
 
     public ProfileGuideFragment() {
@@ -62,13 +57,12 @@ public class ProfileGuideFragment extends LocationGuideFragment {
      * @return A new instance of fragment ProfileGuideFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static ProfileGuideFragment newInstance(String param1, int imageViewID, int imageBgID) {
+    public static ProfileGuideFragment newInstance(String param1, String param2) {
         ProfileGuideFragment fragment = new ProfileGuideFragment();
         Bundle args = new Bundle();
 
         args.putString(ARG_PAGE_TYPE, param1);
-        args.putInt(ARG_IMG_ID, imageViewID);
-        args.putInt(ARG_IMG_BG_ID, imageBgID);
+        args.putString(ARG_USER_ID, param2);
 
         fragment.setArguments(args);
         return fragment;
@@ -79,11 +73,9 @@ public class ProfileGuideFragment extends LocationGuideFragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             type = getArguments().getString(ARG_PAGE_TYPE);
-            expandedIv = getArguments().getInt(ARG_IMG_ID);
-            expandedBg = getArguments().getInt(ARG_IMG_BG_ID);
+            userID = getArguments().getString(ARG_USER_ID);
         }
 
-        user = ParseUser.getCurrentUser();
     }
 
     @Override
@@ -96,18 +88,31 @@ public class ProfileGuideFragment extends LocationGuideFragment {
     @Override
     public void onViewCreated(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
 
-
         guideList = new ArrayList<>();
+        setParseUser(userID, view);
+    }
 
-        // set up the guide list
-        setupGuideList(view, view.getContext(), imageView, view, true);
-        queryGuides();
+    // returns user based on ID
+    public void setParseUser(String userID, View view) {
 
-        handler.postDelayed(new Runnable() {
-            public void run() {
-                System.out.println("visibility " + rvGuides.getVisibility());
+        if (userID != null) {
+            if (ParseUser.getCurrentUser().getObjectId().equals(userID)) {
+                parseUser = ParseUser.getCurrentUser();
+
+
+            } else {
+                HelperClass.fetchUser(userID, new GetCallback<ParseUser>() {
+                    @Override
+                    public void done(ParseUser object, ParseException e) {
+                        parseUser = object;
+                    }
+                });
             }
-        }, delay);
+
+            // set up guide list
+            setupGuideList(view, view.getContext(), imageView, expandedView, true);
+            queryGuides();
+        }
     }
 
     @Override
@@ -128,7 +133,7 @@ public class ProfileGuideFragment extends LocationGuideFragment {
         // limit query to latest 20 items
         query.setLimit(20);
         //  where the author is the logged in user
-        query.whereEqualTo("author", user);
+        query.whereEqualTo("author", parseUser);
         // order posts by creation date (newest first)
         query.addDescendingOrder("createdAt");
 
@@ -153,11 +158,14 @@ public class ProfileGuideFragment extends LocationGuideFragment {
 
     // gets guides that user liked
     private void queryLikedGuides() {
+
         // specify what type of data we want to query - Guide.class
         ParseQuery<Activity> query = ParseQuery.getQuery(Activity.class);
+
         //  where the author is the logged in user
-        query.whereEqualTo(Activity.getKeyUserId(), user);
+        query.whereEqualTo(Activity.getKeyUserId(), parseUser);
         query.include(Activity.getKeyGuideId());
+
         // order posts by creation date (newest first)
         query.addDescendingOrder("createdAt");
 
@@ -182,12 +190,21 @@ public class ProfileGuideFragment extends LocationGuideFragment {
             adapter.addAll(guideList);
 
             adapter.notifyDataSetChanged();
+
+            Log.i(TAG, String.valueOf(adapter.getItemCount()));
+
             showEmptyListText();
         });
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        queryGuides();
+    }
+
     public void setExpandedElements(ImageView expandedImgViewID, View expandedImgViewBgID) {
         imageView = expandedImgViewID;
-        view = expandedImgViewBgID;
+        expandedView = expandedImgViewBgID;
     }
 }
