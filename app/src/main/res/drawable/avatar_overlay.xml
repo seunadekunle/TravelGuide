@@ -13,9 +13,9 @@
     </item>
 
     <item
-        android:bottom="20dp"
+        android:bottom="5dp"
         android:drawable="@drawable/ic_baseline_camera_alt_24_profile"
-        android:left="65dp"
-        android:right="65dp"
-        android:top="110dp" />
+        android:top="90dp"
+        android:left="47.5dp"
+        android:right="47.5dp"/>
 </layer-list>

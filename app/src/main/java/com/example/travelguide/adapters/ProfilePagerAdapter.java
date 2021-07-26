@@ -27,6 +27,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+import static androidx.fragment.app.FragmentStatePagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT;
+
 public class ProfilePagerAdapter extends FragmentStateAdapter {
 
     private static final String TAG = "ProfilePagerAdapter";
@@ -34,6 +36,10 @@ public class ProfilePagerAdapter extends FragmentStateAdapter {
     private ImageView expandedImgViewID;
     private View expandedImgViewBgID;
     private String userID;
+
+    @Deprecated public static final int USE_SET_USER_VISIBLE_HINT = 0;
+
+    public static final int RESUME_ONLY_CURRENT_FRAGMENT = 1;
 
     public ProfilePagerAdapter(@NonNull @NotNull FragmentActivity fragmentActivity, ImageView expandedImgViewID, View expandedImgViewBgID, String userID) {
         super(fragmentActivity);

@@ -1,6 +1,7 @@
 package com.example.travelguide.fragments;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,7 +24,6 @@ import com.example.travelguide.adapters.ProfilePagerAdapter;
 import com.example.travelguide.helpers.HelperClass;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
-import com.parse.GetCallback;
 import com.parse.LogOutCallback;
 import com.parse.ParseException;
 import com.parse.ParseUser;
@@ -104,13 +104,11 @@ public class ProfileFragment extends Fragment {
                 parseUser = ParseUser.getCurrentUser();
                 displayUserDetails();
             } else {
-                HelperClass.fetchUser(userID, new GetCallback<ParseUser>() {
-                    @Override
-                    public void done(ParseUser object, ParseException e) {
-                        Log.i(TAG, object.getObjectId());
-                        parseUser = object;
-                        displayUserDetails();
-                    }
+                HelperClass.fetchUser(userID, (object, e) -> {
+                    Log.i(TAG, object.getObjectId());
+                    parseUser = object;
+                    displayUserDetails();
+                    hidePrivateInfo();
                 });
             }
         }
@@ -137,7 +135,6 @@ public class ProfileFragment extends Fragment {
         fragmentManager = requireActivity().getSupportFragmentManager();
         changeAvatarFragment = ChangeAvatarFragment.newInstance(true);
 
-
         ibAvatar.setOnClickListener(v ->
                 HelperClass.replaceFragment(fragmentManager, frameID, changeAvatarFragment, changeAvatarFragment.TAG));
 
@@ -158,6 +155,16 @@ public class ProfileFragment extends Fragment {
         ).attach();
     }
 
+    // hides ui information that only the logged in user can see
+    private void hidePrivateInfo() {
+        logOutBtn.setVisibility(View.GONE);
+        ibAvatar.setClickable(false);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            ibAvatar.setForeground(null);
+        }
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -173,6 +180,7 @@ public class ProfileFragment extends Fragment {
     public void loadViewPager() {
         profilePagerAdapter = new ProfilePagerAdapter(requireActivity(), ivExpanded, imageBG, userID);
         viewPager2.setAdapter(profilePagerAdapter);
+        viewPager2.setCurrentItem(0);
     }
 
     // loads the avatar for the profile image

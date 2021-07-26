@@ -54,6 +54,7 @@ public class ProfileGuideFragment extends LocationGuideFragment {
      * this fragment using the provided parameters.
      *
      * @param param1 Parameter 1.
+     * @param param2 Parameter 1.
      * @return A new instance of fragment ProfileGuideFragment.
      */
     // TODO: Rename and change types and number of parameters
@@ -98,20 +99,11 @@ public class ProfileGuideFragment extends LocationGuideFragment {
         if (userID != null) {
             if (ParseUser.getCurrentUser().getObjectId().equals(userID)) {
                 parseUser = ParseUser.getCurrentUser();
-
-
             } else {
-                HelperClass.fetchUser(userID, new GetCallback<ParseUser>() {
-                    @Override
-                    public void done(ParseUser object, ParseException e) {
-                        parseUser = object;
-                    }
-                });
+                HelperClass.fetchUser(userID, (object, e) -> parseUser = object);
             }
-
             // set up guide list
             setupGuideList(view, view.getContext(), imageView, expandedView, true);
-            queryGuides();
         }
     }
 
@@ -197,11 +189,23 @@ public class ProfileGuideFragment extends LocationGuideFragment {
         });
     }
 
+
+    @Override
+    public void onViewStateRestored(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+    }
+
     @Override
     public void onResume() {
         super.onResume();
+
         queryGuides();
     }
+
+    public boolean isFragmentUIActive() {
+        return isAdded() && !isDetached() && !isRemoving();
+    }
+
 
     public void setExpandedElements(ImageView expandedImgViewID, View expandedImgViewBgID) {
         imageView = expandedImgViewID;
