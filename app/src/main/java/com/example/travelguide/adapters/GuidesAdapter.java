@@ -140,9 +140,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
 
     private void goToProfile(Guide guide) {
         ProfileFragment userProfile = ProfileFragment.newInstance(guide.getAuthor().getObjectId());
-
         HelperClass.showFragment(fragmentManager, frameID, userProfile, ProfileFragment.TAG);
-
     }
 
     // clear all elements of the RecyclerView
@@ -264,8 +262,8 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
                     // creates a like row and updates Guide text
                     com.example.travelguide.classes.Activity likeActivity = new com.example.travelguide.classes.Activity();
 
-                    likeActivity.put("userID", ParseUser.getCurrentUser());
-                    likeActivity.put("guideID", guide);
+                    likeActivity.put(com.example.travelguide.classes.Activity.getKeyUserId(), ParseUser.getCurrentUser());
+                    likeActivity.put(com.example.travelguide.classes.Activity.getKeyGuideId(), guide);
 
                     likeActivity.saveInBackground(new SaveCallback() {
                         @Override

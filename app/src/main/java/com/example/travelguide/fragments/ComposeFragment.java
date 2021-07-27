@@ -42,7 +42,6 @@ import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseUser;
-import com.parse.SaveCallback;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -497,76 +496,70 @@ public class ComposeFragment extends Fragment {
         Guide guide = new Guide();
 
         // saves guide after saving locatoin
-        GetCallback<Location> composeCallback = new GetCallback<Location>() {
-            @Override
-            public void done(Location result, ParseException e) {
-                if (e == null) {
-                    // get location from server
-                    guideLocation[0] = result;
-                } else {
+        GetCallback<Location> composeCallback = (result, e) -> {
+            if (e == null) {
+                // get location from server
+                guideLocation[0] = result;
+            } else {
 
-                    // if the location wasn't found add a new one
-                    if (e.getCode() == ParseException.OBJECT_NOT_FOUND) {
-                        guideLocation[0] = new Location();
-                        guideLocation[0].setPlaceId(placeID);
-                        guideLocation[0].setCoord(location.latitude, location.longitude);
-                        guideLocation[0].saveInBackground();
-                    }
+                // if the location wasn't found add a new one
+                if (e.getCode() == ParseException.OBJECT_NOT_FOUND) {
+                    guideLocation[0] = new Location();
+                    guideLocation[0].setPlaceId(placeID);
+                    guideLocation[0].setCoord(location.latitude, location.longitude);
+                    guideLocation[0].saveInBackground();
                 }
-
-                guide.setAuthor(user);
-                guide.setText(text);
-                guide.setLocation(guideLocation[0]);
-
-                // sets the photo and video fields if they exist
-                if (photo != null)
-                    guide.setPhoto(new ParseFile(photo));
-                else if (video != null)
-                    guide.setVideo(new ParseFile(video));
-                else if (audio != null) {
-
-                    // Save sound using input stream
-                    // ref: https://stackoverflow.com/questions/43350226/android-how-to-upload-an-audio-file-with-parse-sdk
-                    byte[] soundBytes = new byte[0];
-
-                    InputStream inputStream = null;
-                    try {
-                        inputStream = requireContext().getContentResolver().openInputStream(Uri.fromFile(audio));
-                    } catch (FileNotFoundException fileNotFoundException) {
-                        fileNotFoundException.printStackTrace();
-                    }
-//                soundBytes = new byte[inputStream.available()];
-                    try {
-                        soundBytes = toByteArray(inputStream);
-                    } catch (IOException ioException) {
-                        ioException.printStackTrace();
-                    }
-
-                    guide.setAudio(new ParseFile("audio.mp4", soundBytes));
-                }
-
-                // uploads new guide in the background
-                guide.saveInBackground(new SaveCallback() {
-                    @Override
-                    public void done(ParseException e) {
-                        if (e != null) {
-                            Log.i(TAG, "Error while saving tag", e);
-                            return;
-                        }
-
-                        // clears guide and goes back to main fragment
-                        guide.setText("");
-                        ivPreview.setImageResource(0);
-                        controller = null;
-                        vvPreview.setVideoPath("");
-                        photoFile = new File("");
-                        videoFile = new File("");
-                        audioFile = new File("");
-
-                        requireActivity().onBackPressed();
-                    }
-                });
             }
+
+            guide.setAuthor(user);
+            guide.setText(text);
+            guide.setLocation(guideLocation[0]);
+
+            // sets the photo and video fields if they exist
+            if (photo != null)
+                guide.setPhoto(new ParseFile(photo));
+            else if (video != null)
+                guide.setVideo(new ParseFile(video));
+            else if (audio != null) {
+
+                // Save sound using input stream
+                // ref: https://stackoverflow.com/questions/43350226/android-how-to-upload-an-audio-file-with-parse-sdk
+                byte[] soundBytes = new byte[0];
+
+                InputStream inputStream = null;
+                try {
+                    inputStream = requireContext().getContentResolver().openInputStream(Uri.fromFile(audio));
+                } catch (FileNotFoundException fileNotFoundException) {
+                    fileNotFoundException.printStackTrace();
+                }
+//                soundBytes = new byte[inputStream.available()];
+                try {
+                    soundBytes = toByteArray(inputStream);
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+
+                guide.setAudio(new ParseFile("audio.mp4", soundBytes));
+            }
+
+            // uploads new guide in the background
+            guide.saveInBackground(e1 -> {
+                if (e1 != null) {
+                    Log.i(TAG, "Error while saving tag", e1);
+                    return;
+                }
+
+                // clears guide and goes back to main fragment
+                guide.setText("");
+                ivPreview.setImageResource(0);
+                controller = null;
+                vvPreview.setVideoPath("");
+                photoFile = new File("");
+                videoFile = new File("");
+                audioFile = new File("");
+
+                requireActivity().onBackPressed();
+            });
         };
 
         HelperClass.fetchLocation(location, composeCallback);

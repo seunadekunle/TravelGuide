@@ -1,15 +1,7 @@
 package com.example.travelguide.classes;
 
-import android.util.Log;
-
-import com.google.android.gms.maps.model.LatLng;
 import com.parse.ParseClassName;
-import com.parse.ParseFile;
-import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
-import com.parse.ParseUser;
-
-import java.util.Date;
 
 @ParseClassName("Activity")
 public class Activity extends ParseObject {
@@ -19,6 +11,9 @@ public class Activity extends ParseObject {
     private static final String KEY_CREATION_DATE = "createdAt";
     private static final String KEY_USER_ID = "userID";
     private static final String KEY_GUIDE_ID = "guideID";
+    private static final String KEY_LOC_ID = "locationID";
+    private static final String KEY_TYPE = "type";
+
 
     public Guide getGuide() {
         return (Guide) getParseObject(KEY_GUIDE_ID);
@@ -38,5 +33,13 @@ public class Activity extends ParseObject {
 
     public static String getKeyGuideId() {
         return KEY_GUIDE_ID;
+    }
+
+    public static String getKeyLocId() {
+        return KEY_LOC_ID;
+    }
+
+    public static String getKeyType() {
+        return KEY_TYPE;
     }
 }

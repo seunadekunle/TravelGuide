@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -31,6 +32,7 @@ import com.google.android.libraries.places.api.net.FetchPlaceResponse;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseQuery;
+import com.parse.ParseUser;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -51,12 +53,14 @@ public class LocationGuideFragment extends Fragment {
     protected SwipeRefreshLayout swipeContainer;
     protected SimpleExoPlayer globalPlayer;
     protected TextView tvEmptyList;
+    protected int frameParam;
+
 
     private List<Guide> guideList;
     private TextView tvAddress;
     private ImageView ivExpandIndicator;
-    protected int frameParam;
     private String locationName;
+    private Button followBtn;
 
     private static final String ARG_LOC = "location";
     private static final String ARG_FRAME = "frame_ID";
@@ -104,26 +108,39 @@ public class LocationGuideFragment extends Fragment {
 
         tvAddress = view.findViewById(R.id.tvAddress);
         ivExpandIndicator = view.findViewById(R.id.ivExpandIndicator);
+        followBtn = view.findViewById(R.id.followBtn);
 
         context = view.getContext();
 
-        OnSuccessListener<FetchPlaceResponse> textSuccess = new OnSuccessListener<FetchPlaceResponse>() {
-            @Override
-            public void onSuccess(FetchPlaceResponse fetchPlaceResponse) {
-                tvAddress.setText(fetchPlaceResponse.getPlace().getName());
-            }
-        };
+        setTitleText();
+
+        setupGuideList(view, context, view.findViewById(R.id.expandedImgView), view.findViewById(R.id.expandedImgViewBG), false);
+        ivExpandIndicator.setVisibility(View.INVISIBLE);
+
+        queryGuides();
+
+        followBtn.setOnClickListener((v -> {
+            // creates a like row and updates Guide text
+            com.example.travelguide.classes.Activity followActivity = new com.example.travelguide.classes.Activity();
+
+            followActivity.put(com.example.travelguide.classes.Activity.getKeyUserId(), ParseUser.getCurrentUser());
+            followActivity.put(com.example.travelguide.classes.Activity.getKeyLocId(), parseLocation);
+            followActivity.put(com.example.travelguide.classes.Activity.getKeyType(), "follow");
+//            followActivity.saveInBackground(e -> {
+//
+//            });
+        }));
+
+    }
+
+    public void setTitleText() {
+        OnSuccessListener<FetchPlaceResponse> textSuccess = fetchPlaceResponse -> tvAddress.setText(fetchPlaceResponse.getPlace().getName());
 
         // sets the title name based on place id
         if (parseLocation.getPlaceID().equals(HelperClass.defaultPlaceID))
             tvAddress.setText(HelperClass.getAddress(context, parseLocation.getCoord().latitude, parseLocation.getCoord().longitude));
         else
             fetchPlacesName(textSuccess);
-
-        setupGuideList(view, context, view.findViewById(R.id.expandedImgView), view.findViewById(R.id.expandedImgViewBG), false);
-        ivExpandIndicator.setVisibility(View.INVISIBLE);
-
-        queryGuides();
     }
 
     private void fetchPlacesName(OnSuccessListener<FetchPlaceResponse> responseListener) {
@@ -181,29 +198,26 @@ public class LocationGuideFragment extends Fragment {
         query.addDescendingOrder("createdAt");
 
         // start an asynchronous call for posts
-        query.findInBackground(new FindCallback<Guide>() {
-            @Override
-            public void done(List<Guide> guides, ParseException e) {
-                // check for errors
-                if (e != null) {
+        query.findInBackground((guides, e) -> {
+            // check for errors
+            if (e != null) {
 
-                    Log.e(TAG, "Issue with getting guides", e);
+                Log.e(TAG, "Issue with getting guides", e);
 
-                    // show that the list is empty
-                    if (e.getCode() == ParseException.OTHER_CAUSE)
-                        showEmptyListText();
+                // show that the list is empty
+                if (e.getCode() == ParseException.OTHER_CAUSE)
+                    showEmptyListText();
 
-                    return;
-                }
-
-                // clears the adapter
-                adapter.clear();
-                // save received posts to list and notify adapter of new data
-                adapter.addAll(guides);
-                adapter.notifyDataSetChanged();
-
-                showEmptyListText();
+                return;
             }
+
+            // clears the adapter
+            adapter.clear();
+            // save received posts to list and notify adapter of new data
+            adapter.addAll(guides);
+            adapter.notifyDataSetChanged();
+
+            showEmptyListText();
         });
     }
 
