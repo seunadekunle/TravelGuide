@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--     Google maps api key-->
+    <string name="firebase_id">402662900904</string>
+</resources>

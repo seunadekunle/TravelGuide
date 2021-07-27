@@ -3,6 +3,7 @@ package com.example.travelguide.fragments;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,11 +22,14 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.example.travelguide.R;
 import com.example.travelguide.adapters.GuidesAdapter;
 import com.example.travelguide.classes.Guide;
+import com.example.travelguide.classes.Location;
 import com.example.travelguide.helpers.HelperClass;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.libraries.places.api.net.FetchPlaceRequest;
+import com.google.android.libraries.places.api.net.FetchPlaceResponse;
 import com.parse.FindCallback;
 import com.parse.ParseException;
-import com.parse.ParseGeoPoint;
 import com.parse.ParseQuery;
 
 import org.jetbrains.annotations.NotNull;
@@ -52,24 +56,23 @@ public class LocationGuideFragment extends Fragment {
     private TextView tvAddress;
     private ImageView ivExpandIndicator;
     protected int frameParam;
+    private String locationName;
 
-    private static final String ARG_LAT = "lat";
-    private static final String ARG_LONG = "long";
+    private static final String ARG_LOC = "location";
     private static final String ARG_FRAME = "frame_ID";
 
-    private ParseGeoPoint parseLocation;
+    private Location parseLocation;
 
     // Mandatory empty constructor for the fragment manager
     public LocationGuideFragment() {
     }
 
     @SuppressWarnings("unused")
-    public static LocationGuideFragment newInstance(Double latCoord, Double longCoord, int frameParam) {
+    public static LocationGuideFragment newInstance(Object location, int frameParam) {
         LocationGuideFragment fragment = new LocationGuideFragment();
         Bundle args = new Bundle();
 
-        args.putDouble(ARG_LAT, latCoord);
-        args.putDouble(ARG_LONG, longCoord);
+        args.putParcelable(ARG_LOC, (Parcelable) location);
         args.putInt(ARG_FRAME, frameParam);
 
         fragment.setArguments(args);
@@ -83,7 +86,7 @@ public class LocationGuideFragment extends Fragment {
         // there are arguments to be gotten
         if (getArguments() != null) {
             // initializes local Parse variable
-            parseLocation = new ParseGeoPoint(getArguments().getDouble(ARG_LAT), getArguments().getDouble(ARG_LONG));
+            parseLocation = (Location) getArguments().getParcelable(ARG_LOC);
             frameParam = getArguments().getInt(ARG_FRAME);
         }
     }
@@ -99,19 +102,35 @@ public class LocationGuideFragment extends Fragment {
     public void onViewCreated(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-
         tvAddress = view.findViewById(R.id.tvAddress);
         ivExpandIndicator = view.findViewById(R.id.ivExpandIndicator);
 
         context = view.getContext();
 
-        setupGuideList(view, context, view.findViewById(R.id.expandedImgView), view.findViewById(R.id.expandedImgViewBG), false);
+        OnSuccessListener<FetchPlaceResponse> textSuccess = new OnSuccessListener<FetchPlaceResponse>() {
+            @Override
+            public void onSuccess(FetchPlaceResponse fetchPlaceResponse) {
+                tvAddress.setText(fetchPlaceResponse.getPlace().getName());
+            }
+        };
 
-        // sets text of header
-        tvAddress.setText(HelperClass.getAddress(context, parseLocation.getLatitude(), parseLocation.getLongitude()));
+        // sets the title name based on place id
+        if (parseLocation.getPlaceID().equals(HelperClass.defaultPlaceID))
+            tvAddress.setText(HelperClass.getAddress(context, parseLocation.getCoord().latitude, parseLocation.getCoord().longitude));
+        else
+            fetchPlacesName(textSuccess);
+
+        setupGuideList(view, context, view.findViewById(R.id.expandedImgView), view.findViewById(R.id.expandedImgViewBG), false);
         ivExpandIndicator.setVisibility(View.INVISIBLE);
 
         queryGuides();
+    }
+
+    private void fetchPlacesName(OnSuccessListener<FetchPlaceResponse> responseListener) {
+        FetchPlaceRequest request = FetchPlaceRequest.newInstance(parseLocation.getPlaceID(), HelperClass.placesFields);
+        HelperClass.getPlacesClient().fetchPlace(request)
+                .addOnSuccessListener(responseListener);
+
     }
 
     protected void setupGuideList(@NotNull View view, Context context, ImageView expandedImgView, View expandedImgViewBG, boolean inProfile) {
@@ -157,7 +176,7 @@ public class LocationGuideFragment extends Fragment {
         // limit query to latest 20 items
         query.setLimit(20);
         // get posts that are specific to the location
-        query.whereEqualTo(Guide.getKeyLocation(), parseLocation);
+        query.whereEqualTo("locationID", parseLocation);
         // order posts by creation date (newest first)
         query.addDescendingOrder("createdAt");
 
@@ -167,7 +186,13 @@ public class LocationGuideFragment extends Fragment {
             public void done(List<Guide> guides, ParseException e) {
                 // check for errors
                 if (e != null) {
+
                     Log.e(TAG, "Issue with getting guides", e);
+
+                    // show that the list is empty
+                    if (e.getCode() == ParseException.OTHER_CAUSE)
+                        showEmptyListText();
+
                     return;
                 }
 

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "402662900904",
+    "project_id": "spheric-arcadia-171305",
+    "storage_bucket": "spheric-arcadia-171305.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:402662900904:android:4ee9d159277ee7d5f02e9d",
+        "android_client_info": {
+          "package_name": "com.example.travelguide"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "402662900904-4po1b4g5ap7ofdrk5ivkq4ov0n1mm00o.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZR6UzYjC9LvXV_oTVEYlqtHZw7ogBJYU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "402662900904-4po1b4g5ap7ofdrk5ivkq4ov0n1mm00o.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -14,7 +14,7 @@ import java.util.Date;
 @ParseClassName("Activity")
 public class Activity extends ParseObject {
 
-    private static final String TAG = "Activity";
+    private static final String TAG = Activity.class.getSimpleName();
 
     private static final String KEY_CREATION_DATE = "createdAt";
     private static final String KEY_USER_ID = "userID";

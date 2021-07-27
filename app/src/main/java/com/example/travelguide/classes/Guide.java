@@ -23,7 +23,7 @@ public class Guide extends ParseObject {
     private static final String KEY_CREATION_DATE = "createdAt";
     private static final String KEY_AUTHOR = "author";
     private static final String KEY_TEXT = "text";
-    private static final String KEY_LOCATION = "location";
+    private static final String KEY_LOCATION = "locationID";
     private static final String KEY_PHOTO = "photo";
     private static final String KEY_AUDIO = "audio";
     private static final String KEY_VIDEO = "video";
@@ -48,8 +48,8 @@ public class Guide extends ParseObject {
         put(KEY_TEXT, newText);
     }
 
-    public void setLocation(LatLng newLocation) {
-        put(KEY_LOCATION, new ParseGeoPoint(newLocation.latitude, newLocation.longitude));
+    public void setLocation(Location newLocation) {
+        put(KEY_LOCATION, newLocation);
     }
 
     public void setPhoto(ParseFile newPhoto) {

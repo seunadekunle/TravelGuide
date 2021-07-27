@@ -198,14 +198,12 @@ public class ProfileGuideFragment extends LocationGuideFragment {
     @Override
     public void onResume() {
         super.onResume();
-
         queryGuides();
     }
 
     public boolean isFragmentUIActive() {
         return isAdded() && !isDetached() && !isRemoving();
     }
-
 
     public void setExpandedElements(ImageView expandedImgViewID, View expandedImgViewBgID) {
         imageView = expandedImgViewID;

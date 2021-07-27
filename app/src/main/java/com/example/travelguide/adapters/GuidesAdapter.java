@@ -74,7 +74,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
 
 
     public GuidesAdapter(List<Guide> items, Context context, ImageView expandedImageView, View expandedImageViewBG, Activity activity, SimpleExoPlayer exoPlayer, boolean inProfile
-    , FragmentManager fragmentManager, int frameID) {
+            , FragmentManager fragmentManager, int frameID) {
         this.context = context;
         this.expandedImageView = expandedImageView;
         guides = items;
@@ -111,7 +111,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
             e.printStackTrace();
         }
 
-        if(profileUrl != null)
+        if (profileUrl != null)
             HelperClass.loadCircularImage(profileUrl, context, 100, 100, holder.ivAvatar);
 
 
@@ -126,11 +126,11 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
         setTextViewText(holder.tvLikes, String.valueOf(guide.getLikes()));
 
         holder.tvUsername.setOnClickListener(v -> {
-                goToProfile(guide);
+            goToProfile(guide);
         });
 
         holder.ivAvatar.setOnClickListener(v -> {
-                goToProfile(guide);
+            goToProfile(guide);
         });
 
         // if there is any media
@@ -140,7 +140,9 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
 
     private void goToProfile(Guide guide) {
         ProfileFragment userProfile = ProfileFragment.newInstance(guide.getAuthor().getObjectId());
+
         HelperClass.showFragment(fragmentManager, frameID, userProfile, ProfileFragment.TAG);
+
     }
 
     // clear all elements of the RecyclerView
@@ -369,7 +371,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
                             .setContentType(C.CONTENT_TYPE_MUSIC)
                             .build();
 
-                    exoPlayer.setAudioAttributes(audioAttributes);
+                    exoPlayer.setAudioAttributes(audioAttributes, true);
                 } else {
                     mediaUri = Uri.parse(guide.getVideo().getUrl());
                 }

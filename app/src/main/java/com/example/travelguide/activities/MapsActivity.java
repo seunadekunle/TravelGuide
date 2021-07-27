@@ -1,8 +1,11 @@
 package com.example.travelguide.activities;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -13,6 +16,8 @@ import android.widget.SearchView;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -24,7 +29,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.travelguide.R;
 import com.example.travelguide.adapters.SearchListAdapter;
-import com.example.travelguide.classes.Guide;
 import com.example.travelguide.databinding.ActivityMapsBinding;
 import com.example.travelguide.fragments.ComposeFragment;
 import com.example.travelguide.fragments.LocationGuideFragment;
@@ -51,8 +55,8 @@ import com.google.android.libraries.places.api.net.FetchPlaceRequest;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.parse.ParseGeoPoint;
-import com.parse.ParseObject;
+import com.parse.GetCallback;
+import com.parse.ParseException;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
@@ -60,7 +64,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -117,6 +120,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        createNotificationChannel();
 
         // Retrieve location and camera position from saved instance state.
         if (savedInstanceState != null) {
@@ -184,8 +189,37 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
 
         hideOverlayBtns();
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "4")
+                .setSmallIcon(R.drawable.profile_icon)
+                .setContentTitle("My notification")
+                .setContentText("Much longer text that cannot fit one line...")
+                .setStyle(new NotificationCompat.BigTextStyle()
+                        .bigText("Much longer text that cannot fit one line..."))
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+
+// notificationId is a unique int for each notification that you must define
+        notificationManager.notify(0, builder.build());
     }
 
+
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = ("R.string.channel_name");
+            String description = ("R.string.channel_description");
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel("4", name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
 
     // show prediction info
     private void showPredictionInfo(AutocompletePrediction prediction) {
@@ -210,18 +244,38 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         @Override
                         public void onFinish() {
 
-                            // shows modal view of location being selected
-                            findViewById(modalFrameId).setVisibility(View.VISIBLE);
-                            modalLocationGuideFragment = LocationGuideFragment.newInstance(Objects.requireNonNull(place.getLatLng()).latitude, place.getLatLng().longitude, fragmentsFrameId);
+                            com.example.travelguide.classes.Location[] modalLocation = new com.example.travelguide.classes.Location[1];
 
-                            // Begin the transaction
-                            FragmentTransaction ft = fragmentManager.beginTransaction();
-                            // add fragment to container
-                            ft.replace(modalFrameId, modalLocationGuideFragment);
-                            // complete the transaction
-                            ft.show(modalLocationGuideFragment);
-                            // Complete the changes added above
-                            ft.commit();
+                            GetCallback<com.example.travelguide.classes.Location> modalCallback = (result, e) -> {
+                                if (e == null) {
+                                    // get location from server
+                                    modalLocation[0] = result;
+                                } else {
+
+                                    // if the location wasn't found add a new one
+                                    if (e.getCode() == ParseException.OBJECT_NOT_FOUND) {
+                                        modalLocation[0] = new com.example.travelguide.classes.Location();
+                                        modalLocation[0].setPlaceId(placeId);
+                                        modalLocation[0].setCoord(place.getLatLng().latitude, place.getLatLng().longitude);
+                                    }
+                                }
+
+                                // shows modal view of location being selected
+                                findViewById(modalFrameId).setVisibility(View.VISIBLE);
+                                modalLocationGuideFragment = LocationGuideFragment.newInstance(modalLocation[0], fragmentsFrameId);
+
+                                // Begin the transaction
+                                FragmentTransaction ft = fragmentManager.beginTransaction();
+                                // add fragment to container
+                                ft.replace(modalFrameId, modalLocationGuideFragment);
+                                // complete the transaction
+                                ft.show(modalLocationGuideFragment);
+                                // Complete the changes added above
+                                ft.commit();
+                            };
+
+
+                            HelperClass.fetchLocation(place.getLatLng(), modalCallback);
                         }
 
                         @Override
@@ -369,15 +423,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public boolean onMarkerClick(@NonNull @NotNull Marker marker) {
 
-                // gets the location of the marker
-                Double latitude = ((ParseGeoPoint) marker.getTag()).getLatitude();
-                Double longitude = ((ParseGeoPoint) marker.getTag()).getLongitude();
 
-                locationGuideFragment = LocationGuideFragment.newInstance(latitude, longitude, fragmentsFrameId);
+                locationGuideFragment = LocationGuideFragment.newInstance(marker.getTag(), fragmentsFrameId);
 
                 // Begin the transaction
                 FragmentTransaction ft = fragmentManager.beginTransaction();
-
                 // add fragment to container
                 ft.replace(fragmentsFrameId, locationGuideFragment);
 
@@ -400,19 +450,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // clears the map of markers
         map.clear();
 
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("Guide");
-        query.whereExists(Guide.getKeyLocation());
+        ParseQuery<com.example.travelguide.classes.Location> query = ParseQuery.getQuery(com.example.travelguide.classes.Location.class);
         query.findInBackground((locations, e) -> {
 
             if (e == null) {
                 for (int i = 0; i < locations.size(); i++) {
 
                     // retrieves geo point from database and converts it to a LatLng Object
-                    ParseGeoPoint locationData = locations.get(i).getParseGeoPoint(Guide.getKeyLocation());
-                    LatLng location = new LatLng(locationData.getLatitude(), locationData.getLongitude());
-
+                    LatLng location = locations.get(i).getCoord();
                     // adds a new marker with the LatLng object
-                    addMarker(new MarkerOptions().position(location), locations.get(i).getParseGeoPoint(Guide.getKeyLocation()));
+                    addMarker(new MarkerOptions().position(location), locations.get(i));
                 }
 
                 // hides progress bar
@@ -526,11 +573,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     // add new marker to the map along with tag
     // TODO: replace with place id
-    private void addMarker(MarkerOptions newMarker, ParseGeoPoint objectId) {
+    private void addMarker(MarkerOptions newMarker, com.example.travelguide.classes.Location location) {
         Marker marker = map.addMarker(newMarker);
 
         if (marker != null) {
-            marker.setTag(objectId);
+            marker.setTag(location);
         }
     }
 

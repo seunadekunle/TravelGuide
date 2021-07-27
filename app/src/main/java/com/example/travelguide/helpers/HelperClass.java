@@ -29,6 +29,8 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.example.travelguide.R;
 import com.example.travelguide.classes.GlideApp;
+import com.example.travelguide.classes.Location;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
@@ -37,6 +39,7 @@ import com.parse.FindCallback;
 import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
+import com.parse.ParseGeoPoint;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
@@ -66,6 +69,7 @@ public class HelperClass {
 
     public static String[] profileTabTitles = {"Guides", "Liked"};
     public static final String videoFileName = "video.mp4";
+    public static final String defaultPlaceID = "0";
 
     // Set the fields to specify which types of place data to return
     // for Google places API
@@ -79,6 +83,7 @@ public class HelperClass {
 
         try {
             likelyNames = geocoder.getFromLocation(latitude, longitude, 1);
+            Log.i(TAG, String.valueOf(likelyNames));
             return likelyNames.get(0).getAddressLine(0);
 
         } catch (IOException e) {
@@ -112,7 +117,11 @@ public class HelperClass {
                 Manifest.permission.RECORD_AUDIO,
                 Manifest.permission.ACCESS_NETWORK_STATE,
                 Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.MANAGE_EXTERNAL_STORAGE
+                Manifest.permission.MANAGE_EXTERNAL_STORAGE,
+                Manifest.permission.ACCESS_NOTIFICATION_POLICY,
+                Manifest.permission.VIBRATE,
+                Manifest.permission.RECEIVE_BOOT_COMPLETED,
+                Manifest.permission.WAKE_LOCK
         };
 
         ActivityCompat.requestPermissions(activity, PERMISSIONS, PERMISSION_ALL);
@@ -367,4 +376,13 @@ public class HelperClass {
         user.setObjectId(userID);
         user.fetchInBackground(callback);
     }
+
+    // returns location based on LatLng object
+    public static void fetchLocation(LatLng location, GetCallback<Location> callback) {
+
+        ParseQuery<Location> query = ParseQuery.getQuery(Location.class);
+        query.whereEqualTo(Location.getKeyCoord(), new ParseGeoPoint(location.latitude, location.longitude));
+        query.getFirstInBackground(callback);
+    }
+
 }

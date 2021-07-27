@@ -5,8 +5,8 @@
     android:layout_height="match_parent"
     android:background="@color/white"
     android:clickable="true"
-    tools:context=".fragments.ComposeFragment"
-    android:focusable="true">
+    android:focusable="true"
+    tools:context=".fragments.ComposeFragment">
 
     <!-- TODO: Update blank fragment layout -->
     <LinearLayout
@@ -40,7 +40,7 @@
                 android:id="@+id/locationBtn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/add_location" />
+                android:text="@string/add_location"/>
         </LinearLayout>
 
 
@@ -65,55 +65,69 @@
                 android:inputType="textMultiLine" />
         </LinearLayout>
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
-            android:layout_marginBottom="7.5dp">
+            android:orientation="vertical">
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/textView4"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:text="@string/add_media" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="7.5dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <ImageButton
+                        android:id="@+id/photoBtn"
+                        android:layout_width="@dimen/add_guide_media_btn"
+                        android:layout_height="@dimen/add_guide_media_btn"
+                        android:background="@android:color/transparent"
+                        android:contentDescription="@string/add_photo"
+                        android:src="@drawable/image_btn_bg" />
+
+                    <ImageButton
+                        android:id="@+id/galleryBtn"
+                        android:layout_width="@dimen/add_guide_media_btn"
+                        android:layout_height="@dimen/add_guide_media_btn"
+                        android:layout_marginStart="25dp"
+                        android:background="@android:color/transparent"
+                        android:contentDescription="@string/add_photo"
+                        android:src="@drawable/gallery_btn_bg" />
+
+                    <ImageButton
+                        android:id="@+id/audioBtn"
+                        android:layout_width="@dimen/add_guide_media_btn"
+                        android:layout_height="@dimen/add_guide_media_btn"
+                        android:layout_marginStart="25dp"
+                        android:background="@android:color/transparent"
+                        android:contentDescription="@string/add_audio"
+                        android:src="@drawable/audio_btn_bg" />
+
+                </LinearLayout>
 
                 <ImageButton
-                    android:id="@+id/photoBtn"
+                    android:id="@+id/clearBtn"
                     android:layout_width="@dimen/add_guide_media_btn"
                     android:layout_height="@dimen/add_guide_media_btn"
-                    android:background="@android:color/transparent"
-                    android:contentDescription="@string/add_photo"
-                    android:src="@drawable/image_btn_bg" />
-
-                <ImageButton
-                    android:id="@+id/galleryBtn"
-                    android:layout_width="@dimen/add_guide_media_btn"
-                    android:layout_height="@dimen/add_guide_media_btn"
+                    android:layout_alignParentEnd="true"
                     android:layout_marginStart="25dp"
                     android:background="@android:color/transparent"
-                    android:contentDescription="@string/add_photo"
-                    android:src="@drawable/gallery_btn_bg" />
+                    android:contentDescription="@string/delete_media"
+                    android:src="@drawable/clear_btn_bg" />
+            </RelativeLayout>
+        </LinearLayout>
 
-                <ImageButton
-                    android:id="@+id/audioBtn"
-                    android:layout_width="@dimen/add_guide_media_btn"
-                    android:layout_height="@dimen/add_guide_media_btn"
-                    android:layout_marginStart="25dp"
-                    android:background="@android:color/transparent"
-                    android:contentDescription="@string/add_audio"
-                    android:src="@drawable/audio_btn_bg" />
-
-            </LinearLayout>
-
-            <ImageButton
-                android:id="@+id/clearBtn"
-                android:layout_width="@dimen/add_guide_media_btn"
-                android:layout_height="@dimen/add_guide_media_btn"
-                android:layout_marginStart="25dp"
-                android:background="@android:color/transparent"
-                android:contentDescription="@string/delete_media"
-                android:src="@drawable/clear_btn_bg"
-                android:layout_alignParentEnd="true"/>
-        </RelativeLayout>
 
         <LinearLayout
             android:id="@+id/recordingLayout"
@@ -167,7 +181,7 @@
                 android:id="@+id/addBtn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/add_guide" />
+                android:text="@string/add_guide"/>
 
         </LinearLayout>
 

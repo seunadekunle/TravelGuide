@@ -1,6 +1,5 @@
 package com.example.travelguide.fragments;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
@@ -26,12 +25,11 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
-import com.bumptech.glide.Glide;
 import com.example.travelguide.R;
 import com.example.travelguide.classes.Guide;
+import com.example.travelguide.classes.Location;
 import com.example.travelguide.helpers.HelperClass;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.model.LatLng;
@@ -40,6 +38,7 @@ import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.android.material.snackbar.Snackbar;
+import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseUser;
@@ -48,12 +47,10 @@ import com.parse.SaveCallback;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
-import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
-
-import static com.example.travelguide.R.string.empty_text;
 import static com.google.android.gms.common.util.IOUtils.toByteArray;
 
 /**
@@ -88,6 +85,7 @@ public class ComposeFragment extends Fragment {
     // parameters for passing data
     private Double longParam;
     private Double latParam;
+    private String placeID = HelperClass.defaultPlaceID;
 
     // default location
     private LatLng location = new LatLng(0, 0);
@@ -413,19 +411,19 @@ public class ComposeFragment extends Fragment {
         addBtn.setOnClickListener(v -> {
             String text = etText.getText().toString();
 
-            // if the text field is empty
-            if (text.isEmpty()) {
-                Snackbar emptyText = Snackbar.make(etText, empty_text, Snackbar.LENGTH_SHORT);
-                HelperClass.displaySnackBarWithBottomMargin(emptyText, 80, getActivity());
-                return;
-            }
-
-            // if no location is selected
-            if (location == null) {
-                Snackbar emptyLocation = Snackbar.make(etText, R.string.no_location, Snackbar.LENGTH_SHORT);
-                HelperClass.displaySnackBarWithBottomMargin(emptyLocation, 80, getActivity());
-                return;
-            }
+//            // if the text field is empty
+//            if (text.isEmpty()) {
+//                Snackbar emptyText = Snackbar.make(etText, empty_text, Snackbar.LENGTH_SHORT);
+//                HelperClass.displaySnackBarWithBottomMargin(emptyText, 80, getActivity());
+//                return;
+//            }
+//
+//            // if no location is selected
+//            if (location == null) {
+//                Snackbar emptyLocation = Snackbar.make(etText, R.string.no_location, Snackbar.LENGTH_SHORT);
+//                HelperClass.displaySnackBarWithBottomMargin(emptyLocation, 80, getActivity());
+//                return;
+//            }
 
             ParseUser user = ParseUser.getCurrentUser();
             saveGuide(text, user, photoFile, videoFile, audioFile);
@@ -495,52 +493,83 @@ public class ComposeFragment extends Fragment {
     // creates new Travel guide and updates it to the database
     private void saveGuide(String text, ParseUser user, File photo, File video, File audio) {
 
+        final Location[] guideLocation = new Location[1];
         Guide guide = new Guide();
-        guide.setAuthor(user);
-        guide.setText(text);
-        guide.setLocation(location);
 
-        // sets the photo and video fields if they exist
-        if (photo != null)
-            guide.setPhoto(new ParseFile(photo));
-        else if (video != null)
-            guide.setVideo(new ParseFile(video));
-        else if (audio != null) {
-
-            // Save sound using input stream
-            // ref: https://stackoverflow.com/questions/43350226/android-how-to-upload-an-audio-file-with-parse-sdk
-            byte[] soundBytes;
-            try {
-                InputStream inputStream = requireContext().getContentResolver().openInputStream(Uri.fromFile(audio));
-//                soundBytes = new byte[inputStream.available()];
-                soundBytes = toByteArray(inputStream);
-                guide.setAudio(new ParseFile("audio.mp4", soundBytes));
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        // uploads new guide in the background
-        guide.saveInBackground(new SaveCallback() {
+        // saves guide after saving locatoin
+        GetCallback<Location> composeCallback = new GetCallback<Location>() {
             @Override
-            public void done(ParseException e) {
-                if (e != null) {
-                    Log.i(TAG, "Error while saving tag", e);
-                    return;
+            public void done(Location result, ParseException e) {
+                if (e == null) {
+                    // get location from server
+                    guideLocation[0] = result;
+                } else {
+
+                    // if the location wasn't found add a new one
+                    if (e.getCode() == ParseException.OBJECT_NOT_FOUND) {
+                        guideLocation[0] = new Location();
+                        guideLocation[0].setPlaceId(placeID);
+                        guideLocation[0].setCoord(location.latitude, location.longitude);
+                        guideLocation[0].saveInBackground();
+                    }
                 }
 
-                // clears guide and goes back to main fragment
-                guide.setText("");
-                ivPreview.setImageResource(0);
-                controller = null;
-                vvPreview.setVideoPath("");
-                photoFile = new File("");
-                videoFile = new File("");
-                audioFile = new File("");
+                guide.setAuthor(user);
+                guide.setText(text);
+                guide.setLocation(guideLocation[0]);
 
-                requireActivity().onBackPressed();
+                // sets the photo and video fields if they exist
+                if (photo != null)
+                    guide.setPhoto(new ParseFile(photo));
+                else if (video != null)
+                    guide.setVideo(new ParseFile(video));
+                else if (audio != null) {
+
+                    // Save sound using input stream
+                    // ref: https://stackoverflow.com/questions/43350226/android-how-to-upload-an-audio-file-with-parse-sdk
+                    byte[] soundBytes = new byte[0];
+
+                    InputStream inputStream = null;
+                    try {
+                        inputStream = requireContext().getContentResolver().openInputStream(Uri.fromFile(audio));
+                    } catch (FileNotFoundException fileNotFoundException) {
+                        fileNotFoundException.printStackTrace();
+                    }
+//                soundBytes = new byte[inputStream.available()];
+                    try {
+                        soundBytes = toByteArray(inputStream);
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
+                    }
+
+                    guide.setAudio(new ParseFile("audio.mp4", soundBytes));
+                }
+
+                // uploads new guide in the background
+                guide.saveInBackground(new SaveCallback() {
+                    @Override
+                    public void done(ParseException e) {
+                        if (e != null) {
+                            Log.i(TAG, "Error while saving tag", e);
+                            return;
+                        }
+
+                        // clears guide and goes back to main fragment
+                        guide.setText("");
+                        ivPreview.setImageResource(0);
+                        controller = null;
+                        vvPreview.setVideoPath("");
+                        photoFile = new File("");
+                        videoFile = new File("");
+                        audioFile = new File("");
+
+                        requireActivity().onBackPressed();
+                    }
+                });
             }
-        });
+        };
+
+        HelperClass.fetchLocation(location, composeCallback);
     }
 
     private void showImgView() {
@@ -552,18 +581,6 @@ public class ComposeFragment extends Fragment {
         // sets other file to be null
         videoFile = null;
     }
-
-//    // load image into preview ui element
-//    private void loadImgIntoPreview(File photoFile) {
-//
-//        ivPreview.setImageResource(0);
-//
-//        // Load the taken image into a preview
-//        Glide.with(requireContext())
-//                .load(photoFile)
-//
-//                .into(ivPreview);
-//    }
 
     // plays video that has been recorded
     public void playbackRecordedVideo(Uri videoUri) {
@@ -592,6 +609,8 @@ public class ComposeFragment extends Fragment {
     // sets location from Google place object and changes button text
     public void setLocation(Place newLocation) {
         location = newLocation.getLatLng();
+        placeID = newLocation.getId();
+
         setButtonText(newLocation.getName());
     }
 
@@ -611,7 +630,6 @@ public class ComposeFragment extends Fragment {
     private void setButtonText(String newText) {
         locationBtn.setText(newText);
     }
-
 
     /*
      * Returns the File for a video stored on disk given the fileName
