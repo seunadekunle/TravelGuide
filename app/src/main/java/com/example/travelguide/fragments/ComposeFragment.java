@@ -42,13 +42,18 @@ import com.parse.FunctionCallback;
 import com.parse.GetCallback;
 import com.parse.ParseCloud;
 import com.parse.ParseException;
+import com.parse.ParseFile;
 import com.parse.ParseUser;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
+
+import static com.google.android.gms.common.util.IOUtils.toByteArray;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -484,57 +489,61 @@ public class ComposeFragment extends Fragment {
             guide.setText(text);
             guide.setLocation(guideLocation[0]);
 
+            // sets the photo and video fields if they exist
+            if (photo != null) {
+                guide.setPhoto(new ParseFile(photo));
+                Log.i(TAG, photo.toString());
+            }
+            else if (video != null) {
+                guide.setVideo(new ParseFile(video));
+                Log.i(TAG, video.toString());
 
-            sendNotification(guideLocation[0]);
+            }
+            else if (audio != null) {
 
-//            // sets the photo and video fields if they exist
-//            if (photo != null)
-//                guide.setPhoto(new ParseFile(photo));
-//            else if (video != null)
-//                guide.setVideo(new ParseFile(video));
-//            else if (audio != null) {
-//
-//                // Save sound using input stream
-//                // ref: https://stackoverflow.com/questions/43350226/android-how-to-upload-an-audio-file-with-parse-sdk
-//                byte[] soundBytes = new byte[0];
-//
-//                InputStream inputStream = null;
-//                try {
-//                    inputStream = requireContext().getContentResolver().openInputStream(Uri.fromFile(audio));
-//                } catch (FileNotFoundException fileNotFoundException) {
-//                    fileNotFoundException.printStackTrace();
-//                }
-////                soundBytes = new byte[inputStream.available()];
-//                try {
-//                    soundBytes = toByteArray(inputStream);
-//                } catch (IOException ioException) {
-//                    ioException.printStackTrace();
-//                }
-//
-//                guide.setAudio(new ParseFile("audio.mp4", soundBytes));
-//            }
-//
-//            // uploads new guide in the background
-//            guide.saveInBackground(e1 -> {
-//                if (e1 != null) {
-//                    Log.i(TAG, "Error while saving tag", e1);
-//                    return;
-//                }
-//
-//                // clears guide and goes back to main fragment
-//                guide.setText("");
-//                ivPreview.setImageResource(0);
-//                controller = null;
-//                vvPreview.setVideoPath("");
-//                photoFile = new File("");
-//                videoFile = new File("");
-//                audioFile = new File("");
-//
-//                requireActivity().onBackPressed();
-//            });
+                Log.i(TAG, audio.toString());
+                // Save sound using input stream
+                // ref: https://stackoverflow.com/questions/43350226/android-how-to-upload-an-audio-file-with-parse-sdk
+                byte[] soundBytes = new byte[0];
+
+                InputStream inputStream = null;
+                try {
+                    inputStream = requireContext().getContentResolver().openInputStream(Uri.fromFile(audio));
+                } catch (FileNotFoundException fileNotFoundException) {
+                    fileNotFoundException.printStackTrace();
+                }
+//                soundBytes = new byte[inputStream.available()];
+                try {
+                    soundBytes = toByteArray(inputStream);
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+
+                guide.setAudio(new ParseFile("audio.mp4", soundBytes));
+            }
+
+            // uploads new guide in the background
+            guide.saveInBackground(e1 -> {
+                if (e1 != null) {
+                    Log.i(TAG, "Error while saving tag", e1);
+                    return;
+                }
+
+                // clears guide and goes back to main fragment
+                guide.setText("");
+                ivPreview.setImageResource(0);
+                controller = null;
+                vvPreview.setVideoPath("");
+                photoFile = new File("");
+                videoFile = new File("");
+                audioFile = new File("");
+
+                sendNotification(guideLocation[0]);
+            });
         };
 
         HelperClass.fetchLocation(location, composeCallback);
+        requireActivity().onBackPressed();
     }
 
     private void sendNotification(Location location1) {

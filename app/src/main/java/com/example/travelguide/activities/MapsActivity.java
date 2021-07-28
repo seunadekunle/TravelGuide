@@ -155,6 +155,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         initializeMap();
 
+        rvSearchList.setVisibility(View.GONE);
+        rvSearchList.setBackgroundResource(R.drawable.searchview_bg);
         // creates new instance of the different fragments
         composeFragment = new ComposeFragment();
         profileFragment = ProfileFragment.newInstance(fragmentsFrameId, ParseUser.getCurrentUser().getObjectId());
@@ -168,10 +170,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 showPredictionInfo(prediction);
             }
         };
+
         predictions = new ArrayList<>();
         adapter = new SearchListAdapter(predictions, this, onItemClickListener);
         setupSearchView();
 
+        // profile button on click listener
         ibProfile.setOnClickListener(v -> {
 
             HelperClass.showFragment(fragmentManager, fragmentsFrameId, profileFragment, ProfileFragment.TAG);
@@ -295,7 +299,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
 
         // sets sheet behavaior height
-        sheetBehavior.setPeekHeight(DeviceDimenHelper.getDisplayHeight(getApplicationContext()) / 4);
+        sheetBehavior.setPeekHeight(DeviceDimenHelper.getDisplayHeight(getApplicationContext()) / 3);
     }
 
     private void setupSearchView() {
