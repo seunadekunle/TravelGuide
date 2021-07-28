@@ -36,11 +36,13 @@
                 android:layout_height="wrap_content"
                 android:text="@string/add_location" />
 
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/locationBtn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/add_location"/>
+                android:text="@string/add_location"
+                android:textColor="@color/white"
+                android:background="@drawable/follow_selected"/>
         </LinearLayout>
 
 
@@ -177,11 +179,13 @@
             android:gravity="bottom"
             android:orientation="vertical">
 
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/addBtn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/add_guide"/>
+                android:text="@string/add_guide"
+                android:background="@drawable/follow_selected"
+                android:textColor="@color/white"/>
 
         </LinearLayout>
 
