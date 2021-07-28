@@ -11,8 +11,9 @@
                 android:top="@dimen/img_btn_padding" />
             <size
                 android:width="100dp"
-                android:height="25dp" />
-            <solid android:color="@color/main_color" />
+                android:height="20dp" />
+            <solid android:color="@color/white" />
+            <stroke android:color="@color/main_color" android:width="1.5dp"/>
             <corners android:radius="@dimen/corner_radius" />
         </shape>
     </item>

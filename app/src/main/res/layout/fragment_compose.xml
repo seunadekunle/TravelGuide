@@ -27,14 +27,15 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="55dp"
+            android:layout_marginTop="47.5dp"
             android:orientation="vertical">
 
             <TextView
                 android:id="@+id/textView2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/add_location" />
+                android:text="@string/add_location"
+                android:layout_marginBottom="5dp"/>
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/locationBtn"
@@ -42,7 +43,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/add_location"
                 android:textColor="@color/white"
-                android:background="@drawable/follow_selected"/>
+                android:background="@drawable/btn_selected"/>
         </LinearLayout>
 
 
@@ -184,8 +185,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/add_guide"
-                android:background="@drawable/follow_selected"
-                android:textColor="@color/white"/>
+                android:background="@drawable/btn_bg"
+                android:textColor="@color/white"
+                android:textSize="15dp"/>
 
         </LinearLayout>
 

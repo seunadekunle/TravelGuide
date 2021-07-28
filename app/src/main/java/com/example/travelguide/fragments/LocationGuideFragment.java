@@ -2,6 +2,7 @@ package com.example.travelguide.fragments;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -16,6 +17,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -57,7 +59,6 @@ public class LocationGuideFragment extends Fragment {
     protected SimpleExoPlayer globalPlayer;
     protected TextView tvEmptyList;
     protected int frameParam;
-
 
     private List<Guide> guideList;
     private TextView tvAddress;
@@ -129,7 +130,7 @@ public class LocationGuideFragment extends Fragment {
         handleFollowBtn();
 
         // show indicator if the fragment is expandable
-        if(expandable)
+        if (expandable)
             changeIndicatorState(View.VISIBLE);
     }
 
@@ -165,8 +166,32 @@ public class LocationGuideFragment extends Fragment {
 
         followBtn.setOnClickListener((v -> {
 
+            // shows an alert dialog
             if (followBtn.isSelected()) {
-                isLocationFollowed(parseLocation, unfollowCallback);
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+                // sets title and message
+                builder.setTitle("Unfollow location");
+                builder.setMessage("Unfollow " + tvAddress.getText());
+
+                // Add the buttons
+                builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User clicked yes button
+                        isLocationFollowed(parseLocation, unfollowCallback);
+                    }
+                });
+
+                builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User cancelled the dialog
+                    }
+                });
+
+                builder.create();
+                builder.show();
+
             } else {
                 // creates a follow row and updates button
                 Activity followActivity = new Activity();
@@ -195,7 +220,6 @@ public class LocationGuideFragment extends Fragment {
             followBtn.setTextColor(Color.parseColor("#000000"));
 
         }
-
         followBtn.setSelected(selected);
     }
 
@@ -203,6 +227,8 @@ public class LocationGuideFragment extends Fragment {
     public void isLocationFollowed(Location location, FindCallback<ParseObject> followCallback) {
 
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Activity");
+        // only where the location exists
+        query.whereExists(Activity.getKeyLocId());
         query.whereEqualTo(Activity.getKeyUserId(), ParseUser.getCurrentUser());
         query.whereEqualTo(Activity.getKeyLocId(), location);
 
@@ -217,6 +243,8 @@ public class LocationGuideFragment extends Fragment {
             tvAddress.setText(HelperClass.getAddress(context, parseLocation.getCoord().latitude, parseLocation.getCoord().longitude));
         else
             fetchPlacesName(textSuccess);
+
+
     }
 
     private void fetchPlacesName(OnSuccessListener<FetchPlaceResponse> responseListener) {

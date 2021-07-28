@@ -27,9 +27,6 @@ public class ParseApplication extends Application {
         ParseObject.registerSubclass(Activity.class);
         ParseObject.registerSubclass(Location.class);
 
-        ArrayList<String> channels = new ArrayList<>();
-        channels.add("News");
-
         // creates Parse Client
         Parse.initialize(new Parse.Configuration.Builder(this)
                 .applicationId("LehUdwXhP2IpTN6Tnu7gXIayECJALrtOKyEao0N5")
@@ -38,12 +35,11 @@ public class ParseApplication extends Application {
                 .build()
         );
 
+        // creates installation object
         ParseInstallation installation = ParseInstallation.getCurrentInstallation();
         installation.put("GCMSenderId", getResources().getString(R.string.firebase_id));
-
         // associates a user to this device
         installation.put("userID", ParseUser.getCurrentUser());
-
         // Save the updated installation object
         installation.saveInBackground(e -> Log.i(TAG, "Installation object saved " + ((e != null) ? "failed" : "successfully")));
     }

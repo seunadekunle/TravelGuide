@@ -74,7 +74,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/guide_content_margin"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="2.5dp"
                 android:layout_marginEnd="@dimen/guide_content_margin"
                 android:layout_marginBottom="@dimen/text_margin"
                 android:text="TextView"

@@ -47,4 +47,6 @@
     <string name="get_photo">Get photo</string>
     <string name="change_profile_photo">Change Profile Photo</string>
     <string name="add_media">Add Media</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 </resources>

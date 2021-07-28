@@ -386,6 +386,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
     private void isGuideLiked(Guide guide, FindCallback<ParseObject> findCallback) {
 
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Activity");
+
         query.whereEqualTo(com.example.travelguide.classes.Activity.getKeyUserId(), ParseUser.getCurrentUser());
         query.whereEqualTo(com.example.travelguide.classes.Activity.getKeyGuideId(), guide);
 
