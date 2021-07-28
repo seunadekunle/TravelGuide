@@ -20,6 +20,7 @@ import com.example.travelguide.activities.EntryActivity;
 import com.example.travelguide.databinding.FragmentEntryBinding;
 import com.example.travelguide.helpers.HelperClass;
 import com.google.android.material.snackbar.Snackbar;
+import com.parse.ParseInstallation;
 import com.parse.ParseUser;
 
 import java.util.Objects;
@@ -123,16 +124,19 @@ public class EntryFormFragment extends Fragment {
 
             loadingProgressBar.setVisibility(View.VISIBLE);
             ParseUser.logInInBackground(username, password, (user, e) -> {
+
                 if (e != null) {
                     // if the username or password is wrong
                     if (Objects.equals(e.getMessage(), INVALID_ENTRY_DATA_ERROR)) {
                         showSignUpState(R.string.error_invalid_credentials);
                         loadingProgressBar.setVisibility(View.GONE);
                     }
+
                     Log.e(TAG, "Issue with login " + e.getMessage());
                     return;
                 }
 
+                assignUser();
                 ((EntryActivity) requireActivity()).navigateToMapView();
             });
 
@@ -155,12 +159,14 @@ public class EntryFormFragment extends Fragment {
             user.signUpInBackground(e -> {
 
                 if (e == null) {
+
+                    assignUser();
                     // goes to change avatar
                     if (getArguments() != null) {
                         HelperClass.replaceFragment(requireActivity().getSupportFragmentManager(),
                                 getArguments().getInt(ARG_ID), newUserAvatar, ChangeAvatarFragment.TAG);
                     }
-
+                    
                 } else {
 
                     // Sign up didn't succeed. stay on page and show message
@@ -169,6 +175,10 @@ public class EntryFormFragment extends Fragment {
                 }
             });
         }
+    }
+
+    private void assignUser() {
+        ParseInstallation.getCurrentInstallation().put("userID", ParseUser.getCurrentUser());
     }
 
     // returns if the entered values are valid

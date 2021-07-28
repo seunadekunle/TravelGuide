@@ -68,7 +68,6 @@ public class EntryActivity extends AppCompatActivity {
         signupBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 // goes to signup fragment
                 HelperClass.replaceFragment(fragmentManager, entryFrameId, signUpFragment, signUpFragment.TAG);
             }

@@ -38,8 +38,13 @@ public class ParseApplication extends Application {
         // creates installation object
         ParseInstallation installation = ParseInstallation.getCurrentInstallation();
         installation.put("GCMSenderId", getResources().getString(R.string.firebase_id));
-        // associates a user to this device
-        installation.put("userID", ParseUser.getCurrentUser());
+
+        // if a user is logged in
+        if (ParseUser.getCurrentUser() != null) {
+            // associates a user to this device
+            installation.put("userID", ParseUser.getCurrentUser());
+        }
+
         // Save the updated installation object
         installation.saveInBackground(e -> Log.i(TAG, "Installation object saved " + ((e != null) ? "failed" : "successfully")));
     }
