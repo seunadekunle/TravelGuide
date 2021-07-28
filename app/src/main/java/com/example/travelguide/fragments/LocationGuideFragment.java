@@ -150,7 +150,6 @@ public class LocationGuideFragment extends Fragment {
         FindCallback<ParseObject> unfollowCallback = (objects, e) -> {
 
             if (e == null && objects.size() >= 1) {
-
                 for (ParseObject object : objects) {
                     try {
                         object.delete();

@@ -1,23 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="20dp"
     android:clickable="true"
+    android:orientation="vertical"
     android:id="@+id/searchViewLayout">
 
     <TextView
         android:id="@+id/tvPlace"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginStart="@dimen/searchview_left_margin"
+        android:layout_marginEnd="@dimen/searchview_left_margin"
         android:text="TextView"
         android:textColor="#000000"
-        android:textSize="14sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/tvPlaceInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/searchview_left_margin"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="@dimen/searchview_left_margin"
+        android:text="TextView"
+        android:textColor="@color/hint_color"
+        android:textSize="12.5sp" />
+
+
+</LinearLayout>

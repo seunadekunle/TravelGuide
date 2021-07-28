@@ -49,6 +49,7 @@ public class SearchListAdapter extends RecyclerView.Adapter<SearchListAdapter.Vi
 
         AutocompletePrediction prediction = locationPredictions.get(position);
         holder.tvPlace.setText(prediction.getPrimaryText(null));
+        holder.tvPlaceInfo.setText(prediction.getSecondaryText(null));
 
         holder.searchViewLayout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -82,6 +83,7 @@ public class SearchListAdapter extends RecyclerView.Adapter<SearchListAdapter.Vi
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         public TextView tvPlace;
+        public TextView tvPlaceInfo;
         public View searchViewLayout;
 
         public ViewHolder(SearchviewItemBinding binding) {
@@ -89,6 +91,7 @@ public class SearchListAdapter extends RecyclerView.Adapter<SearchListAdapter.Vi
 
             // binds ui elements to variables
             tvPlace = binding.tvPlace;
+            tvPlaceInfo = binding.tvPlaceInfo;
             searchViewLayout = binding.searchViewLayout;
         }
     }
