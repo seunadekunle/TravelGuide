@@ -37,6 +37,7 @@ import com.google.android.exoplayer2.audio.AudioAttributes;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.parse.FindCallback;
+import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseObject;
@@ -103,10 +104,13 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
         // get current guide at position
         Guide guide = guides.get(position);
 
+        if (guide == null)
+            return;
+
 
         String profileUrl = null;
         try {
-            profileUrl = ((ParseFile) Objects.requireNonNull(guide.getAuthor().fetchIfNeeded().get("avatar"))).getUrl();
+            profileUrl = ((ParseFile) guide.getAuthor().fetchIfNeeded().get("avatar")).getUrl();
         } catch (ParseException e) {
             e.printStackTrace();
         }

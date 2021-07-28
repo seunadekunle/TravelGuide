@@ -23,6 +23,7 @@ import com.parse.ParseUser;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -39,7 +40,7 @@ public class ProfileGuideFragment extends LocationGuideFragment {
     private String type = "";
     private String userID = "";
 
-    private List<Guide> guideList;
+    private ArrayList<Guide> guideList;
     private ImageView imageView;
     private View expandedView;
     private ParseUser parseUser;
@@ -102,6 +103,8 @@ public class ProfileGuideFragment extends LocationGuideFragment {
             } else {
                 HelperClass.fetchUser(userID, (object, e) -> parseUser = object);
             }
+
+            guideList = new ArrayList<>();
             // set up guide list
             setupGuideList(view, view.getContext(), imageView, expandedView, true);
         }
@@ -154,8 +157,13 @@ public class ProfileGuideFragment extends LocationGuideFragment {
         // specify what type of data we want to query - Guide.class
         ParseQuery<Activity> query = ParseQuery.getQuery(Activity.class);
 
+        query.selectKeys(Arrays.asList(Activity.getKeyUserId(), Activity.getKeyType(), Activity.getKeyGuideId()));
+
         //  where the author is the logged in user
         query.whereEqualTo(Activity.getKeyUserId(), parseUser);
+        query.whereEqualTo(Activity.getKeyType(), "like");
+
+        // select the guide data object referenced by the pointer
         query.include(Activity.getKeyGuideId());
 
         // order posts by creation date (newest first)
@@ -173,7 +181,10 @@ public class ProfileGuideFragment extends LocationGuideFragment {
 
             // get guides that have been liked
             for (Activity activity : activities) {
-                guideList.add(activity.getGuide());
+
+                // only add guide that isn't null
+                if (activity.getGuide() != null)
+                    guideList.add(activity.getGuide());
             }
 
             // clears the adapter

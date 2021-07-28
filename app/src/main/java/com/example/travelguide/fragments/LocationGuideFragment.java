@@ -60,7 +60,7 @@ public class LocationGuideFragment extends Fragment {
     protected TextView tvEmptyList;
     protected int frameParam;
 
-    private List<Guide> guideList;
+    private ArrayList<Guide> guideList;
     private TextView tvAddress;
     private ImageView ivExpandIndicator;
     private Boolean expandable;
@@ -123,8 +123,8 @@ public class LocationGuideFragment extends Fragment {
 
         setTitleText();
 
+        guideList = new ArrayList<>();
         setupGuideList(view, context, view.findViewById(R.id.expandedImgView), view.findViewById(R.id.expandedImgViewBG), false);
-        ivExpandIndicator.setVisibility(View.INVISIBLE);
 
         queryGuides();
         handleFollowBtn();
@@ -132,6 +132,9 @@ public class LocationGuideFragment extends Fragment {
         // show indicator if the fragment is expandable
         if (expandable)
             changeIndicatorState(View.VISIBLE);
+        else
+            ivExpandIndicator.setVisibility(View.INVISIBLE);
+
     }
 
     public void handleFollowBtn() {

@@ -42,18 +42,13 @@ import com.parse.FunctionCallback;
 import com.parse.GetCallback;
 import com.parse.ParseCloud;
 import com.parse.ParseException;
-import com.parse.ParseFile;
 import com.parse.ParseUser;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
-
-import static com.google.android.gms.common.util.IOUtils.toByteArray;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -69,7 +64,7 @@ public class ComposeFragment extends Fragment {
 
     public static final int AUTOCOMPLETE_REQUEST_CODE = 1;
 
-    private String photoFileName = "photo.jpg";
+    private final String photoFileName = "photo.jpg";
 
     private File audioFile;
     private File photoFile;
@@ -108,42 +103,12 @@ public class ComposeFragment extends Fragment {
     private LinearLayout playLayout;
     private ImageButton recordBtn;
     private ImageButton playBtn;
+    private String placeName;
 
 
     public ComposeFragment() {
         // Required empty public constructor
     }
-
-//    /**
-//     * @param param1 Parameter 1.
-//     * @param param2 Parameter 2.
-//     * @return A new instance of fragment ComposeFragment.
-//     */
-    // TODO: Rename and change types and number of parameters
-//    public static ComposeFragment newInstance(Double param1, Double param2) {
-//        ComposeFragment fragment = new ComposeFragment();
-//        Bundle args = new Bundle();
-//
-//        args.putDouble(ARG_LONG, param1);
-//        args.putDouble(ARG_LAT, param2);
-//
-//        fragment.setArguments(args);
-//        return fragment;
-//    }
-//
-//    @Override
-//    public void onCreate(Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//        if (getArguments() != null) {
-//
-//            longParam = getArguments().getDouble(ARG_LONG);
-//            latParam = getArguments().getDouble(ARG_LAT);
-//
-//            // sets default location for new Travel Guide
-//            location = new LatLng(longParam, latParam);
-//
-//        }
-//    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -173,9 +138,11 @@ public class ComposeFragment extends Fragment {
         recordBtn = view.findViewById(R.id.recordBtn);
         playBtn = view.findViewById(R.id.playBtn);
 
-        if (latParam != null && longParam != null)
+        if (latParam != null && longParam != null) {
             // gets location info from coordinates and sets button text
-            setButtonText(HelperClass.getAddress(getContext(), latParam, longParam));
+            placeName = HelperClass.getAddress(getContext(), latParam, longParam);
+            setButtonText(placeName);
+        }
 
         setActivityLaunchers();
         setClickListeners();
@@ -518,18 +485,7 @@ public class ComposeFragment extends Fragment {
             guide.setLocation(guideLocation[0]);
 
 
-            final HashMap<String, String> params = new HashMap<>();
-            params.put("location", guideLocation[0].getObjectId());
-
-            // Calling the cloud code function
-            ParseCloud.callFunctionInBackground("sendFollowNotification", params, new FunctionCallback<Object>() {
-                @Override
-                public void done(Object response, ParseException e) {
-                    if (e != null)
-                        Log.i(TAG, e.getMessage());
-
-                }
-            });
+            sendNotification(guideLocation[0]);
 
 //            // sets the photo and video fields if they exist
 //            if (photo != null)
@@ -581,6 +537,30 @@ public class ComposeFragment extends Fragment {
         HelperClass.fetchLocation(location, composeCallback);
     }
 
+    private void sendNotification(Location location1) {
+
+        Log.i(TAG, location1.toString());
+
+        // passes in the parameters for the cloud function
+        final HashMap<String, String> params = new HashMap<>();
+        params.put("locationID", location1.getObjectId());
+        params.put("locationName", placeName);
+        params.put("userID", ParseUser.getCurrentUser().getObjectId());
+
+        // Calling the cloud code function
+        ParseCloud.callFunctionInBackground("sendFollowNotification", params, new FunctionCallback<Object>() {
+            @Override
+            public void done(Object response, ParseException e) {
+
+                Log.i(TAG, "done");
+
+                if (e != null)
+                    Log.i(TAG, e.getMessage());
+
+            }
+        });
+    }
+
     private void showImgView() {
 
         // adjust view states to be visible
@@ -617,14 +597,17 @@ public class ComposeFragment extends Fragment {
 
     // sets location from Google place object and changes button text
     public void setLocation(Place newLocation) {
+
         location = newLocation.getLatLng();
         placeID = newLocation.getId();
 
-        setButtonText(newLocation.getName());
+        placeName = newLocation.getName();
+        setButtonText(placeName);
     }
 
     // sets location from LatLNg object
     public void setLocation(LatLng newLocation) {
+
         longParam = newLocation.longitude;
         latParam = newLocation.latitude;
         location = newLocation;
