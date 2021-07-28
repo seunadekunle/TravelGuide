@@ -40,6 +40,8 @@ public class ParseApplication extends Application {
 
         ParseInstallation installation = ParseInstallation.getCurrentInstallation();
         installation.put("GCMSenderId", getResources().getString(R.string.firebase_id));
+
+        // associates a user to this device
         installation.put("userID", ParseUser.getCurrentUser());
 
         // Save the updated installation object

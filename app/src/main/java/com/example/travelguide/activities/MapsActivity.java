@@ -3,7 +3,6 @@ package com.example.travelguide.activities;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
@@ -16,7 +15,6 @@ import android.widget.ProgressBar;
 import android.widget.SearchView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -248,7 +246,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                                 // shows modal view of location being selected
                                 findViewById(modalFrameId).setVisibility(View.VISIBLE);
-                                modalLocationGuideFragment = LocationGuideFragment.newInstance(modalLocation[0], fragmentsFrameId);
+                                modalLocationGuideFragment = LocationGuideFragment.newInstance(modalLocation[0], fragmentsFrameId, true);
 
                                 // Begin the transaction
                                 FragmentTransaction ft = fragmentManager.beginTransaction();
@@ -294,21 +292,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onStateChanged(@NonNull @NotNull View bottomSheet, int newState) {
 
-                // toggle searchview if view is expanded
-                if (newState == BottomSheetBehavior.STATE_EXPANDED)
+                // toggle searchview if view is expanded and show expand indicator
+                if (newState == BottomSheetBehavior.STATE_EXPANDED) {
                     searchView.setVisibility(View.INVISIBLE);
+                    modalLocationGuideFragment.changeIndicatorState(View.INVISIBLE);
+                }
+
                 if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
                     searchView.setVisibility(View.VISIBLE);
-                    modalLocationGuideFragment.makeIndicatorVisible();
+                    modalLocationGuideFragment.changeIndicatorState(View.VISIBLE);
                 }
             }
 
             @Override
             public void onSlide(@NonNull @NotNull View bottomSheet, float slideOffset) {
-                // shows expansion indicator
-                modalLocationGuideFragment.setIndicatorOpacity(255 - ((int) slideOffset * 255));
             }
         });
+
+        // sets sheet behavaior height
+        sheetBehavior.setPeekHeight(DeviceDimenHelper.getDisplayHeight(getApplicationContext()) / 4);
     }
 
     private void setupSearchView() {
@@ -410,7 +412,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public boolean onMarkerClick(@NonNull @NotNull Marker marker) {
 
 
-                locationGuideFragment = LocationGuideFragment.newInstance(marker.getTag(), fragmentsFrameId);
+                locationGuideFragment = LocationGuideFragment.newInstance(marker.getTag(), fragmentsFrameId, false);
 
                 // Begin the transaction
                 FragmentTransaction ft = fragmentManager.beginTransaction();

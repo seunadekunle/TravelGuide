@@ -208,88 +208,79 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
     // handle click for like button
     private void handleLikeButton(ViewHolder holder, Guide guide, int pos) {
 
-        // call back for getting like data
-        FindCallback<ParseObject> findCallback = new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> objects, ParseException e) {
+        // callback for getting like data
+        FindCallback<ParseObject> findCallback = (objects, e) -> {
 
-                if (!guide.isGuideLiked() && e == null && objects.size() >= 1) {
-                    guide.setGuideLiked(true);
-                    holder.ibLikes.setSelected(guide.isGuideLiked());
-                }
+            if (!guide.isGuideLiked() && e == null && objects.size() >= 1) {
+                guide.setGuideLiked(true);
+                holder.ibLikes.setSelected(guide.isGuideLiked());
             }
         };
 
         isGuideLiked(guide, findCallback);
 
         // callback for deleting like data
-        FindCallback<ParseObject> deleteCallback = new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> objects, ParseException e) {
+        FindCallback<ParseObject> deleteCallback = (objects, e) -> {
 
-                if (guide.isGuideLiked() && e == null && objects.size() >= 1) {
+            if (guide.isGuideLiked() && e == null && objects.size() >= 1) {
 
-                    for (ParseObject object : objects) {
-                        try {
-                            object.delete();
-                        } catch (ParseException parseException) {
-                            parseException.printStackTrace();
-                        }
-                        object.saveInBackground();
+                for (ParseObject object : objects) {
+                    try {
+                        object.delete();
+                    } catch (ParseException parseException) {
+                        parseException.printStackTrace();
                     }
+                    object.saveInBackground();
+                }
 
-                    guide.setGuideLiked(false);
-                    guide.saveInBackground();
-                    setTextViewText(holder.tvLikes, String.valueOf(guide.getLikes()));
+                guide.setGuideLiked(false);
+                guide.saveInBackground();
+                setTextViewText(holder.tvLikes, String.valueOf(guide.getLikes()));
 
-                    // if list is in profile update liked list
-                    if (inProfile) {
-                        guides.remove(pos);
-                        notifyDataSetChanged();
-                    }
+                // if list is in profile update liked list
+                if (inProfile) {
+                    guides.remove(pos);
+                    notifyDataSetChanged();
                 }
             }
         };
 
         // click listener for like button
-        holder.ibLikes.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        holder.ibLikes.setOnClickListener(v -> {
 
-                if (holder.ibLikes.isSelected()) {
-                    isGuideLiked(guide, deleteCallback);
-                } else {
-                    // creates a like row and updates Guide text
-                    com.example.travelguide.classes.Activity likeActivity = new com.example.travelguide.classes.Activity();
+            if (holder.ibLikes.isSelected()) {
+                isGuideLiked(guide, deleteCallback);
+            } else {
+                // creates a like row and updates Guide text
+                com.example.travelguide.classes.Activity likeActivity = new com.example.travelguide.classes.Activity();
 
-                    likeActivity.put(com.example.travelguide.classes.Activity.getKeyUserId(), ParseUser.getCurrentUser());
-                    likeActivity.put(com.example.travelguide.classes.Activity.getKeyGuideId(), guide);
+                likeActivity.put(com.example.travelguide.classes.Activity.getKeyUserId(), ParseUser.getCurrentUser());
+                likeActivity.put(com.example.travelguide.classes.Activity.getKeyGuideId(), guide);
 
-                    likeActivity.saveInBackground(new SaveCallback() {
-                        @Override
-                        public void done(ParseException e) {
-                            if (e != null)
-                                Log.i(TAG, e.getMessage());
-                            else {
+                likeActivity.saveInBackground(new SaveCallback() {
+                    @Override
+                    public void done(ParseException e) {
+                        if (e != null)
+                            Log.i(TAG, e.getMessage());
+                        else {
 
-                                // if guide isn't liked
-                                if (!guide.isGuideLiked()) {
+                            // if guide isn't liked
+                            if (!guide.isGuideLiked()) {
 
-                                    // update ui state and save like
-                                    guide.setGuideLiked(true);
-                                    guide.setLikes(guide.getLikes() + 1);
-                                    guide.saveInBackground();
+                                // update ui state and save like
+                                guide.setGuideLiked(true);
+                                guide.setLikes(guide.getLikes() + 1);
+                                guide.saveInBackground();
 
-                                    setTextViewText(holder.tvLikes, String.valueOf(guide.getLikes()));
-                                }
+                                setTextViewText(holder.tvLikes, String.valueOf(guide.getLikes()));
                             }
                         }
-                    });
-                }
-
-                // toggle view state
-                holder.ibLikes.setSelected(!holder.ibLikes.isSelected());
+                    }
+                });
             }
+
+            // toggle view state
+            holder.ibLikes.setSelected(!holder.ibLikes.isSelected());
         });
     }
 
@@ -395,8 +386,8 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
     private void isGuideLiked(Guide guide, FindCallback<ParseObject> findCallback) {
 
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Activity");
-        query.whereEqualTo("userID", ParseUser.getCurrentUser());
-        query.whereEqualTo("guideID", guide);
+        query.whereEqualTo(com.example.travelguide.classes.Activity.getKeyUserId(), ParseUser.getCurrentUser());
+        query.whereEqualTo(com.example.travelguide.classes.Activity.getKeyGuideId(), guide);
 
         query.findInBackground(findCallback);
     }

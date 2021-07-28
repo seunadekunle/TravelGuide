@@ -2,6 +2,7 @@ package com.example.travelguide.fragments;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
@@ -22,6 +23,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.travelguide.R;
 import com.example.travelguide.adapters.GuidesAdapter;
+import com.example.travelguide.classes.Activity;
 import com.example.travelguide.classes.Guide;
 import com.example.travelguide.classes.Location;
 import com.example.travelguide.helpers.HelperClass;
@@ -31,6 +33,7 @@ import com.google.android.libraries.places.api.net.FetchPlaceRequest;
 import com.google.android.libraries.places.api.net.FetchPlaceResponse;
 import com.parse.FindCallback;
 import com.parse.ParseException;
+import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
@@ -59,11 +62,12 @@ public class LocationGuideFragment extends Fragment {
     private List<Guide> guideList;
     private TextView tvAddress;
     private ImageView ivExpandIndicator;
-    private String locationName;
+    private Boolean expandable;
     private Button followBtn;
 
     private static final String ARG_LOC = "location";
     private static final String ARG_FRAME = "frame_ID";
+    private static final String ARG_MODAL = "in_modal";
 
     private Location parseLocation;
 
@@ -72,12 +76,13 @@ public class LocationGuideFragment extends Fragment {
     }
 
     @SuppressWarnings("unused")
-    public static LocationGuideFragment newInstance(Object location, int frameParam) {
+    public static LocationGuideFragment newInstance(Object location, int frameParam, boolean inModal) {
         LocationGuideFragment fragment = new LocationGuideFragment();
         Bundle args = new Bundle();
 
         args.putParcelable(ARG_LOC, (Parcelable) location);
         args.putInt(ARG_FRAME, frameParam);
+        args.putBoolean(ARG_MODAL, inModal);
 
         fragment.setArguments(args);
         return fragment;
@@ -92,6 +97,9 @@ public class LocationGuideFragment extends Fragment {
             // initializes local Parse variable
             parseLocation = (Location) getArguments().getParcelable(ARG_LOC);
             frameParam = getArguments().getInt(ARG_FRAME);
+
+            // shows expand indicator
+            expandable = getArguments().getBoolean(ARG_MODAL);
         }
     }
 
@@ -101,7 +109,7 @@ public class LocationGuideFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_location_guide_list, container, false);
     }
 
-    @SuppressLint("ClickableViewAccessibility")
+    @SuppressLint({"ClickableViewAccessibility", "ResourceAsColor"})
     @Override
     public void onViewCreated(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -118,19 +126,87 @@ public class LocationGuideFragment extends Fragment {
         ivExpandIndicator.setVisibility(View.INVISIBLE);
 
         queryGuides();
+        handleFollowBtn();
+
+        // show indicator if the fragment is expandable
+        if(expandable)
+            changeIndicatorState(View.VISIBLE);
+    }
+
+    public void handleFollowBtn() {
+        // callback to follow a location
+        FindCallback<ParseObject> followCallback = (objects, e) -> {
+
+            if (e == null && objects.size() >= 1) {
+                setFollowBtnState(true);
+            }
+        };
+
+        // callback to unfollow a location
+        FindCallback<ParseObject> unfollowCallback = (objects, e) -> {
+
+            if (e == null && objects.size() >= 1) {
+
+                for (ParseObject object : objects) {
+                    try {
+                        object.delete();
+                    } catch (ParseException parseException) {
+                        parseException.printStackTrace();
+                    }
+                    object.saveInBackground();
+                }
+
+                setFollowBtnState(false);
+            }
+        };
+
+        // sets button state
+        isLocationFollowed(parseLocation, followCallback);
 
         followBtn.setOnClickListener((v -> {
-            // creates a like row and updates Guide text
-            com.example.travelguide.classes.Activity followActivity = new com.example.travelguide.classes.Activity();
 
-            followActivity.put(com.example.travelguide.classes.Activity.getKeyUserId(), ParseUser.getCurrentUser());
-            followActivity.put(com.example.travelguide.classes.Activity.getKeyLocId(), parseLocation);
-            followActivity.put(com.example.travelguide.classes.Activity.getKeyType(), "follow");
-//            followActivity.saveInBackground(e -> {
-//
-//            });
+            if (followBtn.isSelected()) {
+                isLocationFollowed(parseLocation, unfollowCallback);
+            } else {
+                // creates a follow row and updates button
+                Activity followActivity = new Activity();
+
+                followActivity.put(Activity.getKeyUserId(), ParseUser.getCurrentUser());
+                followActivity.put(Activity.getKeyLocId(), parseLocation);
+                followActivity.put(Activity.getKeyType(), "follow");
+                followActivity.saveInBackground(e -> {
+                    if (e == null) {
+                        setFollowBtnState(true);
+                    } else {
+                        Log.i(TAG, e.getMessage());
+                    }
+                });
+            }
         }));
+    }
 
+    // changes button state based on boolean variable
+    public void setFollowBtnState(boolean selected) {
+        if (selected) {
+            followBtn.setText("Following");
+            followBtn.setTextColor(Color.parseColor("#FFFFFF"));
+        } else {
+            followBtn.setText("Follow");
+            followBtn.setTextColor(Color.parseColor("#000000"));
+
+        }
+
+        followBtn.setSelected(selected);
+    }
+
+
+    public void isLocationFollowed(Location location, FindCallback<ParseObject> followCallback) {
+
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Activity");
+        query.whereEqualTo(Activity.getKeyUserId(), ParseUser.getCurrentUser());
+        query.whereEqualTo(Activity.getKeyLocId(), location);
+
+        query.findInBackground(followCallback);
     }
 
     public void setTitleText() {
@@ -242,12 +318,7 @@ public class LocationGuideFragment extends Fragment {
         super.onDestroy();
     }
 
-
-    public void setIndicatorOpacity(int opacity) {
-        ivExpandIndicator.setImageAlpha(opacity);
-    }
-
-    public void makeIndicatorVisible() {
-        ivExpandIndicator.setVisibility(View.VISIBLE);
+    public void changeIndicatorState(int state) {
+        ivExpandIndicator.setVisibility(state);
     }
 }

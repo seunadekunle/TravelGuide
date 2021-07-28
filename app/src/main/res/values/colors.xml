@@ -15,4 +15,6 @@
     <color name="black_overlay">#66000000</color>
     <color name="media_button_selected">#CCCCCC</color>
     <color name="hint_color">#A2A2A2</color>
+    <color name="main_color">#003F91</color>
+
 </resources>

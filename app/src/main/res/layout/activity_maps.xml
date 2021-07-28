@@ -50,7 +50,7 @@
             android:queryBackground="@color/white"
             android:queryHint="@string/search"
             android:searchIcon="@drawable/search_icon"
-            android:visibility="visible" />
+            android:visibility="visible"/>
 
         <ImageButton
             android:id="@+id/ibProfile"
