@@ -63,7 +63,7 @@ public class HelperClass {
     private static PlacesClient placesClient;
     private static ParseUser profileUser;
 
-    public static int picRadius = 45;
+    public static int picRadius = 50;
     public static int resizedImgDimen = 650;
     public static int detailImgDimen = 475;
 

@@ -20,6 +20,10 @@ public class Location extends ParseObject {
         put(KEY_COORD, new ParseGeoPoint(latitude, longitude));
     }
 
+    public void setNumFollowers(int numFollowers) {
+        put(KEY_FOLLOWERS, numFollowers);
+    }
+
     public LatLng getCoord() {
 
         ParseGeoPoint coord = getParseGeoPoint(KEY_COORD);
@@ -33,7 +37,11 @@ public class Location extends ParseObject {
         return new LatLng(latitude, longitude);
     }
 
-    public String getPlaceID (){
+    public int getNumFollowers() {
+        return getInt(KEY_FOLLOWERS);
+    }
+
+    public String getPlaceID() {
         return getString(KEY_PLACE_ID);
     }
 

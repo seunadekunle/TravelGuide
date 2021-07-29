@@ -178,9 +178,10 @@ public class LocationGuideFragment extends Fragment {
     }
 
     public void handleFollowBtn() {
-        // callback to follow a location
-        FindCallback<ParseObject> followCallback = (objects, e) -> {
 
+
+        // callback to follow a location
+        FindCallback<ParseObject> isFollowedCallback = (objects, e) -> {
             if (e == null && objects.size() >= 1) {
                 setFollowBtnState(true);
             }
@@ -197,6 +198,10 @@ public class LocationGuideFragment extends Fragment {
                         parseException.printStackTrace();
                     }
                     object.saveInBackground();
+
+                    // update the number of followers
+                    parseLocation.setFollowers(parseLocation.getNumFollowers() - 1);
+                    parseLocation.saveInBackground();
                 }
 
                 setFollowBtnState(false);
@@ -204,7 +209,7 @@ public class LocationGuideFragment extends Fragment {
         };
 
         // sets button state
-        isLocationFollowed(parseLocation, followCallback);
+        isLocationFollowed(parseLocation, isFollowedCallback);
 
         followBtn.setOnClickListener((v -> {
 
@@ -243,7 +248,13 @@ public class LocationGuideFragment extends Fragment {
                 followActivity.put(Activity.getKeyType(), "follow");
                 followActivity.saveInBackground(e -> {
                     if (e == null) {
+
+                        // update the number of followers
+                        parseLocation.setFollowers(parseLocation.getNumFollowers() + 1);
+                        parseLocation.saveInBackground();
+
                         setFollowBtnState(true);
+
                     } else {
                         Log.i(TAG, e.getMessage());
                     }

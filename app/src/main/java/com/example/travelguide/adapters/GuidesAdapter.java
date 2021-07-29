@@ -18,7 +18,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.appcompat.view.ActionMode;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -80,7 +79,8 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
         this.context = context;
         this.expandedImageView = expandedImageView;
         guides = items;
-        updateOriginalGuides();        this.expandedImageViewBG = expandedImageViewBG;
+        updateOriginalGuides();
+        this.expandedImageViewBG = expandedImageViewBG;
         this.activity = activity;
         this.exoPlayer = exoPlayer;
         this.inProfile = inProfile;
@@ -195,7 +195,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
         notifyDataSetChanged();
 
         // call onBindViewHolder for each of the items to update the like button
-        for(int i = 0; i < list.size(); i++){
+        for (int i = 0; i < list.size(); i++) {
             notifyItemChanged(i);
         }
     }
@@ -334,7 +334,6 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
         if (guide.getPhoto() != null || guide.getVideo() != null || guide.getAudio() != null) {
 
             Log.i(TAG, guide.getText());
-
             holder.mediaLayout.setVisibility(View.VISIBLE);
 
             if (guide.getPhoto() != null) {
@@ -348,7 +347,8 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
                     holder.epPlayerView.setVisibility(View.GONE);
 
                     GlideApp.with(context)
-                            .load(photoUrl).centerCrop().override(HelperClass.detailImgDimen, HelperClass.detailImgDimen)
+                            .load(photoUrl).centerCrop()
+                            .override((int) (HelperClass.detailImgDimen * 1.7), (int) (HelperClass.detailImgDimen * 1.7))
                             .transform(new RoundedCornersTransformation(HelperClass.picRadius, 0)).into(holder.ibThumb);
 
                     holder.ibThumb.setOnClickListener(new View.OnClickListener() {
