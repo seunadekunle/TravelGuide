@@ -14,6 +14,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/searchview_left_margin"
         android:layout_marginEnd="@dimen/searchview_left_margin"
+        android:fontFamily="sans-serif-medium"
         android:text="TextView"
         android:textColor="#000000"
         android:textSize="14sp" />

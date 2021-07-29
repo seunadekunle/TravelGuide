@@ -325,7 +325,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 // clears focus and hides keyboard
                 searchView.clearFocus();
-                hideKeyboard();
+                HelperClass.hideKeyboard(MapsActivity.this);
 
                 return false;
             }
@@ -642,17 +642,5 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         searchView.setQuery("", false);
         searchView.setIconified(true);
         searchView.onActionViewCollapsed();
-    }
-
-    /*
-     *  hides current keyboard
-     *  ref: https://stackoverflow.com/questions/43061216/dismiss-keyboard-on-button-click-that-close-fragment
-     */
-    public void hideKeyboard() {
-        View view = getCurrentFocus();
-        if (view != null) {
-            InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            inputManager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-        }
     }
 }

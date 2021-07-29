@@ -82,4 +82,5 @@ dependencies {
     // dependencies for the Firebase Cloud Messaging and Analytics libraries
     implementation 'com.google.firebase:firebase-messaging'
     implementation 'com.google.firebase:firebase-analytics'
+
 }

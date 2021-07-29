@@ -16,5 +16,8 @@
     <color name="media_button_selected">#CCCCCC</color>
     <color name="hint_color">#A2A2A2</color>
     <color name="main_color">#003F91</color>
+    <color name="secondary_color">#3590F3</color>
+    <color name="tertiary_color">#CF9893</color>
+
 
 </resources>

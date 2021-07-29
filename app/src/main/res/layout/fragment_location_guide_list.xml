@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:name="com.example.travelguide.fragments.LocationDetail"
     android:layout_width="match_parent"
@@ -32,8 +31,8 @@
             android:id="@+id/ivExpandIndicator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/expandable_icon"
-            android:layout_gravity="center"/>
+            android:layout_gravity="center"
+            android:src="@drawable/expandable_icon" />
 
         <TextView
             android:id="@+id/tvAddress"
@@ -53,16 +52,33 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="7.5dp"
             android:layout_marginEnd="7.5dp"
-            android:layout_marginBottom="25dp"
+            android:layout_marginBottom="5dp"
             android:background="@drawable/follow_btn_bg"
-            android:text="Follow"
-            android:elevation="0dp"/>
+            android:elevation="0dp"
+            android:text="@string/follow" />
 
 
-        <Spinner
-            android:id="@+id/spinner2"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <SearchView
+                android:id="@+id/svGuide"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:iconifiedByDefault="true"
+                android:padding="0dp"
+                android:queryBackground="@drawable/searchview_bg"
+                android:queryHint="@string/search"
+                android:visibility="visible" />
+
+            <Spinner
+                android:id="@+id/spinner2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/swipeContainer"
@@ -71,9 +87,9 @@
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvGuides"
-                android:nestedScrollingEnabled="false"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="match_parent"
+                android:nestedScrollingEnabled="false" />
 
             <ProgressBar
                 android:id="@+id/pbLoading"
@@ -82,14 +98,14 @@
                 android:layout_height="match_parent"
                 android:padding="@dimen/progress_bar_padding" />
 
+            <include
+                android:id="@+id/imgExpanded"
+                layout="@layout/image_expanded"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="visible" />
+
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
     </LinearLayout>
-
-    <include
-        android:id="@+id/imgExpanded"
-        layout="@layout/image_expanded"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="visible" />
 
 </FrameLayout>

@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@color/off_white"
     android:clickable="true"
     android:focusable="true"
     tools:context=".fragments.ComposeFragment">
@@ -42,8 +42,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/add_location"
-                android:textColor="@color/white"
-                android:background="@drawable/btn_selected"/>
+                android:textColor="@color/black"
+                android:background="@drawable/searchview_bg"/>
         </LinearLayout>
 
 

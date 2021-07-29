@@ -14,6 +14,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
@@ -383,6 +384,18 @@ public class HelperClass {
         ParseQuery<Location> query = ParseQuery.getQuery(Location.class);
         query.whereEqualTo(Location.getKeyCoord(), new ParseGeoPoint(location.latitude, location.longitude));
         query.getFirstInBackground(callback);
+    }
+
+    /*
+     *  hides current keyboard
+     *  ref: https://stackoverflow.com/questions/43061216/dismiss-keyboard-on-button-click-that-close-fragment
+     */
+    public static void hideKeyboard(Activity activity) {
+        View view = activity.getCurrentFocus();
+        if (view != null) {
+            InputMethodManager inputManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+            inputManager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        }
     }
 
 }

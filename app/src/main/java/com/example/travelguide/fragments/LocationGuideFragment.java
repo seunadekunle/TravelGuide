@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.SearchView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -58,9 +59,10 @@ public class LocationGuideFragment extends Fragment {
     protected SwipeRefreshLayout swipeContainer;
     protected SimpleExoPlayer globalPlayer;
     protected TextView tvEmptyList;
+    private SearchView svGuide;
     protected int frameParam;
 
-    private ArrayList<Guide> guideList;
+    private List<Guide> guideList;
     private TextView tvAddress;
     private ImageView ivExpandIndicator;
     private Boolean expandable;
@@ -118,6 +120,7 @@ public class LocationGuideFragment extends Fragment {
         tvAddress = view.findViewById(R.id.tvAddress);
         ivExpandIndicator = view.findViewById(R.id.ivExpandIndicator);
         followBtn = view.findViewById(R.id.followBtn);
+        svGuide = view.findViewById(R.id.svGuide);
 
         context = view.getContext();
 
@@ -128,6 +131,42 @@ public class LocationGuideFragment extends Fragment {
 
         queryGuides();
         handleFollowBtn();
+
+        svGuide.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                // clears focus and hides keyboard
+                svGuide.clearFocus();
+                HelperClass.hideKeyboard(getActivity());
+
+                swipeContainer.setEnabled(true);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+
+                if (!newText.isEmpty())
+                    adapter.filter(newText);
+                else
+                    adapter.resetFilter();
+
+                swipeContainer.setEnabled(false);
+                return false;
+            }
+        });
+
+        svGuide.setOnCloseListener(new SearchView.OnCloseListener() {
+
+            @Override
+            public boolean onClose() {
+
+                adapter.resetFilter();
+                swipeContainer.setEnabled(true);
+                return false;
+            }
+        });
+
 
         // show indicator if the fragment is expandable
         if (expandable)
@@ -215,13 +254,13 @@ public class LocationGuideFragment extends Fragment {
     // changes button state based on boolean variable
     public void setFollowBtnState(boolean selected) {
         if (selected) {
-            followBtn.setText("Following");
+            followBtn.setText(R.string.following);
             followBtn.setTextColor(Color.parseColor("#FFFFFF"));
         } else {
-            followBtn.setText("Follow");
+            followBtn.setText(R.string.follow);
             followBtn.setTextColor(Color.parseColor("#000000"));
-
         }
+
         followBtn.setSelected(selected);
     }
 
@@ -270,6 +309,7 @@ public class LocationGuideFragment extends Fragment {
 
         rvGuides.setAdapter(adapter);
         rvGuides.setLayoutManager(new LinearLayoutManager(context));
+        rvGuides.setAnimation(null);
 
         // Setup refresh listener which triggers new data loading
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {

@@ -37,7 +37,6 @@ import com.google.android.exoplayer2.audio.AudioAttributes;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.parse.FindCallback;
-import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseObject;
@@ -45,8 +44,8 @@ import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
@@ -57,7 +56,8 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
 
     private static final String TAG = "GuidesAdapter";
 
-    private final List<Guide> guides;
+    private List<Guide> guides;
+    private List<Guide> originalGuides;
     private final Context context;
     private final ImageView expandedImageView;
     private final View expandedImageViewBG;
@@ -79,12 +79,18 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
         this.context = context;
         this.expandedImageView = expandedImageView;
         guides = items;
-        this.expandedImageViewBG = expandedImageViewBG;
+        updateOriginalGuides();        this.expandedImageViewBG = expandedImageViewBG;
         this.activity = activity;
         this.exoPlayer = exoPlayer;
         this.inProfile = inProfile;
         this.fragmentManager = fragmentManager;
         this.frameID = frameID;
+
+        updateOriginalGuides();
+    }
+
+    public void updateOriginalGuides() {
+        originalGuides = guides;
     }
 
     @Override
@@ -151,12 +157,16 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
     public void clear() {
         guides.clear();
         notifyDataSetChanged();
+
+        updateOriginalGuides();
     }
 
     // Add a list of items to the list
     public void addAll(List<Guide> list) {
         guides.addAll(list);
         notifyDataSetChanged();
+
+        updateOriginalGuides();
     }
 
     @Override
@@ -167,6 +177,27 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
     @Override
     public int getItemViewType(int position) {
         return position;
+    }
+
+    public void filter(String newText) {
+
+        List<Guide> filteredList = new ArrayList<>();
+
+        // add guides whose text fit it
+        for (Guide guide : guides) {
+            if (guide.getText().toLowerCase().contains(newText.toLowerCase()))
+                filteredList.add(guide);
+        }
+        updateList(filteredList);
+    }
+
+    private void updateList(List<Guide> list) {
+        guides = list;
+        notifyDataSetChanged();
+    }
+
+    public void resetFilter() {
+        updateList(originalGuides);
     }
 
 
@@ -245,6 +276,8 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
                 if (inProfile) {
                     guides.remove(pos);
                     notifyDataSetChanged();
+
+                    updateOriginalGuides();
                 }
             }
         };

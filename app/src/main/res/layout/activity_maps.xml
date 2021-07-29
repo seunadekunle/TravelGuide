@@ -13,9 +13,11 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/action_buttons_margin"
         android:layout_marginBottom="@dimen/fab_margin_bottom"
+        android:backgroundTint="@color/main_color"
         android:clickable="true"
         android:focusable="true"
         android:src="@android:drawable/ic_input_add"
+        app:tint="@color/white"
         map:layout_constraintBottom_toBottomOf="parent"
         map:layout_constraintEnd_toEndOf="parent" />
 
@@ -49,7 +51,8 @@
             android:queryBackground="@drawable/searchview_bg"
             android:queryHint="@string/search"
             android:searchIcon="@drawable/search_icon"
-            android:visibility="visible"/>
+            android:visibility="visible"
+            />
 
         <ImageButton
             android:id="@+id/ibProfile"
@@ -78,7 +81,7 @@
             android:focusable="true"
             android:visibility="visible"
             map:layout_constraintTop_toBottomOf="@+id/searchView"
-            tools:layout_editor_absoluteX="20dp"/>
+            tools:layout_editor_absoluteX="20dp" />
 
         <androidx.coordinatorlayout.widget.CoordinatorLayout
 

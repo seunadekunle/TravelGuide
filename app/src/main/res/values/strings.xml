@@ -49,4 +49,6 @@
     <string name="add_media">Add Media</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="follow">Follow</string>
+    <string name="following">Following</string>
 </resources>
