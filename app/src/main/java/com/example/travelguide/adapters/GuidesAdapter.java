@@ -18,6 +18,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.appcompat.view.ActionMode;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -174,11 +175,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
         return position;
     }
 
-    @Override
-    public int getItemViewType(int position) {
-        return position;
-    }
-
+    // filters the recyclerview
     public void filter(String newText) {
 
         List<Guide> filteredList = new ArrayList<>();
@@ -188,14 +185,22 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
             if (guide.getText().toLowerCase().contains(newText.toLowerCase()))
                 filteredList.add(guide);
         }
+
         updateList(filteredList);
     }
 
+    // updates the list that the adapter uses
     private void updateList(List<Guide> list) {
         guides = list;
         notifyDataSetChanged();
+
+        // call onBindViewHolder for each of the items to update the like button
+        for(int i = 0; i < list.size(); i++){
+            notifyItemChanged(i);
+        }
     }
 
+    // goes back to the default list of guides
     public void resetFilter() {
         updateList(originalGuides);
     }
