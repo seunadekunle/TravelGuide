@@ -1,33 +1,32 @@
-package com.example.travelguide.activities;
-
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.ImageButton;
-import android.widget.ProgressBar;
-import android.widget.SearchView;
+package com.example.travelguide.fragments;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
+import android.widget.ProgressBar;
+import android.widget.SearchView;
+
 import com.example.travelguide.R;
+import com.example.travelguide.activities.MapsActivity;
 import com.example.travelguide.adapters.SearchListAdapter;
 import com.example.travelguide.databinding.ActivityMapsBinding;
-import com.example.travelguide.fragments.ComposeFragment;
-import com.example.travelguide.fragments.LocationGuideFragment;
-import com.example.travelguide.fragments.ProfileFragment;
 import com.example.travelguide.helpers.DeviceDimenHelper;
 import com.example.travelguide.helpers.HelperClass;
 import com.google.android.gms.common.api.ApiException;
@@ -50,9 +49,7 @@ import com.google.android.libraries.places.api.net.FetchPlaceRequest;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.parse.FunctionCallback;
 import com.parse.GetCallback;
-import com.parse.ParseCloud;
 import com.parse.ParseException;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
@@ -60,25 +57,24 @@ import com.parse.ParseUser;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
+public class MapsFragment extends Fragment {
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
-    private static final String TAG = MapsActivity.class.getSimpleName();
+    private static final String TAG = "MapsFragment";
     private int fragmentsFrameId;
     private int modalFrameId;
 
     // Ui elements
     private GoogleMap map;
-    private ActivityMapsBinding binding;
     private FloatingActionButton addGuide;
     private FragmentManager fragmentManager;
     private ProgressBar pbMaps;
     private SearchView searchView;
     private RecyclerView rvSearchList;
     private ImageButton ibProfile;
+    private FrameLayout frameLayout;
 
     // search ui elements
     private SearchListAdapter adapter;
@@ -115,45 +111,120 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final String KEY_CAMERA_POSITION = "camera_position";
     private static final String KEY_LOCATION = "location";
 
+    private OnMapReadyCallback callback = new OnMapReadyCallback() {
+
+        /**
+         * Manipulates the map once available.
+         */
+        @Override
+        public void onMapReady(GoogleMap googleMap) {
+            map = googleMap;
+            map.getUiSettings().setMapToolbarEnabled(false);
+            map.getUiSettings().setScrollGesturesEnabled(true);
+            // TODO: add map versions
+
+            // sets padding to change position of map controls
+            map.setPadding(0, (int) (height / 1.25), 0, 0);
+
+            // Prompt the user for permission.
+            getLocationPermission();
+
+            // Turn on the My Location layer and the related control on the map.
+            updateLocationUI();
+            // get list of currrent guides
+            getGuides();
+            // Get the current location of the device and set the position of the map.
+            getDeviceLocation();
+
+            map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                @Override
+                public boolean onMarkerClick(@NonNull @NotNull Marker marker) {
+
+
+                    locationGuideFragment = LocationGuideFragment.newInstance(marker.getTag(), fragmentsFrameId, false);
+
+                    // Begin the transaction
+                    FragmentTransaction ft = fragmentManager.beginTransaction();
+                    // add fragment to container
+                    ft.replace(fragmentsFrameId, locationGuideFragment);
+
+                    // complete the transaction
+                    HelperClass.finishTransaction(ft, LocationGuideFragment.TAG, (Fragment) locationGuideFragment);
+                    hideOverlayBtns();
+
+                    return true;
+                }
+            });
+        }
+    };
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onCreate(@Nullable Bundle savedInstanceState) {
 
-
-        // Retrieve location and camera position from saved instance state.
         if (savedInstanceState != null) {
+
+            // Retrieve location and camera position from saved instance state.
             lastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION);
             CameraPosition cameraPosition = savedInstanceState.getParcelable(KEY_CAMERA_POSITION);
+
+            // moves camera to the location
+            map.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
         }
 
-        binding = ActivityMapsBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+
+        if (map != null) {
+            // saves map current location and camera position when fragment is paused
+            outState.putParcelable(KEY_CAMERA_POSITION, map.getCameraPosition());
+            outState.putParcelable(KEY_LOCATION, lastKnownLocation);
+        }
+
+        super.onSaveInstanceState(outState);
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_maps, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+
+        super.onViewCreated(view, savedInstanceState);
+
+        initializeMap();
 
         // verify that we have permissions
-        HelperClass.verifyPermissions(this);
+        HelperClass.verifyPermissions(requireActivity());
         // init Places SDK
-        HelperClass.initPlacesSDK(this);
+        HelperClass.initPlacesSDK(requireActivity());
 
         // Prompt the user for permission.
         getLocationPermission();
 
         // bind ui element to variable
-        addGuide = binding.addGuide;
-        pbMaps = binding.pbMaps;
-        searchView = binding.searchView;
-        rvSearchList = binding.rvSearchList;
-        ibProfile = binding.ibProfile;
-        sheetBehavior = BottomSheetBehavior.from(findViewById(R.id.modalLocationView));
+        addGuide = view.findViewById(R.id.addGuide);
+        pbMaps = view.findViewById(R.id.pbMaps);
+        searchView = view.findViewById(R.id.searchView);
+        rvSearchList = view.findViewById(R.id.rvSearchList);
+        ibProfile = view.findViewById(R.id.ibProfile);
+        frameLayout = view.findViewById(modalFrameId);
+        sheetBehavior = BottomSheetBehavior.from(view.findViewById(R.id.modalLocationView));
 
         fragmentsFrameId = R.id.fragmentsFrame;
         modalFrameId = R.id.modalLocationView;
 
-        fragmentManager = getSupportFragmentManager();
+        fragmentManager = getParentFragmentManager();
 
-        height = DeviceDimenHelper.getDisplayHeight(this);
-        width = DeviceDimenHelper.getDisplayWidth(this);
-
-        initializeMap();
+        height = DeviceDimenHelper.getDisplayHeight(requireContext());
+        width = DeviceDimenHelper.getDisplayWidth(requireContext());
 
         rvSearchList.setVisibility(View.GONE);
         rvSearchList.setBackgroundResource(R.drawable.searchview_bg);
@@ -172,7 +243,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         };
 
         predictions = new ArrayList<>();
-        adapter = new SearchListAdapter(predictions, this, onItemClickListener);
+        adapter = new SearchListAdapter(predictions, requireContext(), onItemClickListener);
         setupSearchView();
 
         // profile button on click listener
@@ -193,6 +264,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         hideOverlayBtns();
     }
 
+    private void initializeMap() {
+
+        // Construct a FusedLocationProviderClient.
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext());
+
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+
+        // if the fragment is available call onMapReady function
+        if (mapFragment != null) {
+            mapFragment.getMapAsync(callback);
+        }
+    }
 
     // show prediction info
     private void showPredictionInfo(AutocompletePrediction prediction) {
@@ -234,7 +318,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 }
 
                                 // shows modal view of location being selected
-                                findViewById(modalFrameId).setVisibility(View.VISIBLE);
+                                frameLayout.setVisibility(View.VISIBLE);
                                 modalLocationGuideFragment = LocationGuideFragment.newInstance(modalLocation[0], fragmentsFrameId, true);
 
                                 // Begin the transaction
@@ -275,6 +359,110 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
 
+    /*
+     * Get the best and most recent location of the device, which may be null in rare
+     * cases when a location is not available.
+     */
+    private void getDeviceLocation() {
+
+        try {
+            if (locationPermissionGranted) {
+                Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
+
+                locationResult.addOnCompleteListener(requireActivity(), new OnCompleteListener<Location>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Location> task) {
+                        if (task.isSuccessful()) {
+                            // Set the map's camera position to the current location of the device.
+                            lastKnownLocation = task.getResult();
+                            if (lastKnownLocation != null) {
+                                LatLng currentLocation = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
+                                zoomToLocation(currentLocation);
+
+                                // sends current location data to compose fragment
+                                composeFragment.setLocation(new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()));
+                            }
+                        } else {
+                            Log.e(TAG, "Exception: %s", task.getException());
+                            zoomToLocation(defaultLocation);
+                            map.getUiSettings().setMyLocationButtonEnabled(false);
+                        }
+                    }
+                });
+            }
+        } catch (SecurityException e) {
+            Log.e("Exception: %s", e.getMessage(), e);
+        }
+    }
+
+    // gets list of locations from the ParseServer
+    public void getGuides() {
+
+        // shows progress bar
+        pbMaps.setVisibility(View.VISIBLE);
+
+        // clears the map of markers
+        map.clear();
+
+        ParseQuery<com.example.travelguide.classes.Location> query = ParseQuery.getQuery(com.example.travelguide.classes.Location.class);
+        query.findInBackground((locations, e) -> {
+
+            if (e == null) {
+                for (int i = 0; i < locations.size(); i++) {
+
+                    // retrieves geo point from database and converts it to a LatLng Object
+                    LatLng location = locations.get(i).getCoord();
+                    // adds a new marker with the LatLng object
+                    addMarker(new MarkerOptions().position(location), locations.get(i));
+                }
+
+                // hides progress bar
+                pbMaps.setVisibility(View.INVISIBLE);
+                showOverlayBtns();
+            } else {
+                Log.e(TAG, "Not getting guides", e);
+            }
+        });
+        ParseQuery.clearAllCachedResults();
+    }
+
+    /*
+     * Request location permission, so that we can get the location of the
+     * device. The result of the permission request is handled by a callback,
+     * onRequestPermissionsResult.
+     */
+    private void getLocationPermission() {
+
+        // if the user granted permission to use the device location
+        if (ContextCompat.checkSelfPermission(requireContext(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            locationPermissionGranted = true;
+        } else {
+            ActivityCompat.requestPermissions(requireActivity(),
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+        }
+    }
+
+    /*
+     * updates the locationPermissionGranted variable based on the user permission dialog
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        locationPermissionGranted = false;
+        if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {// If request is cancelled, the result arrays are empty.
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                locationPermissionGranted = true;
+            }
+        }
+        updateLocationUI();
+    }
+
+
     // sets up modal sheetBehavior
     private void setupSheetBehavior() {
         sheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
@@ -299,12 +487,38 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
 
         // sets sheet behavaior height
-        sheetBehavior.setPeekHeight(DeviceDimenHelper.getDisplayHeight(getApplicationContext()) / 3);
+        sheetBehavior.setPeekHeight(DeviceDimenHelper.getDisplayHeight(requireContext()) / 3);
+    }
+
+
+    /*
+     * sets location enabled to be true and updates maps ui
+     */
+    private void updateLocationUI() {
+        if (map == null) {
+            return;
+        }
+        try {
+            if (locationPermissionGranted) {
+                map.setMyLocationEnabled(true);
+                map.getUiSettings().setMyLocationButtonEnabled(true);
+                getDeviceLocation();
+            } else {
+                map.setMyLocationEnabled(false);
+                map.getUiSettings().setMyLocationButtonEnabled(false);
+                lastKnownLocation = null;
+
+                // call location permissions dialog again
+//                getLocationPermission();
+            }
+        } catch (SecurityException e) {
+            Log.e("Exception: %s", e.getMessage());
+        }
     }
 
     private void setupSearchView() {
 
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(requireContext());
         // creates divider for recyclerview
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(rvSearchList.getContext()
                 , linearLayoutManager.getOrientation());
@@ -325,7 +539,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 // clears focus and hides keyboard
                 searchView.clearFocus();
-                HelperClass.hideKeyboard(MapsActivity.this);
+                HelperClass.hideKeyboard(requireActivity());
 
                 return false;
             }
@@ -359,257 +573,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
 
-    private void initializeMap() {
-        // Construct a FusedLocationProviderClient.
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        mapFragment = (SupportMapFragment) fragmentManager.findFragmentById(R.id.map);
-
-        // if the fragment is available call onMapReady function
-        if (mapFragment != null) {
-            mapFragment.getMapAsync(this);
-        }
-    }
-
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     */
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        map = googleMap;
-        map.getUiSettings().setMapToolbarEnabled(false);
-        map.getUiSettings().setScrollGesturesEnabled(true);
-        // TODO: add map versions
-
-        // sets padding to change position of map controls
-        map.setPadding(0, (int) (height / 1.25), 0, 0);
-
-        // Prompt the user for permission.
-        getLocationPermission();
-
-        // Turn on the My Location layer and the related control on the map.
-        updateLocationUI();
-        // get list of currrent guides
-        getGuides();
-        // Get the current location of the device and set the position of the map.
-        getDeviceLocation();
-
-        map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-            @Override
-            public boolean onMarkerClick(@NonNull @NotNull Marker marker) {
-
-
-                locationGuideFragment = LocationGuideFragment.newInstance(marker.getTag(), fragmentsFrameId, false);
-
-                // Begin the transaction
-                FragmentTransaction ft = fragmentManager.beginTransaction();
-                // add fragment to container
-                ft.replace(fragmentsFrameId, locationGuideFragment);
-
-                // complete the transaction
-                HelperClass.finishTransaction(ft, LocationGuideFragment.TAG, (Fragment) locationGuideFragment);
-                hideOverlayBtns();
-
-                return true;
-            }
-        });
-    }
-
-
-    // gets list of locations from the ParseServer
-    public void getGuides() {
-
-        // shows progress bar
-        pbMaps.setVisibility(View.VISIBLE);
-
-        // clears the map of markers
-        map.clear();
-
-        ParseQuery<com.example.travelguide.classes.Location> query = ParseQuery.getQuery(com.example.travelguide.classes.Location.class);
-        query.findInBackground((locations, e) -> {
-
-            if (e == null) {
-                for (int i = 0; i < locations.size(); i++) {
-
-                    // retrieves geo point from database and converts it to a LatLng Object
-                    LatLng location = locations.get(i).getCoord();
-                    // adds a new marker with the LatLng object
-                    addMarker(new MarkerOptions().position(location), locations.get(i));
-                }
-
-                // hides progress bar
-                pbMaps.setVisibility(View.INVISIBLE);
-                showOverlayBtns();
-            } else {
-                Log.e(TAG, "Not getting guides", e);
-            }
-        });
-        ParseQuery.clearAllCachedResults();
-    }
-
-
-    /*
-     * Request location permission, so that we can get the location of the
-     * device. The result of the permission request is handled by a callback,
-     * onRequestPermissionsResult.
-     */
-    private void getLocationPermission() {
-
-        // if the user granted permission to use the device location
-        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
-                android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            locationPermissionGranted = true;
-        } else {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-        }
-    }
-
-    /*
-     * updates the locationPermissionGranted variable based on the user permission dialog
-     */
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        locationPermissionGranted = false;
-        if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {// If request is cancelled, the result arrays are empty.
-            if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                locationPermissionGranted = true;
-            }
-        }
-        updateLocationUI();
-    }
-
-
-    /*
-     * sets location enabled to be true and updates maps ui
-     */
-    private void updateLocationUI() {
-        if (map == null) {
-            return;
-        }
-        try {
-            if (locationPermissionGranted) {
-                map.setMyLocationEnabled(true);
-                map.getUiSettings().setMyLocationButtonEnabled(true);
-                getDeviceLocation();
-            } else {
-                map.setMyLocationEnabled(false);
-                map.getUiSettings().setMyLocationButtonEnabled(false);
-                lastKnownLocation = null;
-
-                // call location permissions dialog again
-//                getLocationPermission();
-            }
-        } catch (SecurityException e) {
-            Log.e("Exception: %s", e.getMessage());
-        }
-    }
-
-    /*
-     * Get the best and most recent location of the device, which may be null in rare
-     * cases when a location is not available.
-     */
-    private void getDeviceLocation() {
-
-        try {
-            if (locationPermissionGranted) {
-                Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
-
-                locationResult.addOnCompleteListener(this, new OnCompleteListener<Location>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Location> task) {
-                        if (task.isSuccessful()) {
-                            // Set the map's camera position to the current location of the device.
-                            lastKnownLocation = task.getResult();
-                            if (lastKnownLocation != null) {
-                                LatLng currentLocation = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
-                                zoomToLocation(currentLocation);
-
-                                // sends current location data to compose fragment
-                                composeFragment.setLocation(new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()));
-                            }
-                        } else {
-                            Log.e(TAG, "Exception: %s", task.getException());
-                            zoomToLocation(defaultLocation);
-                            map.getUiSettings().setMyLocationButtonEnabled(false);
-                        }
-                    }
-                });
-            }
-        } catch (SecurityException e) {
-            Log.e("Exception: %s", e.getMessage(), e);
-        }
-    }
-
-    // add new marker to the map along with tag
-    // TODO: replace with place id
-    private void addMarker(MarkerOptions newMarker, com.example.travelguide.classes.Location location) {
-        Marker marker = map.addMarker(newMarker);
-
-        if (marker != null) {
-            marker.setTag(location);
-        }
-    }
-
-
-    @Override
-    protected void onSaveInstanceState(@NonNull @org.jetbrains.annotations.NotNull Bundle outState) {
-
-        if (map != null) {
-            // saves map current location and camera position when activity is paused
-            outState.putParcelable(KEY_CAMERA_POSITION, map.getCameraPosition());
-            outState.putParcelable(KEY_LOCATION, lastKnownLocation);
-        }
-
-        super.onSaveInstanceState(outState);
-    }
-
-    // handles the back press based what is showing
-    @Override
-    public void onBackPressed() {
-
-        // if the modal fragment is visible
-        if (modalLocationGuideFragment != null && modalLocationGuideFragment.isVisible()) {
-
-            // resets the modal state
-            sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-
-            // adjust the ui accordingly
-            getSupportFragmentManager().beginTransaction().remove(modalLocationGuideFragment).commit();
-            findViewById(modalFrameId).setVisibility(View.INVISIBLE);
-            showOverlayBtns();
-
-            return;
-        }
-
-        if (!(searchView.isIconified())) {
-            closeSearchView();
-        } else {
-
-            // if there are no stacks showing go to home screen
-            if (HelperClass.emptyBackStack(fragmentManager)) {
-                super.onBackPressed();
-
-            } else {
-                // if the stack isn't empty
-                fragmentManager.popBackStack();
-
-                // is back stack empty set addGuide button to be visible and refresh page
-                if (fragmentManager.getBackStackEntryCount() == 1) {
-                    getGuides();
-                    showOverlayBtns();
-                }
-            }
-        }
-    }
-
     // TODO: Add transition
     // sets the view state for the addGuide Button
     public void hideOverlayBtns() {
@@ -629,12 +592,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     // TODO: add zoom when navigating from adding new guide
     public void zoomToLocation(LatLng location) {
-        map.animateCamera(CameraUpdateFactory.newLatLngZoom(location, DEFAULT_ZOOM));
+        map.animateCamera(CameraUpdateFactory.newLatLngZoom(location, map.getCameraPosition().zoom));
     }
 
     // overloaded function with callback
     public void zoomToLocation(LatLng location, GoogleMap.CancelableCallback callback) {
-        map.animateCamera(CameraUpdateFactory.newLatLngZoom(location, DEFAULT_ZOOM), callback);
+        map.animateCamera(CameraUpdateFactory.newLatLngZoom(location, map.getCameraPosition().zoom), callback);
+    }
+
+
+    // add new marker to the map along with tag
+    private void addMarker(MarkerOptions newMarker, com.example.travelguide.classes.Location location) {
+        Marker marker = map.addMarker(newMarker);
+
+        if (marker != null) {
+            marker.setTag(location);
+        }
     }
 
     /// close the searchview element

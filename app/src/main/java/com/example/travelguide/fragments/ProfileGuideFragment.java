@@ -112,7 +112,6 @@ public class ProfileGuideFragment extends LocationGuideFragment {
 
     @Override
     protected void queryGuides() {
-
         if (type.equals(HelperClass.profileTabTitles[0])) {
             queryCreatedGuides();
         } else if (type.equals(HelperClass.profileTabTitles[1])) {
@@ -168,7 +167,6 @@ public class ProfileGuideFragment extends LocationGuideFragment {
 
         // order posts by creation date (newest first)
         query.addDescendingOrder("createdAt");
-
         // start an asynchronous call for posts
         query.findInBackground((activities, e) -> {
             // check for errors
@@ -191,7 +189,6 @@ public class ProfileGuideFragment extends LocationGuideFragment {
             adapter.clear();
             // save received posts to list and notify adapter of new data
             adapter.addAll(guideList);
-
             adapter.notifyDataSetChanged();
 
             Log.i(TAG, String.valueOf(adapter.getItemCount()));

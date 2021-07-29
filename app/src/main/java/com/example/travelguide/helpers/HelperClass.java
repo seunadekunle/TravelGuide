@@ -30,6 +30,7 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.example.travelguide.R;
 import com.example.travelguide.classes.GlideApp;
+import com.example.travelguide.classes.GlideModule;
 import com.example.travelguide.classes.Location;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.libraries.places.api.Places;

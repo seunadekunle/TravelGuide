@@ -12,12 +12,15 @@
             <size
                 android:width="@dimen/add_guide_media_btn"
                 android:height="@dimen/add_guide_media_btn" />
-            <solid android:color="@color/media_button_selected" />
+            <solid android:color="@color/white" />
             <corners android:radius="@dimen/corner_radius" />
+            <stroke
+                android:width="1.5dp"
+                android:color="@color/main_color" />
 
         </shape>
     </item>
 
-    <item android:drawable="@drawable/ic_baseline_photo_library_24" />
+    <item android:drawable="@drawable/ic_baseline_photo_library_24_blue" />
 
 </layer-list>

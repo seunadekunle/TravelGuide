@@ -13,7 +13,7 @@
     <color name="light_blue_A200">#FF40C4FF</color>
     <color name="light_blue_A400">#FF00B0FF</color>
     <color name="black_overlay">#66000000</color>
-    <color name="media_button_selected">#CCCCCC</color>
+    <color name="media_button_selected">#F1F1F1</color>
     <color name="hint_color">#A2A2A2</color>
     <color name="main_color">#003F91</color>
     <color name="secondary_color">#3590F3</color>

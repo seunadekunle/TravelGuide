@@ -34,16 +34,17 @@
                 android:id="@+id/textView2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
                 android:text="@string/add_location"
-                android:layout_marginBottom="5dp"/>
+                android:textColor="@color/black" />
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/locationBtn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@drawable/searchview_bg"
                 android:text="@string/add_location"
-                android:textColor="@color/black"
-                android:background="@drawable/searchview_bg"/>
+                android:textColor="@color/black" />
         </LinearLayout>
 
 
@@ -57,15 +58,20 @@
                 android:id="@+id/textView3"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/add_text" />
+                android:layout_marginBottom="5dp"
+
+                android:text="@string/add_text"
+                android:textColor="@color/black" />
 
             <EditText
                 android:id="@+id/etText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@drawable/searchview_bg"
                 android:ems="10"
                 android:gravity="start|top"
-                android:inputType="textMultiLine" />
+                android:inputType="textMultiLine"
+                android:padding="11.5dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -78,7 +84,9 @@
                 android:id="@+id/textView4"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/add_media" />
+                android:layout_marginBottom="5dp"
+                android:text="@string/add_media"
+                android:textColor="@color/black" />
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -184,10 +192,10 @@
                 android:id="@+id/addBtn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/add_guide"
                 android:background="@drawable/btn_bg"
+                android:text="@string/add_guide"
                 android:textColor="@color/white"
-                android:textSize="15dp"/>
+                android:textSize="15dp" />
 
         </LinearLayout>
 

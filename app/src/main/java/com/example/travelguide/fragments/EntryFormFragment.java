@@ -200,7 +200,7 @@ public class EntryFormFragment extends Fragment {
 
     // shows the sign up state
     private void showSignUpState(@StringRes Integer stateString) {
-        Snackbar stateText = Snackbar.make(getView(), stateString, Snackbar.LENGTH_SHORT);
+        Snackbar stateText = Snackbar.make(requireView(), stateString, Snackbar.LENGTH_SHORT);
         HelperClass.displaySnackBarWithBottomMargin(stateText, 400, getActivity());
     }
 

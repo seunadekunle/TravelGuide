@@ -138,7 +138,7 @@ public class LocationGuideFragment extends Fragment {
             public boolean onQueryTextSubmit(String query) {
                 // clears focus and hides keyboard
                 svGuide.clearFocus();
-                HelperClass.hideKeyboard(getActivity());
+                HelperClass.hideKeyboard(requireActivity());
 
                 swipeContainer.setEnabled(true);
                 return false;
@@ -211,7 +211,7 @@ public class LocationGuideFragment extends Fragment {
             // shows an alert dialog
             if (followBtn.isSelected()) {
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
 
                 // sets title and message
                 builder.setTitle("Unfollow location");
