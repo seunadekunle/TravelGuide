@@ -283,7 +283,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void showModalFragment(Fragment modalFragment, boolean isDraggable) {
 
         sheetBehavior.setDraggable(isDraggable);
-
         // shows modal view of location being selected
         findViewById(modalFrameId).setVisibility(View.VISIBLE);
 
@@ -297,9 +296,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         ft.commit();
     }
 
+    // hides modal view making map draggable
     public void hideModalFragment() {
-        // shows modal view of location being selected
-        findViewById(modalFrameId).setVisibility(View.VISIBLE);
+        findViewById(modalFrameId).setVisibility(View.INVISIBLE);
     }
 
 

@@ -143,6 +143,8 @@ Parse.Cloud.define("getTrendingLocations", async (request) => {
         locationsData.push(newLocation);
     }
 
+
+
     // returns location data
     return locationsData;
 });

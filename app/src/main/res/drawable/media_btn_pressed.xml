@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
-        <shapex android:shape="rectangle">
+        <shape android:shape="rectangle">
 
             <padding
                 android:bottom="@dimen/img_btn_padding"
@@ -17,7 +17,7 @@
             <stroke
                 android:width="1.5dp"
                 android:color="@color/main_color" />
-        </shapex>
+        </shape>
     </item>
 
     <item android:drawable="@drawable/ic_baseline_camera_alt_24_blue" />
