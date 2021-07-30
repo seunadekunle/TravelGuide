@@ -1,3 +1,5 @@
+const { async } = require("parse/lib/node/Storage");
+
 Parse.Cloud.define("sendFollowNotification", function (request) {
 
     // gets variables from parameters
@@ -31,7 +33,7 @@ Parse.Cloud.define("sendFollowNotification", function (request) {
 
             // if there are users following the usersuser is
             if (typeof followed != 'undefined') {
-                sendNotifications(followed);
+                getFollowingUsers(followed);
             }
         })
         .catch(error => {
@@ -40,7 +42,7 @@ Parse.Cloud.define("sendFollowNotification", function (request) {
 
 
 
-    function sendNotifications(followed) {
+    function getFollowingUsers(followed) {
 
         // test console
         console.log(JSON.parse(JSON.stringify(followed.get("coordinates"))))
@@ -95,6 +97,50 @@ Parse.Cloud.define("sendFollowNotification", function (request) {
     return "Notification Sent";
 });
 
+Parse.Cloud.define("getTrendingLocations", async (request) => {
+
+    // references to the different Parse classes
+    const Location = Parse.Object.extend("Location");
+    const Activity = Parse.Object.extend("Activity");
+
+    var locationsData = [];
+    var text = "hello";
+
+    // Find location being sent
+    const locationQuery = new Parse.Query(Location);
+    // async query
+    let locations = await locationQuery.find();
+
+    locations.forEach(location => {
+
+        // creates new object
+        let newLocation = new Object();
+
+        newLocation.id = location.id;
+        newLocation.followers = location.attributes.followers;
+
+        addNewLocation(newLocation);
+        // getFollowers(location);
+    });
+
+    // sorts the locations by the number of followers
+    locationsData.sort((a, b) => (a.followers > b.followers) ? -1 : 1)
+
+    // sorts the locations by the number of fllowers
+    locationsData = locationsData.filter(locationData => locationData.followers > 0);
+
+    for (var i = 0; i < locationsData.length; i++) {
+        console.log(locationsData[i])
+    }
+
+    // add new locations to the array
+    function addNewLocation(newLocation) {
+        locationsData.push(newLocation);
+    }
+
+    // returns location data
+    return locationsData;
+});
 //    console.log(results.length);
 
 //

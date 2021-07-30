@@ -1,12 +1,10 @@
 package com.example.travelguide.activities;
 
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
@@ -155,8 +153,29 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         initializeMap();
 
+        // passes in the parameters for the cloud function
+        final HashMap<String, String> trendingParams = new HashMap<>();
+
+        // Calling the cloud code function
+        ParseCloud.callFunctionInBackground("getTrendingLocations", trendingParams, new FunctionCallback<Object>() {
+            @Override
+            public void done(Object response, ParseException e) {
+
+
+                if (e != null) {
+                    Log.i(TAG, e.getMessage());
+                    return;
+                }
+
+                Log.i(TAG, String.valueOf(response));
+                Log.i(TAG, "done");
+            }
+        });
+
+        // makes search list gone and sets resource
         rvSearchList.setVisibility(View.GONE);
         rvSearchList.setBackgroundResource(R.drawable.searchview_bg);
+
         // creates new instance of the different fragments
         composeFragment = new ComposeFragment();
         profileFragment = ProfileFragment.newInstance(fragmentsFrameId, ParseUser.getCurrentUser().getObjectId());
