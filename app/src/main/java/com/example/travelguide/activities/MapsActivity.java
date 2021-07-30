@@ -35,6 +35,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -81,7 +82,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // search ui elements
     private SearchListAdapter adapter;
     private List<AutocompletePrediction> predictions;
-    private BottomSheetBehavior sheetBehavior;
+    private BottomSheetBehavior<View> sheetBehavior;
 
     // different fragments
     private ComposeFragment composeFragment;
@@ -99,6 +100,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final int DEFAULT_ZOOM = 17;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean locationPermissionGranted;
+    private List<HashMap<Integer, String>> trendingLocations;
+
 
     // The geographical location where the device is currently located. That is, the last-known
     // location retrieved by the Fused Location Provider.
@@ -151,26 +154,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         height = DeviceDimenHelper.getDisplayHeight(this);
         width = DeviceDimenHelper.getDisplayWidth(this);
 
+        // initiates the trending location arraylist
+        trendingLocations = new ArrayList<>();
         initializeMap();
-
-        // passes in the parameters for the cloud function
-        final HashMap<String, String> trendingParams = new HashMap<>();
-
-        // Calling the cloud code function
-        ParseCloud.callFunctionInBackground("getTrendingLocations", trendingParams, new FunctionCallback<Object>() {
-            @Override
-            public void done(Object response, ParseException e) {
-
-
-                if (e != null) {
-                    Log.i(TAG, e.getMessage());
-                    return;
-                }
-
-                Log.i(TAG, String.valueOf(response));
-                Log.i(TAG, "done");
-            }
-        });
 
         // makes search list gone and sets resource
         rvSearchList.setVisibility(View.GONE);
@@ -408,10 +394,29 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Prompt the user for permission.
         getLocationPermission();
 
+        // passes in the parameters for the cloud function
+        final HashMap<String, String> trendingParams = new HashMap<>();
+        // Calling the cloud code function to get trending locations
+        ParseCloud.callFunctionInBackground("getTrendingLocations", trendingParams, new FunctionCallback<Object>() {
+            @Override
+            public void done(Object response, ParseException e) {
+
+                if (e != null) {
+                    Log.i(TAG, e.getMessage());
+                    return;
+                }
+
+                if (response != null) {
+                    trendingLocations = (List<HashMap<Integer, String>>) response;
+                    // get list of currrent guides
+                    getGuides();
+                }
+
+            }
+        });
+
         // Turn on the My Location layer and the related control on the map.
         updateLocationUI();
-        // get list of currrent guides
-        getGuides();
         // Get the current location of the device and set the position of the map.
         getDeviceLocation();
 
@@ -449,13 +454,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         ParseQuery<com.example.travelguide.classes.Location> query = ParseQuery.getQuery(com.example.travelguide.classes.Location.class);
         query.findInBackground((locations, e) -> {
 
+            // if there is no error
             if (e == null) {
+
                 for (int i = 0; i < locations.size(); i++) {
 
                     // retrieves geo point from database and converts it to a LatLng Object
                     LatLng location = locations.get(i).getCoord();
-                    // adds a new marker with the LatLng object
-                    addMarker(new MarkerOptions().position(location), locations.get(i));
+
+                    if (inTrendingLocations(locations.get(i))) {
+
+                        // creates colored marker
+                        MarkerOptions markerOptions = new MarkerOptions().position(location)
+                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+                                .title(locations.get(i).getPlaceID());
+
+                        // adds a new marker with the LatLng object
+                        addMarker(markerOptions, locations.get(i));
+                    } else {
+                        // adds a new marker with the LatLng object
+                        addMarker(new MarkerOptions().position(location), locations.get(i));
+                    }
                 }
 
                 // hides progress bar
@@ -466,6 +485,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
         ParseQuery.clearAllCachedResults();
+    }
+
+    // check location object is trending
+    private boolean inTrendingLocations(com.example.travelguide.classes.Location location) {
+
+        if (trendingLocations != null) {
+
+            for (int i = 0; i < trendingLocations.size(); i++) {
+                // if the location is trending return true
+                if (location.getObjectId().equals(trendingLocations.get(i).get("id"))) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 
