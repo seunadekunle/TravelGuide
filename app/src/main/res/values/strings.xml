@@ -55,5 +55,6 @@
     <string name="guides">Guides</string>
     <string name="add">Add</string>
     <string name="profile">Profile</string>
-    <string name="top_guides">Top Guides</string>
+    <string name="top_locations">Top Locations</string>
+    <string name="dismiss">dismiss</string>
 </resources>

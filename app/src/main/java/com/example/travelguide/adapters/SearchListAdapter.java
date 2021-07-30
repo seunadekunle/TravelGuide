@@ -54,7 +54,6 @@ public class SearchListAdapter extends RecyclerView.Adapter<SearchListAdapter.Vi
         holder.searchViewLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 // if the click was a valid part of the ui
                 if(position != RecyclerView.NO_POSITION) {
                     onItemClickListener.onItemClick(locationPredictions.get(position));

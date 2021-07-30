@@ -27,6 +27,7 @@ import com.example.travelguide.databinding.SearchviewUiBinding;
 import com.example.travelguide.fragments.ComposeFragment;
 import com.example.travelguide.fragments.LocationGuideFragment;
 import com.example.travelguide.fragments.ProfileFragment;
+import com.example.travelguide.fragments.TopLocationsFragment;
 import com.example.travelguide.helpers.DeviceDimenHelper;
 import com.example.travelguide.helpers.HelperClass;
 import com.google.android.gms.common.api.ApiException;
@@ -92,6 +93,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LocationGuideFragment modalLocationGuideFragment;
     private ProfileFragment profileFragment;
     private SupportMapFragment mapFragment;
+    private TopLocationsFragment topLocationsFragment;
 
     // The entry point to the Fused Location Provider.
     private FusedLocationProviderClient fusedLocationProviderClient;
@@ -102,7 +104,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final int DEFAULT_ZOOM = 17;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean locationPermissionGranted;
-    private List<HashMap<Integer, String>> trendingLocations;
+
+    // top locations data structures
+    private List<HashMap<Integer, String>> topLocations;
+    private List<com.example.travelguide.classes.Location> topLocationObjects;
 
 
     // The geographical location where the device is currently located. That is, the last-known
@@ -161,7 +166,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         width = DeviceDimenHelper.getDisplayWidth(this);
 
         // initiates the trending location arraylist
-        trendingLocations = new ArrayList<>();
+        topLocations = new ArrayList<>();
         initializeMap();
 
         // makes search list gone and sets resource
@@ -244,18 +249,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     }
                                 }
 
-                                // shows modal view of location being selected
-                                findViewById(modalFrameId).setVisibility(View.VISIBLE);
                                 modalLocationGuideFragment = LocationGuideFragment.newInstance(modalLocation[0], fragmentsFrameId, true);
-
-                                // Begin the transaction
-                                FragmentTransaction ft = fragmentManager.beginTransaction();
-                                // add fragment to container
-                                ft.replace(modalFrameId, modalLocationGuideFragment);
-                                // complete the transaction
-                                ft.show(modalLocationGuideFragment);
-                                // Complete the changes added above
-                                ft.commit();
+                                showModalFragment(modalLocationGuideFragment, true);
                             };
 
 
@@ -264,7 +259,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                         @Override
                         public void onCancel() {
-
                         }
                     };
 
@@ -286,8 +280,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
 
+    public void showModalFragment(Fragment modalFragment, boolean isDraggable) {
+
+        sheetBehavior.setDraggable(isDraggable);
+
+        // shows modal view of location being selected
+        findViewById(modalFrameId).setVisibility(View.VISIBLE);
+
+        // Begin the transaction
+        FragmentTransaction ft = fragmentManager.beginTransaction();
+        // add fragment to container
+        ft.replace(modalFrameId, modalFragment);
+        // complete the transaction
+        ft.show(modalFragment);
+        // Complete the changes added above
+        ft.commit();
+    }
+
+    public void hideModalFragment() {
+        // shows modal view of location being selected
+        findViewById(modalFrameId).setVisibility(View.VISIBLE);
+    }
+
+
     // sets up modal sheetBehavior
     private void setupSheetBehavior() {
+
+        sheetBehavior.setDraggable(modalLocationGuideFragment != null);
+
         sheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull @NotNull View bottomSheet, int newState) {
@@ -295,12 +315,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 // toggle searchview if view is expanded and show expand indicator
                 if (newState == BottomSheetBehavior.STATE_EXPANDED) {
                     searchView.setVisibility(View.INVISIBLE);
-                    modalLocationGuideFragment.changeIndicatorState(View.INVISIBLE);
+
+                    if (modalLocationGuideFragment != null) {
+                        modalLocationGuideFragment.changeIndicatorState(View.INVISIBLE);
+                    }
                 }
 
                 if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
                     searchView.setVisibility(View.VISIBLE);
-                    modalLocationGuideFragment.changeIndicatorState(View.VISIBLE);
+
+                    if (modalLocationGuideFragment != null) {
+                        modalLocationGuideFragment.changeIndicatorState(View.VISIBLE);
+                    }
                 }
             }
 
@@ -413,9 +439,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
 
                 if (response != null) {
-                    trendingLocations = (List<HashMap<Integer, String>>) response;
 
-                    Log.i(TAG, String.valueOf(trendingLocations));
+                    topLocations = (List<HashMap<Integer, String>>) response;
+                    topLocationObjects = new ArrayList<>();
+
                     // get list of currrent guides
                     getGuides();
                 }
@@ -470,25 +497,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     // retrieves geo point from database and converts it to a LatLng Object
                     LatLng location = locations.get(i).getCoord();
 
-                    if (inTrendingLocations(locations.get(i))) {
-
-                        // creates colored marker
-                        MarkerOptions markerOptions = new MarkerOptions().position(location)
-                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
-                                .title(locations.get(i).getPlaceID());
-
-                        // adds a new marker with the LatLng object
-                        addMarker(markerOptions, locations.get(i));
-
-                    } else {
-                        // adds a new marker with the LatLng object
-                        addMarker(new MarkerOptions().position(location), locations.get(i));
+                    // add top location to the object
+                    if (inTopLocations(locations.get(i))) {
+                        topLocationObjects.add(locations.get(i));
                     }
+
+                    // adds a new marker with the LatLng object
+                    MarkerOptions markerOptions = new MarkerOptions().position(location)
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+                    addMarker(markerOptions, locations.get(i));
                 }
 
                 // hides progress bar
                 pbMaps.setVisibility(View.INVISIBLE);
                 showOverlayBtns();
+
+                topLocationsFragment = TopLocationsFragment.newInstance(topLocationObjects);
+                showTopLocations();
             } else {
                 Log.e(TAG, "Not getting guides", e);
             }
@@ -496,14 +521,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         ParseQuery.clearAllCachedResults();
     }
 
+    private void showTopLocations() {
+        if (topLocationsFragment != null) {
+            showModalFragment(topLocationsFragment, false);
+        }
+    }
+
     // check location object is trending
-    private boolean inTrendingLocations(com.example.travelguide.classes.Location location) {
+    private boolean inTopLocations(com.example.travelguide.classes.Location location) {
 
-        if (trendingLocations != null) {
+        if (topLocations != null) {
 
-            for (int i = 0; i < trendingLocations.size(); i++) {
+            for (int i = 0; i < topLocations.size(); i++) {
                 // if the location is trending return true
-                if (location.getObjectId().equals(trendingLocations.get(i).get("id"))) {
+                if (topLocations.get(i).containsValue(location.getObjectId())) {
                     return true;
                 }
             }
@@ -645,7 +676,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             // adjust the ui accordingly
             getSupportFragmentManager().beginTransaction().remove(modalLocationGuideFragment).commit();
-            findViewById(modalFrameId).setVisibility(View.INVISIBLE);
+
+            hideModalFragment();
             showOverlayBtns();
 
             return;
@@ -706,5 +738,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         searchView.setQuery("", false);
         searchView.setIconified(true);
         searchView.onActionViewCollapsed();
+    }
+
+    public void setModalLocationGuideFragment(LocationGuideFragment locationGuideFragment){
+        this.modalLocationGuideFragment = locationGuideFragment;
+        showModalFragment(modalLocationGuideFragment, true);
+    }
+    public int getFragmentsFrameId() {
+        return fragmentsFrameId;
     }
 }

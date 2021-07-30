@@ -138,8 +138,7 @@ public class LocationGuideFragment extends Fragment {
         // show indicator if the fragment is expandable
         if (expandable) {
             changeIndicatorState(View.VISIBLE);
-        }
-        else {
+        } else {
             ivExpandIndicator.setVisibility(View.INVISIBLE);
         }
     }
@@ -295,6 +294,8 @@ public class LocationGuideFragment extends Fragment {
     }
 
     public void setTitleText() {
+
+        // callback to set ui text
         OnSuccessListener<FetchPlaceResponse> textSuccess = fetchPlaceResponse -> tvAddress.setText(fetchPlaceResponse.getPlace().getName());
 
         // sets the title name based on place id
