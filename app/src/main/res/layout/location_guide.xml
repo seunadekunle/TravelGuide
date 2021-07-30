@@ -5,7 +5,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="15dp">
+    android:layout_marginBottom="15dp"
+    android:paddingBottom="15dp">
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
@@ -15,13 +16,14 @@
         android:layout_marginEnd="7.5dp"
         android:layout_marginBottom="7.5dp"
         app:cardCornerRadius="@dimen/corner_radius"
-        app:cardElevation="1dp"
+        app:cardElevation="7.5dp"
         tools:ignore="MissingConstraints">
 
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@drawable/searchview_bg"
             android:orientation="vertical">
 
             <LinearLayout
@@ -38,8 +40,8 @@
                     android:layout_margin="10dp"
                     android:layout_weight="0"
                     android:clickable="true"
-                    tools:srcCompat="@tools:sample/avatars"
-                    android:focusable="true" />
+                    android:focusable="true"
+                    tools:srcCompat="@tools:sample/avatars" />
 
                 <TextView
                     android:id="@+id/tvUsername"
@@ -47,12 +49,12 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_marginRight="10dp"
+                    android:clickable="true"
+                    android:focusable="true"
                     android:fontFamily="sans-serif-medium"
                     android:text="username"
                     android:textColor="@color/black"
-                    android:textSize="14.5sp"
-                    android:clickable="true"
-                    android:focusable="true"/>
+                    android:textSize="14.5sp" />
 
                 <TextView
                     android:id="@+id/tvCreatedAt"

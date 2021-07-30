@@ -26,7 +26,7 @@
     <string name="sign_up_failed">Sorry, the Sign Up Failed</string>
     <string name="error_invalid_credentials">Invalid username/password.</string>
     <string name="delete_media">delete media</string>
-    <string name="search">Search..</string>
+    <string name="search">Where are you going?</string>
     <string name="no_guide_added">No guide has been added \nclick the Add button</string>
     <string name="profile_icon">Profile Icon</string>
     <string name="log_out">Log Out</string>
@@ -51,4 +51,9 @@
     <string name="no">No</string>
     <string name="follow">Follow</string>
     <string name="following">Following</string>
+    <string name="search_guides">Search Guides</string>
+    <string name="guides">Guides</string>
+    <string name="add">Add</string>
+    <string name="profile">Profile</string>
+    <string name="top_guides">Top Guides</string>
 </resources>

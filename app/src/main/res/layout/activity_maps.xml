@@ -37,22 +37,12 @@
         android:layout_height="match_parent"
         android:fitsSystemWindows="true">
 
-        <SearchView
-            android:id="@+id/searchView"
+        <include
+            android:id="@+id/searchViewUI"
+            layout="@layout/searchview_ui"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="7.5dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="10dp"
-            android:fitsSystemWindows="false"
-            android:iconifiedByDefault="true"
-            android:layoutDirection="rtl"
-            android:padding="0dp"
-            android:queryBackground="@drawable/searchview_bg"
-            android:queryHint="@string/search"
-            android:searchIcon="@drawable/search_icon"
-            android:visibility="visible"
-            />
+            android:layout_marginTop="15dp"/>
 
         <ImageButton
             android:id="@+id/ibProfile"
@@ -68,20 +58,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:ignore="MissingConstraints" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvSearchList"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="22.5dp"
-            android:layout_marginTop="75dp"
-            android:layout_marginRight="20dp"
-            android:layout_marginBottom="20dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:visibility="visible"
-            map:layout_constraintTop_toBottomOf="@+id/searchView"
-            tools:layout_editor_absoluteX="20dp" />
 
         <androidx.coordinatorlayout.widget.CoordinatorLayout
 
@@ -103,7 +79,6 @@
                 app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior" />
 
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
-
     </FrameLayout>
 
     <ProgressBar

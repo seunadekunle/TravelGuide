@@ -4,7 +4,7 @@
     android:name="com.example.travelguide.fragments.LocationDetail"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/off_white"
+    android:background="@color/white"
     android:clickable="true"
     android:focusable="true"
     tools:context=".fragments.LocationGuideFragment">
@@ -43,42 +43,41 @@
             android:layout_marginBottom="15dp"
             android:fontFamily="sans-serif-black"
             android:text="Address"
-            android:textColor="#000000"
+            android:textColor="@color/black"
             android:textSize="@dimen/location_header" />
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/followBtn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="7.5dp"
-            android:layout_marginEnd="7.5dp"
-            android:layout_marginBottom="5dp"
-            android:background="@drawable/follow_btn_bg"
-            android:elevation="0dp"
-            android:text="@string/follow" />
-
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="15dp"
             android:orientation="horizontal">
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/followBtn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="7.5dp"
+                android:layout_marginEnd="7.5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_weight="2"
+                android:background="@drawable/follow_btn_bg"
+                android:elevation="0dp"
+                android:text="@string/follow"
+                android:textSize="13sp" />
 
             <SearchView
                 android:id="@+id/svGuide"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:iconifiedByDefault="true"
+                android:layout_weight="1"
+                android:iconifiedByDefault="false"
                 android:padding="0dp"
                 android:queryBackground="@drawable/searchview_bg"
-                android:queryHint="@string/search"
+                android:queryHint="@string/search_guides"
+                android:searchIcon="@null"
                 android:visibility="visible" />
-
-            <Spinner
-                android:id="@+id/spinner2"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
         </LinearLayout>
+
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/swipeContainer"
@@ -89,8 +88,7 @@
                 android:id="@+id/rvGuides"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:nestedScrollingEnabled="false"
-                />
+                android:nestedScrollingEnabled="false" />
 
             <ProgressBar
                 android:id="@+id/pbLoading"

@@ -1,5 +1,7 @@
 const { async } = require("parse/lib/node/Storage");
 
+
+// sends the follos notification
 Parse.Cloud.define("sendFollowNotification", function (request) {
 
     // gets variables from parameters
@@ -79,6 +81,8 @@ Parse.Cloud.define("sendFollowNotification", function (request) {
     }
 
     function pushNotifications(users) {
+
+        // ensures that it only selects the users in the array
         const userQuery = new Parse.Query(Parse.User);
         userQuery.containedIn('objectId', users);
 
@@ -97,6 +101,8 @@ Parse.Cloud.define("sendFollowNotification", function (request) {
     return "Notification Sent";
 });
 
+
+// returns a list of trending locations
 Parse.Cloud.define("getTrendingLocations", async (request) => {
 
     // references to the different Parse classes
@@ -104,7 +110,6 @@ Parse.Cloud.define("getTrendingLocations", async (request) => {
     const Activity = Parse.Object.extend("Activity");
 
     var locationsData = [];
-    var text = "hello";
 
     // Find location being sent
     const locationQuery = new Parse.Query(Location);

@@ -33,7 +33,6 @@ import com.example.travelguide.classes.Location;
 import com.example.travelguide.helpers.HelperClass;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.libraries.places.api.net.FetchPlaceRequest;
 import com.google.android.libraries.places.api.net.FetchPlaceResponse;
 import com.parse.FindCallback;
 import com.parse.ParseException;
@@ -133,6 +132,22 @@ public class LocationGuideFragment extends Fragment {
         queryGuides();
         handleFollowBtn();
 
+        setupSearchView();
+
+
+        // show indicator if the fragment is expandable
+        if (expandable) {
+            changeIndicatorState(View.VISIBLE);
+        }
+        else {
+            ivExpandIndicator.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    // setups the searchView
+    public void setupSearchView() {
+
+//        svGuide.onActionViewExpanded();
         svGuide.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -147,10 +162,11 @@ public class LocationGuideFragment extends Fragment {
             @Override
             public boolean onQueryTextChange(String newText) {
 
-                if (!newText.isEmpty())
+                if (!newText.isEmpty()) {
                     adapter.filter(newText);
-                else
+                } else {
                     adapter.resetFilter();
+                }
 
                 swipeContainer.setEnabled(false);
                 return false;
@@ -167,19 +183,9 @@ public class LocationGuideFragment extends Fragment {
                 return false;
             }
         });
-
-
-        // show indicator if the fragment is expandable
-        if (expandable)
-            changeIndicatorState(View.VISIBLE);
-        else
-            ivExpandIndicator.setVisibility(View.INVISIBLE);
-
     }
 
     public void handleFollowBtn() {
-
-
         // callback to follow a location
         FindCallback<ParseObject> isFollowedCallback = (objects, e) -> {
             if (e == null && objects.size() >= 1) {
@@ -292,20 +298,13 @@ public class LocationGuideFragment extends Fragment {
         OnSuccessListener<FetchPlaceResponse> textSuccess = fetchPlaceResponse -> tvAddress.setText(fetchPlaceResponse.getPlace().getName());
 
         // sets the title name based on place id
-        if (parseLocation.getPlaceID().equals(HelperClass.defaultPlaceID))
+        if (parseLocation.getPlaceID().equals(HelperClass.defaultPlaceID)) {
             tvAddress.setText(HelperClass.getAddress(context, parseLocation.getCoord().latitude, parseLocation.getCoord().longitude));
-        else
-            fetchPlacesName(textSuccess);
-
-
+        } else {
+            HelperClass.fetchPlacesName(textSuccess, parseLocation.getPlaceID());
+        }
     }
 
-    private void fetchPlacesName(OnSuccessListener<FetchPlaceResponse> responseListener) {
-        FetchPlaceRequest request = FetchPlaceRequest.newInstance(parseLocation.getPlaceID(), HelperClass.placesFields);
-        HelperClass.getPlacesClient().fetchPlace(request)
-                .addOnSuccessListener(responseListener);
-
-    }
 
     protected void setupGuideList(@NotNull View view, Context context, ImageView expandedImgView, View expandedImgViewBG, boolean inProfile) {
 

@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.travelguide.R;
 import com.example.travelguide.adapters.SearchListAdapter;
 import com.example.travelguide.databinding.ActivityMapsBinding;
+import com.example.travelguide.databinding.SearchviewUiBinding;
 import com.example.travelguide.fragments.ComposeFragment;
 import com.example.travelguide.fragments.LocationGuideFragment;
 import com.example.travelguide.fragments.ProfileFragment;
@@ -78,6 +79,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private SearchView searchView;
     private RecyclerView rvSearchList;
     private ImageButton ibProfile;
+    private SearchviewUiBinding searchviewUiBinding;
 
     // search ui elements
     private SearchListAdapter adapter;
@@ -141,8 +143,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // bind ui element to variable
         addGuide = binding.addGuide;
         pbMaps = binding.pbMaps;
-        searchView = binding.searchView;
-        rvSearchList = binding.rvSearchList;
+
+        // binds element to search view
+        searchviewUiBinding = binding.searchViewUI;
+        searchView = searchviewUiBinding.searchView;
+        rvSearchList = searchviewUiBinding.rvSearchList;
+
         ibProfile = binding.ibProfile;
         sheetBehavior = BottomSheetBehavior.from(findViewById(R.id.modalLocationView));
 
@@ -303,8 +309,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
-        // sets sheet behavaior height
-        sheetBehavior.setPeekHeight(DeviceDimenHelper.getDisplayHeight(getApplicationContext()) / 3);
+        // sets sheet behavior height
+        sheetBehavior.setPeekHeight((int) (DeviceDimenHelper.getDisplayHeight(getApplicationContext()) / 2.5));
     }
 
     private void setupSearchView() {
@@ -408,6 +414,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 if (response != null) {
                     trendingLocations = (List<HashMap<Integer, String>>) response;
+
+                    Log.i(TAG, String.valueOf(trendingLocations));
                     // get list of currrent guides
                     getGuides();
                 }
@@ -471,6 +479,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                         // adds a new marker with the LatLng object
                         addMarker(markerOptions, locations.get(i));
+
                     } else {
                         // adds a new marker with the LatLng object
                         addMarker(new MarkerOptions().position(location), locations.get(i));
@@ -683,6 +692,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // TODO: add zoom when navigating from adding new guide
     public void zoomToLocation(LatLng location) {
         map.animateCamera(CameraUpdateFactory.newLatLngZoom(location, DEFAULT_ZOOM));
+//        lastKnownLocation = (Location) location;
     }
 
     // overloaded function with callback

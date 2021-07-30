@@ -15,8 +15,6 @@ import com.example.travelguide.R;
 import com.example.travelguide.classes.Activity;
 import com.example.travelguide.classes.Guide;
 import com.example.travelguide.helpers.HelperClass;
-import com.parse.GetCallback;
-import com.parse.ParseException;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
@@ -24,7 +22,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -55,7 +52,7 @@ public class ProfileGuideFragment extends LocationGuideFragment {
      * this fragment using the provided parameters.
      *
      * @param typeParam type of fragment.
-     * @param idParam user ID.
+     * @param idParam   user ID.
      * @return A new instance of fragment ProfileGuideFragment.
      */
     // TODO: Rename and change types and number of parameters
@@ -77,7 +74,6 @@ public class ProfileGuideFragment extends LocationGuideFragment {
             type = getArguments().getString(ARG_PAGE_TYPE);
             userID = getArguments().getString(ARG_USER_ID);
         }
-
     }
 
     @Override

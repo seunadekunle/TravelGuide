@@ -33,8 +33,11 @@ import com.example.travelguide.classes.GlideApp;
 import com.example.travelguide.classes.GlideModule;
 import com.example.travelguide.classes.Location;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.FetchPlaceRequest;
+import com.google.android.libraries.places.api.net.FetchPlaceResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.material.snackbar.Snackbar;
 import com.parse.FindCallback;
@@ -92,6 +95,14 @@ public class HelperClass {
             Log.i(TAG, e.getMessage());
         }
         return "";
+    }
+
+
+    public static void fetchPlacesName(OnSuccessListener<FetchPlaceResponse> responseListener, String placeID) {
+        FetchPlaceRequest request = FetchPlaceRequest.newInstance(placeID, HelperClass.placesFields);
+        HelperClass.getPlacesClient().fetchPlace(request)
+                .addOnSuccessListener(responseListener);
+
     }
 
     /*
@@ -398,5 +409,4 @@ public class HelperClass {
             inputManager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
         }
     }
-
 }
