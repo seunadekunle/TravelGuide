@@ -1,5 +1,9 @@
 const { async } = require("parse/lib/node/Storage");
 
+// references to the different Parse classes
+const Location = Parse.Object.extend("Location");
+const Guide = Parse.Object.extend("Guide");
+
 
 // sends the follos notification
 Parse.Cloud.define("sendFollowNotification", function (request) {
@@ -101,21 +105,15 @@ Parse.Cloud.define("sendFollowNotification", function (request) {
     return "Notification Sent";
 });
 
-
-// returns a list of trending locations
-Parse.Cloud.define("getTrendingLocations", async (request) => {
-
-    // references to the different Parse classes
-    const Location = Parse.Object.extend("Location");
-    const Activity = Parse.Object.extend("Activity");
+async function getLocations() {
 
     var locationsData = [];
 
-    // Find location being sent
+    console.log("text");
+    // // Find location being sent
     const locationQuery = new Parse.Query(Location);
-    // async query
-    let locations = await locationQuery.find();
 
+    locations = await locationQuery.find();
     locations.forEach(location => {
 
         // creates new object
@@ -123,31 +121,90 @@ Parse.Cloud.define("getTrendingLocations", async (request) => {
 
         newLocation.id = location.id;
         newLocation.followers = location.attributes.followers;
-
+        newLocation.numGuides = 0;
+        newLocation.numLikes = 0;
+        newLocation.location = location;
         addNewLocation(newLocation);
-        // getFollowers(location);
     });
-
-    // sorts the locations by the number of followers
-    locationsData.sort((a, b) => (a.followers > b.followers) ? -1 : 1)
-
-    // sorts the locations by the number of fllowers
-    locationsData = locationsData.filter(locationData => locationData.followers > 0);
-
-    for (var i = 0; i < locationsData.length; i++) {
-        console.log(locationsData[i])
-    }
 
     // add new locations to the array
     function addNewLocation(newLocation) {
         locationsData.push(newLocation);
     }
 
-
-
-    // returns location data
     return locationsData;
+}
+
+async function getFinalLocations() {
+    var finalLocations = await getLocations();
+    console.log(finalLocations.length);
+    for (var i = 0; i < finalLocations.length; i++) {
+
+        // Find Guides that have been posted to the location
+        const guideQuery = new Parse.Query(Guide);
+        guideQuery.equalTo("locationID", finalLocations[i].location);
+        let guides = await guideQuery.find();
+
+
+        guides.forEach(guide => {
+            finalLocations[i].numGuides = guides.length;
+
+            // gets the number of likes that has been added to this location
+            var likesTotal = 0;
+            guides.forEach(guide => {
+                likesTotal += guide.attributes.likes;
+            });
+
+            finalLocations[i].numLikes = likesTotal;
+            // console.log(finalLocations[i]);
+        });
+
+    }
+
+    return finalLocations;
+}
+
+
+// returns a list of trending locations
+Parse.Cloud.define("getTrendingLocations", async (request) => {
+    var topLocations = await getFinalLocations();
+
+    for (var i = 0; i < topLocations.length; i++) {
+        console.log(topLocations[i]);
+    }
+
+    // removes locations with no followers, post or likes
+    topLocations = topLocations.filter(topLocation => (topLocation.followers > 0 || topLocation.numGuides > 0 || topLocation.numLikes > 0));
+
+    for (var i = 0; i < topLocations.length; i++) {
+
+        // removes the location variable as it isn't needed
+        delete topLocations[i].location;
+
+        /// calculates rank for each of the locations
+        var rank = (0.35 * topLocations[i].followers)
+        + (0.5 * topLocations[i].numGuides) + (0.15 * topLocations[i].numLikes)
+
+        topLocations[i].rank = rank;
+
+        delete topLocations[i].followers;
+        delete topLocations[i].numGuides;
+        delete topLocations[i].numLikes;
+    }
+
+    // sorts the locations by the rank variable
+    topLocations.sort((a, b) => (a.rank >= b.rank) ? -1 : 1)
+
+    for (var i = 0; i < topLocations.length; i++) {
+        console.log(topLocations[i]);
+    }
+
+
+    // top 3 locations
+    return topLocations.splice(0, 3);
 });
+
+
 //    console.log(results.length);
 
 //

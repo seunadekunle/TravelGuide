@@ -21,6 +21,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -34,15 +35,15 @@ public class TopLocationsFragment extends BottomSheetDialogFragment {
 
     private static final String ARG_LOCATIONS = "locations";
     private FragmentTopLocationsBinding binding;
-    private List<Location> topLocations;
+    private Location[] topLocations;
     private RecyclerView recyclerView;
 
-    public static TopLocationsFragment newInstance(List<Location> topLocations) {
+    public static TopLocationsFragment newInstance(Location[] topLocations) {
 
         final TopLocationsFragment fragment = new TopLocationsFragment();
         final Bundle args = new Bundle();
 
-        args.putParcelableArrayList(ARG_LOCATIONS, (ArrayList<? extends Parcelable>) topLocations);
+        args.putParcelableArray(ARG_LOCATIONS, topLocations);
         fragment.setArguments(args);
         return fragment;
     }
@@ -51,10 +52,9 @@ public class TopLocationsFragment extends BottomSheetDialogFragment {
     @Override
     public void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
 
-        topLocations = new ArrayList<>();
         // there are arguments to be gotten
         if (getArguments() != null) {
-            topLocations = getArguments().getParcelableArrayList(ARG_LOCATIONS);
+            topLocations = (Location[]) getArguments().getParcelableArray(ARG_LOCATIONS);
         }
 
         super.onCreate(savedInstanceState);
@@ -75,7 +75,7 @@ public class TopLocationsFragment extends BottomSheetDialogFragment {
 
         recyclerView = binding.rvTop;
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(new TopLocationAdapter(requireContext(), topLocations, new TopLocationAdapter.OnItemClickListener() {
+        recyclerView.setAdapter(new TopLocationAdapter(requireContext(), Arrays.asList(topLocations.clone()), new TopLocationAdapter.OnItemClickListener() {
 
             // zooms to the location
             @Override

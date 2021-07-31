@@ -76,8 +76,15 @@
                 android:queryHint="@string/search_guides"
                 android:searchIcon="@null"
                 android:visibility="visible" />
+
         </LinearLayout>
 
+        <include
+            android:id="@+id/recommended"
+            layout="@layout/recommended_locations"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="visible" />
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/swipeContainer"
@@ -96,7 +103,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:padding="@dimen/progress_bar_padding" />
-
             <include
                 android:id="@+id/imgExpanded"
                 layout="@layout/image_expanded"

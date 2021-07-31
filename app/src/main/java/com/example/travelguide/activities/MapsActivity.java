@@ -60,6 +60,7 @@ import com.parse.ParseUser;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -107,7 +108,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     // top locations data structures
     private List<HashMap<Integer, String>> topLocations;
-    private List<com.example.travelguide.classes.Location> topLocationObjects;
+    private com.example.travelguide.classes.Location[] topLocationObjects;
 
 
     // The geographical location where the device is currently located. That is, the last-known
@@ -425,29 +426,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Prompt the user for permission.
         getLocationPermission();
 
-        // passes in the parameters for the cloud function
-        final HashMap<String, String> trendingParams = new HashMap<>();
-        // Calling the cloud code function to get trending locations
-        ParseCloud.callFunctionInBackground("getTrendingLocations", trendingParams, new FunctionCallback<Object>() {
-            @Override
-            public void done(Object response, ParseException e) {
-
-                if (e != null) {
-                    Log.i(TAG, e.getMessage());
-                    return;
-                }
-
-                if (response != null) {
-
-                    topLocations = (List<HashMap<Integer, String>>) response;
-                    topLocationObjects = new ArrayList<>();
-
-                    // get list of currrent guides
-                    getGuides();
-                }
-
-            }
-        });
+        getLocationsandGuides();
 
         // Turn on the My Location layer and the related control on the map.
         updateLocationUI();
@@ -475,6 +454,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
 
+    public void getLocationsandGuides() {
+        // passes in the parameters for the cloud function
+        final HashMap<String, String> trendingParams = new HashMap<>();
+        // Calling the cloud code function to get trending locations
+        ParseCloud.callFunctionInBackground("getTrendingLocations", trendingParams, new FunctionCallback<Object>() {
+            @Override
+            public void done(Object response, ParseException e) {
+
+                if (e != null) {
+                    Log.i(TAG, e.getMessage());
+                    return;
+                }
+
+                if (response != null) {
+                    Log.i(TAG, String.valueOf(response));
+
+                    topLocations = (List<HashMap<Integer, String>>) response;
+                    topLocationObjects = new com.example.travelguide.classes.Location[topLocations.size()];
+
+                    // get list of current guides
+                    getGuides();
+                }
+
+            }
+        });
+    }
+
 
     // gets list of locations from the ParseServer
     public void getGuides() {
@@ -497,8 +503,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     LatLng location = locations.get(i).getCoord();
 
                     // add top location to the object
-                    if (inTopLocations(locations.get(i))) {
-                        topLocationObjects.add(locations.get(i));
+
+                    int pos = inTopLocations(locations.get(i));
+                    if (pos != -1) {
+                        topLocationObjects[pos] = locations.get(i);
                     }
 
                     // adds a new marker with the LatLng object
@@ -527,18 +535,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     // check location object is trending
-    private boolean inTopLocations(com.example.travelguide.classes.Location location) {
+    private int inTopLocations(com.example.travelguide.classes.Location location) {
 
         if (topLocations != null) {
 
             for (int i = 0; i < topLocations.size(); i++) {
                 // if the location is trending return true
                 if (topLocations.get(i).containsValue(location.getObjectId())) {
-                    return true;
+                    return i;
                 }
             }
         }
-        return false;
+        return -1;
     }
 
 
@@ -696,7 +704,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 // is back stack empty set addGuide button to be visible and refresh page
                 if (fragmentManager.getBackStackEntryCount() == 1) {
-                    getGuides();
+                    getLocationsandGuides();
                     showOverlayBtns();
                 }
             }
