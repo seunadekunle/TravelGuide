@@ -82,7 +82,6 @@ public class TopLocationsFragment extends BottomSheetDialogFragment {
             public void onItemClick(Location location) {
                 ((MapsActivity) requireActivity()).zoomToLocation(new LatLng(location.getCoord().latitude, location.getCoord().longitude));
 
-
                 // shows bottom getFragmentsFrameId
                 ((MapsActivity) requireActivity()).setModalLocationGuideFragment(
                         (LocationGuideFragment.newInstance(location, ((MapsActivity) requireActivity()).getFragmentsFrameId(), true)));

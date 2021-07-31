@@ -26,15 +26,21 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.travelguide.R;
+import com.example.travelguide.activities.MapsActivity;
 import com.example.travelguide.adapters.GuidesAdapter;
+import com.example.travelguide.adapters.TopLocationAdapter;
 import com.example.travelguide.classes.Activity;
 import com.example.travelguide.classes.Guide;
 import com.example.travelguide.classes.Location;
 import com.example.travelguide.helpers.HelperClass;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.libraries.places.api.net.FetchPlaceResponse;
+import com.google.common.collect.ImmutableList;
 import com.parse.FindCallback;
+import com.parse.FunctionCallback;
+import com.parse.ParseCloud;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
@@ -43,6 +49,9 @@ import com.parse.ParseUser;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -67,6 +76,7 @@ public class LocationGuideFragment extends Fragment {
     private ImageView ivExpandIndicator;
     private Boolean expandable;
     private Button followBtn;
+    private RecyclerView rvRecommended;
 
     private static final String ARG_LOC = "location";
     private static final String ARG_FRAME = "frame_ID";
@@ -121,6 +131,7 @@ public class LocationGuideFragment extends Fragment {
         ivExpandIndicator = view.findViewById(R.id.ivExpandIndicator);
         followBtn = view.findViewById(R.id.followBtn);
         svGuide = view.findViewById(R.id.svGuide);
+        rvRecommended = view.findViewById(R.id.rvRecommended);
 
         context = view.getContext();
 
@@ -128,6 +139,9 @@ public class LocationGuideFragment extends Fragment {
 
         guideList = new ArrayList<>();
         setupGuideList(view, context, view.findViewById(R.id.expandedImgView), view.findViewById(R.id.expandedImgViewBG), false);
+
+
+        getRecommendedLocations();
 
         queryGuides();
         handleFollowBtn();
@@ -141,6 +155,84 @@ public class LocationGuideFragment extends Fragment {
         } else {
             ivExpandIndicator.setVisibility(View.INVISIBLE);
         }
+    }
+
+    private void getRecommendedLocations() {
+
+        // passes in the parameters for the cloud function
+        final HashMap<String, Double> trendingParams = new HashMap<>();
+
+        trendingParams.put("locationLat", parseLocation.getCoord().latitude);
+        trendingParams.put("locationLong", parseLocation.getCoord().longitude);
+
+        // Calling the cloud code function to get trending locations
+        ParseCloud.callFunctionInBackground("getTrendingLocations", trendingParams, new FunctionCallback<Object>() {
+            @Override
+            public void done(Object response, ParseException e) {
+
+                if (e != null) {
+                    Log.i(TAG, e.getMessage());
+                    return;
+                }
+
+                if (response != null) {
+
+                    // excludes the locations that is currently being seen
+                    ArrayList<HashMap<Integer, String>> responseList = (ArrayList<HashMap<Integer, String>>) response;
+                    ArrayList<String> locationIDs = new ArrayList<>();
+
+                    for (int i = 0; i < responseList.size(); i++) {
+
+                        if (!(responseList.get(i).containsValue(parseLocation.getObjectId()))) {
+                            // add it to the arraylist of strings
+                            locationIDs.add(responseList.get(i).get("id"));
+                        }
+                    }
+
+                    Log.i(TAG, String.valueOf(locationIDs));
+
+                    // if there are surrounding locations
+                    if (locationIDs.size() > 0) {
+
+//                        Log.i(TAG, String.valueOf(responseList.get(0)));
+
+                        // specify what type of data we want to query - Guide.class
+                        ParseQuery<Location> query = ParseQuery.getQuery(Location.class);
+                        // include data referred by user key
+                        query.include(Guide.getKeyAuthor());
+                        // limit query to latest 20 items
+                        query.setLimit(20);
+
+                        // get posts that are specific to the location
+                        query.whereContainsAll("objectId", locationIDs);
+
+                        query.findInBackground((objects, e1) -> {
+
+                            if (e1 == null) {
+                                Log.i(TAG, String.valueOf(objects));
+
+                                rvRecommended.setLayoutManager(new LinearLayoutManager(getContext()));
+                                rvRecommended.setAdapter(new TopLocationAdapter(requireContext(), (ArrayList<Location>) objects, new TopLocationAdapter.OnItemClickListener() {
+
+                                    // zooms to the location
+                                    @Override
+                                    public void onItemClick(Location location) {
+                                        ((MapsActivity) requireActivity()).zoomToLocation(new LatLng(location.getCoord().latitude, location.getCoord().longitude));
+
+//                                        // shows bottom getFragmentsFrameId
+//                                        ((MapsActivity) requireActivity()).setModalLocationGuideFragment(
+//                                                (LocationGuideFragment.newInstance(location, ((MapsActivity) requireActivity()).getFragmentsFrameId(), true)));
+                                    }
+                                }));
+                            }
+                        });
+                    }
+
+
+                }
+
+            }
+        });
     }
 
     // setups the searchView
@@ -374,7 +466,6 @@ public class LocationGuideFragment extends Fragment {
                 // show that the list is empty
                 if (e.getCode() == ParseException.OTHER_CAUSE)
                     showEmptyListText();
-
                 return;
             }
 

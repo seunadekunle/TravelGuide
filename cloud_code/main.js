@@ -105,13 +105,17 @@ Parse.Cloud.define("sendFollowNotification", function (request) {
     return "Notification Sent";
 });
 
-async function getLocations() {
+async function getLocations(lat, long) {
 
     var locationsData = [];
 
-    console.log("text");
-    // // Find location being sent
+    // Find location being sent
     const locationQuery = new Parse.Query(Location);
+
+    if (typeof lat != 'undefined' && typeof long != 'undefined') {
+        locationQuery.withinMiles("coordinates", new Parse.GeoPoint(lat, long), 50);
+        console.log("close location");
+    }
 
     locations = await locationQuery.find();
     locations.forEach(location => {
@@ -135,9 +139,11 @@ async function getLocations() {
     return locationsData;
 }
 
-async function getFinalLocations() {
-    var finalLocations = await getLocations();
+async function getFinalLocations(lat, long) {
+
+    var finalLocations = await getLocations(lat, long);
     console.log(finalLocations.length);
+
     for (var i = 0; i < finalLocations.length; i++) {
 
         // Find Guides that have been posted to the location
@@ -167,14 +173,23 @@ async function getFinalLocations() {
 
 // returns a list of trending locations
 Parse.Cloud.define("getTrendingLocations", async (request) => {
-    var topLocations = await getFinalLocations();
+
+    var lat = request.params.locationLat;
+    var long = request.params.locationLong;
+
+    console.log(lat);
+    console.log(long);
+
+    var topLocations = await getFinalLocations(lat, long);
+
+    // removes locations with no followers, post or likes
+    topLocations = topLocations.filter(topLocation => (topLocation.followers > 0 || topLocation.numGuides > 0 || topLocation.numLikes > 0));
 
     for (var i = 0; i < topLocations.length; i++) {
         console.log(topLocations[i]);
     }
 
-    // removes locations with no followers, post or likes
-    topLocations = topLocations.filter(topLocation => (topLocation.followers > 0 || topLocation.numGuides > 0 || topLocation.numLikes > 0));
+
 
     for (var i = 0; i < topLocations.length; i++) {
 
@@ -183,7 +198,7 @@ Parse.Cloud.define("getTrendingLocations", async (request) => {
 
         /// calculates rank for each of the locations
         var rank = (0.35 * topLocations[i].followers)
-        + (0.5 * topLocations[i].numGuides) + (0.15 * topLocations[i].numLikes)
+            + (0.5 * topLocations[i].numGuides) + (0.15 * topLocations[i].numLikes)
 
         topLocations[i].rank = rank;
 
