@@ -49,42 +49,49 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="15dp"
-            android:orientation="horizontal">
+            android:orientation="vertical">
 
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/followBtn"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="7.5dp"
-                android:layout_marginEnd="7.5dp"
-                android:layout_marginBottom="5dp"
-                android:layout_weight="2"
-                android:background="@drawable/follow_btn_bg"
-                android:elevation="0dp"
-                android:text="@string/follow"
-                android:textSize="13sp" />
+                android:layout_marginBottom="15dp"
+                android:orientation="horizontal">
 
-            <SearchView
-                android:id="@+id/svGuide"
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/followBtn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="7.5dp"
+                    android:layout_marginEnd="7.5dp"
+                    android:layout_marginBottom="5dp"
+                    android:layout_weight="2"
+                    android:background="@drawable/follow_btn_bg"
+                    android:elevation="0dp"
+                    android:text="@string/follow"
+                    android:textSize="13sp" />
+
+                <SearchView
+                    android:id="@+id/svGuide"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:iconifiedByDefault="false"
+                    android:padding="0dp"
+                    android:queryBackground="@drawable/searchview_bg"
+                    android:queryHint="@string/search_guides"
+                    android:searchIcon="@null"
+                    android:visibility="visible" />
+            </LinearLayout>
+
+            <include
+                android:id="@+id/recommended"
+                layout="@layout/recommended_locations"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:iconifiedByDefault="false"
-                android:padding="0dp"
-                android:queryBackground="@drawable/searchview_bg"
-                android:queryHint="@string/search_guides"
-                android:searchIcon="@null"
-                android:visibility="visible" />
-
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:visibility="gone" />
         </LinearLayout>
-
-        <include
-            android:id="@+id/recommended"
-            layout="@layout/recommended_locations"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="visible" />
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/swipeContainer"
@@ -103,6 +110,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:padding="@dimen/progress_bar_padding" />
+
             <include
                 android:id="@+id/imgExpanded"
                 layout="@layout/image_expanded"

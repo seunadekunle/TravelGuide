@@ -37,7 +37,6 @@ import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.libraries.places.api.net.FetchPlaceResponse;
-import com.google.common.collect.ImmutableList;
 import com.parse.FindCallback;
 import com.parse.FunctionCallback;
 import com.parse.ParseCloud;
@@ -49,8 +48,6 @@ import com.parse.ParseUser;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -77,6 +74,7 @@ public class LocationGuideFragment extends Fragment {
     private Boolean expandable;
     private Button followBtn;
     private RecyclerView rvRecommended;
+    private View recommendedView;
 
     private static final String ARG_LOC = "location";
     private static final String ARG_FRAME = "frame_ID";
@@ -132,6 +130,7 @@ public class LocationGuideFragment extends Fragment {
         followBtn = view.findViewById(R.id.followBtn);
         svGuide = view.findViewById(R.id.svGuide);
         rvRecommended = view.findViewById(R.id.rvRecommended);
+        recommendedView = view.findViewById(R.id.recommended);
 
         context = view.getContext();
 
@@ -140,14 +139,12 @@ public class LocationGuideFragment extends Fragment {
         guideList = new ArrayList<>();
         setupGuideList(view, context, view.findViewById(R.id.expandedImgView), view.findViewById(R.id.expandedImgViewBG), false);
 
-
         getRecommendedLocations();
 
         queryGuides();
         handleFollowBtn();
 
         setupSearchView();
-
 
         // show indicator if the fragment is expandable
         if (expandable) {
@@ -194,7 +191,8 @@ public class LocationGuideFragment extends Fragment {
                     // if there are surrounding locations
                     if (locationIDs.size() > 0) {
 
-//                        Log.i(TAG, String.valueOf(responseList.get(0)));
+                        // shows recommended locations
+                        recommendedView.setVisibility(View.VISIBLE);
 
                         // specify what type of data we want to query - Guide.class
                         ParseQuery<Location> query = ParseQuery.getQuery(Location.class);
@@ -202,26 +200,22 @@ public class LocationGuideFragment extends Fragment {
                         query.include(Guide.getKeyAuthor());
                         // limit query to latest 20 items
                         query.setLimit(20);
-
                         // get posts that are specific to the location
                         query.whereContainsAll("objectId", locationIDs);
-
                         query.findInBackground((objects, e1) -> {
 
                             if (e1 == null) {
                                 Log.i(TAG, String.valueOf(objects));
 
-                                rvRecommended.setLayoutManager(new LinearLayoutManager(getContext()));
+                                rvRecommended.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
                                 rvRecommended.setAdapter(new TopLocationAdapter(requireContext(), (ArrayList<Location>) objects, new TopLocationAdapter.OnItemClickListener() {
 
-                                    // zooms to the location
                                     @Override
                                     public void onItemClick(Location location) {
-                                        ((MapsActivity) requireActivity()).zoomToLocation(new LatLng(location.getCoord().latitude, location.getCoord().longitude));
 
-//                                        // shows bottom getFragmentsFrameId
-//                                        ((MapsActivity) requireActivity()).setModalLocationGuideFragment(
-//                                                (LocationGuideFragment.newInstance(location, ((MapsActivity) requireActivity()).getFragmentsFrameId(), true)));
+                                        // zooms to location and dismisses fragment
+                                        ((MapsActivity) requireActivity()).zoomToLocation(new LatLng(location.getCoord().latitude, location.getCoord().longitude));
+                                        ((MapsActivity) requireActivity()).onBackPressed();
                                     }
                                 }));
                             }
@@ -413,7 +407,6 @@ public class LocationGuideFragment extends Fragment {
 
         rvGuides.setAdapter(adapter);
         rvGuides.setLayoutManager(new LinearLayoutManager(context));
-
 
         // animation to ensure that like button state is preserved
         DefaultItemAnimator animator = new DefaultItemAnimator() {
