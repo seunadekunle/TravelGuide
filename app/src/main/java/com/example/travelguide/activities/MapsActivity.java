@@ -294,7 +294,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // complete the transaction
         ft.show(modalFragment);
         // Complete the changes added above
-        ft.commit();
+        ft.commitNow();
     }
 
     // hides modal view making map draggable
@@ -751,6 +751,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         this.modalLocationGuideFragment = locationGuideFragment;
         showModalFragment(modalLocationGuideFragment, true);
     }
+
     public int getFragmentsFrameId() {
         return fragmentsFrameId;
     }

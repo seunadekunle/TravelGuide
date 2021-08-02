@@ -7,20 +7,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/addGuide"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/action_buttons_margin"
-        android:layout_marginBottom="@dimen/fab_margin_bottom"
-        android:backgroundTint="@color/main_color"
-        android:clickable="true"
-        android:focusable="true"
-        android:src="@android:drawable/ic_input_add"
-        app:tint="@color/white"
-        map:layout_constraintBottom_toBottomOf="parent"
-        map:layout_constraintEnd_toEndOf="parent" />
-
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
@@ -37,51 +23,12 @@
         android:layout_height="match_parent"
         android:fitsSystemWindows="true">
 
-        <SearchView
-            android:id="@+id/searchView"
+        <include
+            android:id="@+id/searchViewUI"
+            layout="@layout/searchview_ui"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="7.5dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="10dp"
-            android:fitsSystemWindows="false"
-            android:iconifiedByDefault="true"
-            android:layoutDirection="rtl"
-            android:padding="0dp"
-            android:queryBackground="@drawable/searchview_bg"
-            android:queryHint="@string/search"
-            android:searchIcon="@drawable/search_icon"
-            android:visibility="visible"
-            />
-
-<!--        <ImageButton-->
-<!--            android:id="@+id/ibProfile"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginStart="50dp"-->
-<!--            android:layout_marginTop="50dp"-->
-<!--            android:background="@drawable/profile_icon_bg"-->
-<!--            android:contentDescription="@string/profile_icon"-->
-<!--            android:fitsSystemWindows="false"-->
-<!--            android:focusable="true"-->
-<!--            android:visibility="visible"-->
-<!--            app:layout_constraintStart_toStartOf="parent"-->
-<!--            app:layout_constraintTop_toTopOf="parent"-->
-<!--            tools:ignore="MissingConstraints" />-->
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvSearchList"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="22.5dp"
-            android:layout_marginTop="75dp"
-            android:layout_marginRight="20dp"
-            android:layout_marginBottom="20dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:visibility="visible"
-            map:layout_constraintTop_toBottomOf="@+id/searchView"
-            tools:layout_editor_absoluteX="20dp" />
+            android:layout_marginTop="15dp"/>
 
         <androidx.coordinatorlayout.widget.CoordinatorLayout
 
@@ -103,7 +50,6 @@
                 app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior" />
 
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
-
     </FrameLayout>
 
     <ProgressBar
@@ -115,3 +61,4 @@
         android:padding="@dimen/progress_bar_padding"
         android:visibility="invisible" />
 </androidx.constraintlayout.widget.ConstraintLayout>
+

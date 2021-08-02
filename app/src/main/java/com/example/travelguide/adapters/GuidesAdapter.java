@@ -355,8 +355,6 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
                         @Override
                         public void onClick(View v) {
 
-                            // hide add button and zoom image
-                            ((MapsActivity) activity).hideOverlayBtns();
                             // shows background
                             expandedImageViewBG.setVisibility(View.VISIBLE);
                             zoomImageFromThumb(holder.ibThumb, photoUrl, expandedImageView, expandedImageViewBG);

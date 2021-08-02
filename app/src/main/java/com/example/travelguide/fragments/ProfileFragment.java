@@ -107,6 +107,7 @@ public class ProfileFragment extends Fragment {
                 HelperClass.fetchUser(userID, (object, e) -> {
                     Log.i(TAG, object.getObjectId());
                     parseUser = object;
+
                     displayUserDetails();
                     hidePrivateInfo();
                 });
@@ -178,8 +179,10 @@ public class ProfileFragment extends Fragment {
     }
 
     public void loadViewPager() {
-        profilePagerAdapter = new ProfilePagerAdapter(requireActivity(), ivExpanded, imageBG, userID);
+        profilePagerAdapter = new ProfilePagerAdapter(getChildFragmentManager(), getLifecycle(), ivExpanded, imageBG, userID);
         viewPager2.setAdapter(profilePagerAdapter);
+
+        viewPager2.setSaveEnabled(false);
         viewPager2.setCurrentItem(0);
     }
 

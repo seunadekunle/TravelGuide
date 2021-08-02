@@ -214,8 +214,8 @@ public class LocationGuideFragment extends Fragment {
                                     public void onItemClick(Location location) {
 
                                         // zooms to location and dismisses fragment
-                                        ((MapsActivity) requireActivity()).zoomToLocation(new LatLng(location.getCoord().latitude, location.getCoord().longitude));
-                                        ((MapsActivity) requireActivity()).onBackPressed();
+                                        ((MapsFragment) getParentFragment()).zoomToLocation(new LatLng(location.getCoord().latitude, location.getCoord().longitude));
+//                                        ((MapsActivity) requireActivity()).onBackPressed();
                                     }
                                 }));
                             }

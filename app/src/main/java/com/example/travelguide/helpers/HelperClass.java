@@ -173,12 +173,13 @@ public class HelperClass {
     public static void finishTransaction(FragmentTransaction ft, String name, Fragment fragment) {
 
         // add transaction to backstack
-        ft.addToBackStack(name);
+//        ft.addToBackStack(name);
+
         // show fragment
         ft.show(fragment);
 
         // Complete the changes added above
-        ft.commit();
+        ft.commitNow();
     }
 
     // changes the ui state of button

@@ -76,7 +76,7 @@ public class EntryActivity extends AppCompatActivity {
 
     // navigates to the Map Stream view
     public void navigateToMapView() {
-        Intent toMap = new Intent(EntryActivity.this, MapsActivity.class);
+        Intent toMap = new Intent(EntryActivity.this, MainActivity.class);
         startActivity(toMap);
         finish();
     }

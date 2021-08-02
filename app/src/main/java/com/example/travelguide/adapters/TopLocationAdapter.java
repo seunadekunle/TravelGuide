@@ -10,6 +10,7 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.travelguide.classes.Location;
+import com.example.travelguide.databinding.RecommendedLocationsItemBinding;
 import com.example.travelguide.databinding.TopLocationsItemBinding;
 import com.example.travelguide.helpers.HelperClass;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -41,7 +42,7 @@ public class TopLocationAdapter extends RecyclerView.Adapter<TopLocationAdapter.
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new ViewHolder(TopLocationsItemBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+        return new ViewHolder(RecommendedLocationsItemBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
     }
 
     @Override
@@ -73,7 +74,7 @@ public class TopLocationAdapter extends RecyclerView.Adapter<TopLocationAdapter.
         public TextView locationName;
         public CardView cvLocations;
 
-        ViewHolder(TopLocationsItemBinding binding) {
+        ViewHolder(RecommendedLocationsItemBinding binding) {
             super(binding.getRoot());
 
             locationName = binding.locationName;

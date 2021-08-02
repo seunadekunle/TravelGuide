@@ -21,6 +21,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.travelguide.R;
 import com.example.travelguide.activities.EntryActivity;
+import com.example.travelguide.activities.MainActivity;
 import com.example.travelguide.activities.MapsActivity;
 import com.example.travelguide.helpers.HelperClass;
 import com.parse.ParseFile;
@@ -143,7 +144,7 @@ public class ChangeAvatarFragment extends Fragment {
 
         discardBtn.setOnClickListener(v -> {
             if (inProfile)
-                ((MapsActivity) requireActivity()).onBackPressed();
+                ((MainActivity) requireActivity()).onBackPressed();
             else {
                 // goes to map activity
                 ((EntryActivity) requireActivity()).navigateToMapView();
@@ -163,7 +164,7 @@ public class ChangeAvatarFragment extends Fragment {
                 } else {
                     // navigates to different sections depending on where it is shown
                     if (inProfile)
-                        ((MapsActivity) requireActivity()).onBackPressed();
+                        ((MainActivity) requireActivity()).onBackPressed();
                     else
                         ((EntryActivity) requireActivity()).navigateToMapView();
                 }

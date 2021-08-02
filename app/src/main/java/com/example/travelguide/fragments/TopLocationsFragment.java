@@ -1,18 +1,16 @@
 package com.example.travelguide.fragments;
 
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.travelguide.activities.MainActivity;
 import com.example.travelguide.activities.MapsActivity;
 import com.example.travelguide.adapters.TopLocationAdapter;
 import com.example.travelguide.classes.Location;
@@ -20,9 +18,7 @@ import com.example.travelguide.databinding.FragmentTopLocationsBinding;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * <p>A fragment that shows a list of items as a modal bottom sheet.</p>
@@ -34,6 +30,7 @@ import java.util.List;
 public class TopLocationsFragment extends BottomSheetDialogFragment {
 
     private static final String ARG_LOCATIONS = "locations";
+    private static final String TAG = "TopLocationsFragment";
     private FragmentTopLocationsBinding binding;
     private Location[] topLocations;
     private RecyclerView recyclerView;
@@ -80,17 +77,19 @@ public class TopLocationsFragment extends BottomSheetDialogFragment {
             // zooms to the location
             @Override
             public void onItemClick(Location location) {
-                ((MapsActivity) requireActivity()).zoomToLocation(new LatLng(location.getCoord().latitude, location.getCoord().longitude));
+
+                // zoom to location
+                ((MapsFragment) getParentFragment()).zoomToLocation(new LatLng(location.getCoord().latitude, location.getCoord().longitude));
 
                 // shows bottom getFragmentsFrameId
-                ((MapsActivity) requireActivity()).setModalLocationGuideFragment(
-                        (LocationGuideFragment.newInstance(location, ((MapsActivity) requireActivity()).getFragmentsFrameId(), true)));
+                ((MapsFragment) getParentFragment()).setModalLocationGuideFragment(
+                        (LocationGuideFragment.newInstance(location, ((MapsFragment) getParentFragment()).getFragmentsFrameId(), true)));
             }
         }));
 
         // sets button to dismiss the button
         binding.dismiss.setOnClickListener((v -> {
-            ((MapsActivity) requireActivity()).hideModalFragment();
+            ((MapsFragment) getParentFragment()).hideModalFragment();
             dismiss();
         }));
 

@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.TravelGuide" parent="Theme.MaterialComponents.DayNight">
+    <style name="Theme.TravelGuide" parent="Theme.Design.Light.NoActionBar">
 
         <!-- light theme navigation and status bar   -->
         <item name="android:windowTranslucentStatus" tools:ignore="DuplicateDefinition">true</item>

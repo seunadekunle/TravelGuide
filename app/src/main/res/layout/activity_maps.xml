@@ -31,7 +31,7 @@
         map:uiCompass="false"
         tools:context=".activities.MapsActivity" />
 
-    <FrameLayout
+    <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragmentsFrame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -66,7 +66,7 @@
             android:clickable="false"
             android:visibility="visible">
 
-            <FrameLayout
+            <androidx.fragment.app.FragmentContainerView
                 android:id="@+id/modalLocationView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -79,7 +79,7 @@
                 app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior" />
 
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
-    </FrameLayout>
+    </androidx.fragment.app.FragmentContainerView>
 
     <ProgressBar
         android:id="@+id/pbMaps"
