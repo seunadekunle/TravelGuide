@@ -47,27 +47,31 @@ public class MainActivity extends AppCompatActivity {
         mapsFragment = new MapsFragment();
         profileFragment = ProfileFragment.newInstance(tabFrameID, ParseUser.getCurrentUser().getObjectId());
 
-        shownFragment = mapsFragment;
         showFragment(mapsFragment);
-
         // sets up bottom bar
         smoothBottomBar = findViewById(R.id.bottomBar);
-        smoothBottomBar.setSelected(true);
 
         // sets bottom bar state
         smoothBottomBar.setOnItemSelectedListener((OnItemSelectedListener) i -> {
 
+            // if the map fragment is shown but the user hasn't selected a tab yet
+            if (mapsFragment.isVisible() && shownFragment == null) {
+                // remove the fragment
+                getSupportFragmentManager().beginTransaction().hide(mapsFragment).commit();
+            }
+
+            // hide the fragment
+            getSupportFragmentManager().beginTransaction().hide(shownFragment).commit();
+
             switch (i) {
                 case 1:
-                    fragmentManager.beginTransaction().hide(shownFragment);
                     shownFragment = composeFragment;
                     break;
                 case 2:
-                    fragmentManager.beginTransaction().hide(shownFragment);
                     shownFragment = profileFragment;
                     break;
                 default:
-                    fragmentManager.beginTransaction().hide(shownFragment);
+
                     shownFragment = mapsFragment;
                     break;
             }
@@ -77,18 +81,62 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
-//        smoothBottomBar.item
+        smoothBottomBar.setSelected(true);
     }
 
-    private void showFragment(Fragment mapsFragment) {
+    private void showFragment(Fragment shownFragment) {
         // shows map fragment initially
-        HelperClass.replaceFragment(fragmentManager, tabFrameID, mapsFragment, "TAG");
+        HelperClass.addFragment(fragmentManager, tabFrameID, shownFragment, shownFragment.getTag());
     }
 
     @Override
     public void onBackPressed() {
 
+        Log.i(TAG, String.valueOf(mapsFragment.getChildFragmentManager().getBackStackEntryCount()));
+
         if (mapsFragment.isVisible()) {
+
+            FragmentManager mapsFragmentManager = mapsFragment.getChildFragmentManager();
+            Fragment mapModalFragment = mapsFragment.getModalFragment();
+
+            int index = mapsFragmentManager.getBackStackEntryCount() - 1;
+
+            if (index >= 0) {
+
+                for (int i = 0; i <= index; i++) {
+                    FragmentManager.BackStackEntry backEntry = mapsFragmentManager.getBackStackEntryAt(index);
+                    String tag = backEntry.getName();
+
+                    Log.i(TAG, tag);
+                }
+            }
+
+
+            // if the modal fragment is visible
+            if (mapsFragment.getModalFragment() != null && mapModalFragment.isVisible()) {
+
+                // resets the modal state
+                mapsFragment.resetSheetState();
+
+
+                // hide modal view
+                mapsFragment.hideModalFragment();
+                mapsFragment.showOverlayBtns();
+
+            } else {
+
+                // shows last fragment
+                mapsFragmentManager.popBackStack();
+
+                // is back stack empty set addGuide button to be visible and refresh page
+                if (mapsFragmentManager.getBackStackEntryCount() == 1) {
+
+                    // reload data
+                    mapsFragment.getGuides(false);
+                    mapsFragment.showOverlayBtns();
+                }
+            }
+
             Log.i(TAG, "Maps");
         } else if (composeFragment.isVisible()) {
             Log.i(TAG, "Compose");

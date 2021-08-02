@@ -49,7 +49,7 @@ public class TopLocationsFragment extends BottomSheetDialogFragment {
     @Override
     public void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
 
-        // there are arguments to be gotten
+        // get top location array
         if (getArguments() != null) {
             topLocations = (Location[]) getArguments().getParcelableArray(ARG_LOCATIONS);
         }
@@ -72,7 +72,7 @@ public class TopLocationsFragment extends BottomSheetDialogFragment {
 
         recyclerView = binding.rvTop;
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(new TopLocationAdapter(requireContext(), Arrays.asList(topLocations.clone()), new TopLocationAdapter.OnItemClickListener() {
+        recyclerView.setAdapter(new TopLocationAdapter(requireContext(), Arrays.asList(topLocations.clone()), 0, new TopLocationAdapter.OnItemClickListener() {
 
             // zooms to the location
             @Override

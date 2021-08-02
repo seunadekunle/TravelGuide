@@ -60,7 +60,6 @@ import com.parse.ParseUser;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -195,14 +194,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // profile button on click listener
         ibProfile.setOnClickListener(v -> {
 
-            HelperClass.showFragment(fragmentManager, fragmentsFrameId, profileFragment, ProfileFragment.TAG);
+            HelperClass.addFragment(fragmentManager, fragmentsFrameId, profileFragment, ProfileFragment.TAG);
             hideOverlayBtns();
         });
 
         // add button on click listener
         addGuide.setOnClickListener(v -> {
 
-            HelperClass.showFragment(fragmentManager, fragmentsFrameId, composeFragment, ComposeFragment.TAG);
+            HelperClass.addFragment(fragmentManager, fragmentsFrameId, composeFragment, ComposeFragment.TAG);
             hideOverlayBtns();
 
         });
@@ -747,7 +746,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         searchView.onActionViewCollapsed();
     }
 
-    public void setModalLocationGuideFragment(LocationGuideFragment locationGuideFragment){
+    public void setModalLocationGuideFragment(LocationGuideFragment locationGuideFragment) {
         this.modalLocationGuideFragment = locationGuideFragment;
         showModalFragment(modalLocationGuideFragment, true);
     }

@@ -23,7 +23,6 @@ import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.travelguide.R;
-import com.example.travelguide.activities.MapsActivity;
 import com.example.travelguide.classes.GlideApp;
 import com.example.travelguide.classes.Guide;
 import com.example.travelguide.databinding.LocationGuideBinding;
@@ -151,7 +150,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
 
     private void goToProfile(Guide guide) {
         ProfileFragment userProfile = ProfileFragment.newInstance(guide.getAuthor().getObjectId());
-        HelperClass.showFragment(fragmentManager, frameID, userProfile, ProfileFragment.TAG);
+        HelperClass.addFragment(fragmentManager, frameID, userProfile, ProfileFragment.TAG);
     }
 
     // clear all elements of the RecyclerView

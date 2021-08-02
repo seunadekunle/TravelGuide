@@ -144,7 +144,7 @@ public class ChangeAvatarFragment extends Fragment {
 
         discardBtn.setOnClickListener(v -> {
             if (inProfile)
-                ((MainActivity) requireActivity()).onBackPressed();
+                getParentFragment().getParentFragmentManager().popBackStack();
             else {
                 // goes to map activity
                 ((EntryActivity) requireActivity()).navigateToMapView();

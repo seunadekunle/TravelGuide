@@ -139,7 +139,6 @@ public class MapsFragment extends Fragment {
                 @Override
                 public boolean onMarkerClick(@NonNull @NotNull Marker marker) {
 
-
                     locationGuideFragment = LocationGuideFragment.newInstance(marker.getTag(), fragmentsFrameId, false);
 
                     // Begin the transaction
@@ -157,8 +156,9 @@ public class MapsFragment extends Fragment {
         }
     };
 
-
+    // gets top location and guides
     public void getLocationsandGuides() {
+
         // passes in the parameters for the cloud function
         final HashMap<String, String> trendingParams = new HashMap<>();
         // Calling the cloud code function to get trending locations
@@ -178,7 +178,7 @@ public class MapsFragment extends Fragment {
                     topLocationObjects = new com.example.travelguide.classes.Location[topLocations.size()];
 
                     // get list of current guides
-                    getGuides();
+                    getGuides(true);
                 }
 
             }
@@ -273,21 +273,6 @@ public class MapsFragment extends Fragment {
         adapter = new SearchListAdapter(predictions, requireContext(), onItemClickListener);
         setupSearchView();
 
-//        // profile button on click listener
-//        ibProfile.setOnClickListener(v -> {
-//
-//            HelperClass.showFragment(fragmentManager, fragmentsFrameId, profileFragment, ProfileFragment.TAG);
-//            hideOverlayBtns();
-//        });
-//
-//        // add button on click listener
-//        addGuide.setOnClickListener(v -> {
-//
-//            HelperClass.showFragment(fragmentManager, fragmentsFrameId, composeFragment, ComposeFragment.TAG);
-//            hideOverlayBtns();
-//
-//        });
-
         hideOverlayBtns();
     }
 
@@ -346,9 +331,9 @@ public class MapsFragment extends Fragment {
                                 frameLayout.setVisibility(View.VISIBLE);
                                 modalLocationGuideFragment = LocationGuideFragment.newInstance(modalLocation[0], fragmentsFrameId, true);
 
-
                                 showModalFragment(modalLocationGuideFragment, true);
                             };
+
                             HelperClass.fetchLocation(place.getLatLng(), modalCallback);
                         }
 
@@ -389,11 +374,27 @@ public class MapsFragment extends Fragment {
                     @Override
                     public void onComplete(@NonNull Task<Location> task) {
                         if (task.isSuccessful()) {
+
+                            GoogleMap.CancelableCallback zoomCallback  = new GoogleMap.CancelableCallback() {
+                                @Override
+                                public void onFinish() {
+
+                                    // show top locations after zoom;
+                                    showTopLocations();
+                                }
+
+                                @Override
+                                public void onCancel() {
+
+                                }
+                            };
                             // Set the map's camera position to the current location of the device.
                             lastKnownLocation = task.getResult();
+
                             if (lastKnownLocation != null) {
+
                                 LatLng currentLocation = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
-                                zoomToLocation(currentLocation);
+                                zoomToLocation(currentLocation, zoomCallback);
 
                                 // sends current location data to compose fragment
 //                                composeFragment.setLocation(new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()));
@@ -412,7 +413,7 @@ public class MapsFragment extends Fragment {
     }
 
     // gets list of locations from the ParseServer
-    public void getGuides() {
+    public void getGuides(boolean showModal) {
 
         // shows progress bar
         pbMaps.setVisibility(View.VISIBLE);
@@ -431,8 +432,7 @@ public class MapsFragment extends Fragment {
                     // retrieves geo point from database and converts it to a LatLng Object
                     LatLng location = locations.get(i).getCoord();
 
-                    // add top location to the object
-
+                    // add top location to the object array
                     int pos = inTopLocations(locations.get(i));
                     if (pos != -1) {
                         topLocationObjects[pos] = locations.get(i);
@@ -448,8 +448,10 @@ public class MapsFragment extends Fragment {
                 pbMaps.setVisibility(View.INVISIBLE);
                 showOverlayBtns();
 
-                topLocationsFragment = TopLocationsFragment.newInstance(topLocationObjects);
-                showTopLocations();
+                // if you are supposed to show the modal fragment
+                if (showModal) {
+                    topLocationsFragment = TopLocationsFragment.newInstance(topLocationObjects);
+                }
             } else {
                 Log.e(TAG, "Not getting guides", e);
             }
@@ -654,6 +656,13 @@ public class MapsFragment extends Fragment {
 
         // Begin the transaction
         FragmentTransaction ft = fragmentManager.beginTransaction();
+
+        // if the fragment is draggable
+        if (isDraggable) {
+            // add fragment to backstack
+            ft.addToBackStack("ModalFragment");
+        }
+
         // add fragment to container
         ft.replace(modalFrameId, modalFragment);
         // complete the transaction
@@ -666,6 +675,8 @@ public class MapsFragment extends Fragment {
     public void hideModalFragment() {
         if (frameLayout != null) {
             frameLayout.setVisibility(View.INVISIBLE);
+            getChildFragmentManager().beginTransaction().remove(modalLocationGuideFragment).commit();
+            getChildFragmentManager().popBackStack();
         }
     }
 
@@ -719,18 +730,11 @@ public class MapsFragment extends Fragment {
         return fragmentsFrameId;
     }
 
-    @Override
-    public void onHiddenChanged(boolean hidden) {
-        super.onHiddenChanged(hidden);
-
-        Log.i(TAG, String.valueOf(hidden));
+    public Fragment getModalFragment() {
+        return modalLocationGuideFragment;
     }
 
-
-    //    @Override
-//    public void onResume() {
-//        super.onResume();
-//
-//        getLocationsandGuides();
-//    }
+    public void resetSheetState() {
+        sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+    }
 }

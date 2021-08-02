@@ -19,4 +19,6 @@
     <dimen name="list_item_spacing">16dp</dimen>
     <dimen name="list_item_spacing_half">8dp</dimen>
     <dimen name="searchview_left_margin">7.5dp</dimen>
+    <dimen name="recommended_view_margin">5dp</dimen>
+    <dimen name="location_header_margin">7.5dp</dimen>
 </resources>

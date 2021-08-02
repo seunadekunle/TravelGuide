@@ -207,15 +207,20 @@ public class LocationGuideFragment extends Fragment {
                             if (e1 == null) {
                                 Log.i(TAG, String.valueOf(objects));
 
-                                rvRecommended.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-                                rvRecommended.setAdapter(new TopLocationAdapter(requireContext(), (ArrayList<Location>) objects, new TopLocationAdapter.OnItemClickListener() {
+                                //set variables for recommended locations
+                                rvRecommended.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+                                rvRecommended.setAdapter(new TopLocationAdapter(requireContext(), (ArrayList<Location>) objects, 1,new TopLocationAdapter.OnItemClickListener() {
 
                                     @Override
                                     public void onItemClick(Location location) {
 
                                         // zooms to location and dismisses fragment
-                                        ((MapsFragment) getParentFragment()).zoomToLocation(new LatLng(location.getCoord().latitude, location.getCoord().longitude));
-//                                        ((MapsActivity) requireActivity()).onBackPressed();
+                                        if (getParentFragment() != null) {
+                                            ((MapsFragment) getParentFragment()).zoomToLocation(new LatLng(location.getCoord().latitude, location.getCoord().longitude));
+
+                                            // removes bottom modal frame
+                                            ((MapsFragment) getParentFragment()).hideModalFragment();
+                                        }
                                     }
                                 }));
                             }
@@ -403,7 +408,7 @@ public class LocationGuideFragment extends Fragment {
 
         // Set the adapter of the recycler view
         adapter = new GuidesAdapter(guideList, context, expandedImgView, expandedImgViewBG, getActivity(), globalPlayer, inProfile
-                , requireActivity().getSupportFragmentManager(), frameParam);
+                , getParentFragmentManager(), frameParam);
 
         rvGuides.setAdapter(adapter);
         rvGuides.setLayoutManager(new LinearLayoutManager(context));

@@ -24,7 +24,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="15dp"
             android:fontFamily="sans-serif-medium"
-            android:text="TextView"
+            android:text="Location"
             android:textColor="@color/black"
             android:textSize="15sp" />
     </androidx.cardview.widget.CardView>

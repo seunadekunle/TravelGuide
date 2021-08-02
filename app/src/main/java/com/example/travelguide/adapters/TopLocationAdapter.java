@@ -32,17 +32,31 @@ public class TopLocationAdapter extends RecyclerView.Adapter<TopLocationAdapter.
     private Context context;
     private List<Location> locations = new ArrayList<>();
     private OnItemClickListener onItemClickListener;
+    private int viewType;
 
-    public TopLocationAdapter(Context context, List<Location> locations, OnItemClickListener onItemClickListener) {
+    public TopLocationAdapter(Context context, List<Location> locations, int viewType, OnItemClickListener onItemClickListener) {
         this.context = context;
         this.locations = locations;
         this.onItemClickListener = onItemClickListener;
+        this.viewType = viewType;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new ViewHolder(RecommendedLocationsItemBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+
+        // returns separate view based on viewtypes
+
+        if (viewType == 1) {
+            return new ViewHolder(RecommendedLocationsItemBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+        }
+
+        return new ViewHolder(TopLocationsItemBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return viewType;
     }
 
     @Override
@@ -75,6 +89,13 @@ public class TopLocationAdapter extends RecyclerView.Adapter<TopLocationAdapter.
         public CardView cvLocations;
 
         ViewHolder(RecommendedLocationsItemBinding binding) {
+            super(binding.getRoot());
+
+            locationName = binding.locationName;
+            cvLocations = binding.cvLocations;
+        }
+
+        ViewHolder(TopLocationsItemBinding binding) {
             super(binding.getRoot());
 
             locationName = binding.locationName;

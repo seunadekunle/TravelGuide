@@ -146,7 +146,7 @@ public class HelperClass {
     }
 
     // shows fragment in container
-    public static void showFragment(FragmentManager fragmentManager, int fragmentsFrameId, Fragment fragment, String tag) {
+    public static void addFragment(FragmentManager fragmentManager, int fragmentsFrameId, Fragment fragment, String tag) {
         // Begin the transaction
         FragmentTransaction ft = fragmentManager.beginTransaction();
 
@@ -162,6 +162,7 @@ public class HelperClass {
         // Begin the transaction
         FragmentTransaction ft = fragmentManager.beginTransaction();
 
+        ft.setTransition(FragmentTransaction.TRANSIT_ENTER_MASK);
         // replace fragment in container
         ft.replace(fragmentsFrameId, fragment);
 
@@ -173,13 +174,13 @@ public class HelperClass {
     public static void finishTransaction(FragmentTransaction ft, String name, Fragment fragment) {
 
         // add transaction to backstack
-//        ft.addToBackStack(name);
+        ft.addToBackStack(name);
 
         // show fragment
         ft.show(fragment);
 
         // Complete the changes added above
-        ft.commitNow();
+        ft.commit();
     }
 
     // changes the ui state of button

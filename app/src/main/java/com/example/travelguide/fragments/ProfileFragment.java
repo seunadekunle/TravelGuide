@@ -133,11 +133,11 @@ public class ProfileFragment extends Fragment {
         ivExpanded = view.findViewById(R.id.expandedImgView);
         imageBG = view.findViewById(R.id.expandedImgViewBG);
 
-        fragmentManager = requireActivity().getSupportFragmentManager();
+        fragmentManager = getChildFragmentManager();;
         changeAvatarFragment = ChangeAvatarFragment.newInstance(true);
 
-        ibAvatar.setOnClickListener(v ->
-                HelperClass.replaceFragment(fragmentManager, frameID, changeAvatarFragment, changeAvatarFragment.TAG));
+//        ibAvatar.setOnClickListener(v ->
+//                HelperClass.replaceFragment(fragmentManager, frameID, changeAvatarFragment, changeAvatarFragment.TAG));
 
         // handles logout button click
         logOutBtn.setOnClickListener(v -> logOutUser());

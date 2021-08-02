@@ -4,9 +4,7 @@
     android:name="com.example.travelguide.fragments.LocationDetail"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
-    android:clickable="true"
-    android:focusable="true"
+    android:background="@color/off_white"
     tools:context=".fragments.LocationGuideFragment">
 
     <TextView
@@ -22,86 +20,100 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:orientation="vertical">
 
-
         <ImageView
             android:id="@+id/ivExpandIndicator"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:contentDescription="expandIndicator"
             android:src="@drawable/expandable_icon" />
-
-        <TextView
-            android:id="@+id/tvAddress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:layout_marginTop="15dp"
-            android:layout_marginBottom="15dp"
-            android:fontFamily="sans-serif-black"
-            android:text="Address"
-            android:textColor="@color/black"
-            android:textSize="@dimen/location_header" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <TextView
+                android:id="@+id/tvAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/location_header_margin"
+                android:layout_marginTop="15dp"
+                android:fontFamily="sans-serif-black"
+                android:text="@string/location"
+                android:textColor="@color/black"
+                android:textSize="@dimen/location_header" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="15dp"
-                android:orientation="horizontal">
+                android:orientation="vertical">
 
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/followBtn"
+                <include
+                    android:id="@+id/recommended"
+                    layout="@layout/recommended_locations"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/location_header_margin"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginBottom="@dimen/recommended_view_margin"
+                    android:visibility="gone" />
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="7.5dp"
-                    android:layout_marginEnd="7.5dp"
-                    android:layout_marginBottom="5dp"
-                    android:layout_weight="2"
-                    android:background="@drawable/follow_btn_bg"
-                    android:elevation="0dp"
-                    android:text="@string/follow"
-                    android:textSize="13sp" />
 
-                <SearchView
-                    android:id="@+id/svGuide"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:iconifiedByDefault="false"
-                    android:padding="0dp"
-                    android:queryBackground="@drawable/searchview_bg"
-                    android:queryHint="@string/search_guides"
-                    android:searchIcon="@null"
-                    android:visibility="visible" />
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:orientation="horizontal">
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/followBtn"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="7.5dp"
+                        android:layout_marginEnd="7.5dp"
+                        android:layout_weight="2"
+                        android:background="@drawable/follow_btn_bg"
+                        android:elevation="0dp"
+                        android:text="@string/follow"
+                        android:textSize="13sp" />
+
+                    <SearchView
+                        android:id="@+id/svGuide"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:iconifiedByDefault="false"
+                        android:padding="0dp"
+                        android:queryBackground="@drawable/searchview_bg"
+                        android:queryHint="@string/search_guides"
+                        android:searchIcon="@null"
+                        android:visibility="visible" />
+                </LinearLayout>
             </LinearLayout>
 
-            <include
-                android:id="@+id/recommended"
-                layout="@layout/recommended_locations"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:visibility="gone" />
         </LinearLayout>
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/swipeContainer"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:clickable="true"
+            android:focusable="true">
+
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvGuides"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
                 android:nestedScrollingEnabled="false" />
 
             <ProgressBar
@@ -119,6 +131,7 @@
                 android:visibility="visible" />
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
     </LinearLayout>
 
 </FrameLayout>

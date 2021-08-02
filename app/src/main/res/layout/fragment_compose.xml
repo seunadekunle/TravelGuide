@@ -168,7 +168,7 @@
         <ImageView
             android:id="@+id/ivPreview"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="40dp"
             android:visibility="gone"
@@ -177,7 +177,7 @@
         <VideoView
             android:id="@+id/vvPreview"
             android:layout_width="match_parent"
-            android:layout_height="300dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:visibility="gone" />
 
