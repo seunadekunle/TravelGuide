@@ -162,6 +162,7 @@ public class ChangeAvatarFragment extends Fragment {
                 if (e != null) {
                     Log.i(TAG, "there was an error saving the profile photo");
                 } else {
+
                     // navigates to different sections depending on where it is shown
                     if (inProfile)
                         ((MainActivity) requireActivity()).onBackPressed();

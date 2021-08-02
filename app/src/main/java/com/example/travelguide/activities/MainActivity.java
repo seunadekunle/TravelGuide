@@ -12,6 +12,7 @@ import com.example.travelguide.fragments.ComposeFragment;
 import com.example.travelguide.fragments.MapsFragment;
 import com.example.travelguide.fragments.ProfileFragment;
 import com.example.travelguide.helpers.HelperClass;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.parse.ParseUser;
 
 import me.ibrahimsn.lib.OnItemSelectedListener;
@@ -48,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
         profileFragment = ProfileFragment.newInstance(tabFrameID, ParseUser.getCurrentUser().getObjectId());
 
         showFragment(mapsFragment);
-        // sets up bottom bar
+        // sets up bottom navbar
         smoothBottomBar = findViewById(R.id.bottomBar);
 
         // sets bottom bar state
@@ -57,7 +58,8 @@ public class MainActivity extends AppCompatActivity {
             // if the map fragment is shown but the user hasn't selected a tab yet
             if (mapsFragment.isVisible() && shownFragment == null) {
                 // remove the fragment
-                getSupportFragmentManager().beginTransaction().hide(mapsFragment).commit();
+                getSupportFragmentManager().beginTransaction().remove(mapsFragment).commit();
+                getSupportFragmentManager().popBackStack();
             }
 
             // hide the fragment
@@ -92,33 +94,24 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
 
-        Log.i(TAG, String.valueOf(mapsFragment.getChildFragmentManager().getBackStackEntryCount()));
+        Fragment currentFragment = getSupportFragmentManager().findFragmentById(tabFrameID);
 
-        if (mapsFragment.isVisible()) {
+        if (currentFragment instanceof MapsFragment) {
 
             FragmentManager mapsFragmentManager = mapsFragment.getChildFragmentManager();
             Fragment mapModalFragment = mapsFragment.getModalFragment();
 
-            int index = mapsFragmentManager.getBackStackEntryCount() - 1;
-
-            if (index >= 0) {
-
-                for (int i = 0; i <= index; i++) {
-                    FragmentManager.BackStackEntry backEntry = mapsFragmentManager.getBackStackEntryAt(index);
-                    String tag = backEntry.getName();
-
-                    Log.i(TAG, tag);
-                }
-            }
-
-
             // if the modal fragment is visible
             if (mapsFragment.getModalFragment() != null && mapModalFragment.isVisible()) {
 
+                if (mapsFragment.getSheetBehavior().getState() == BottomSheetBehavior.STATE_EXPANDED) {
+                    // resets the modal state
+                    mapsFragment.setSheetState(BottomSheetBehavior.STATE_HALF_EXPANDED);
+                    return;
+                }
+
                 // resets the modal state
-                mapsFragment.resetSheetState();
-
-
+                mapsFragment.setSheetState(BottomSheetBehavior.STATE_COLLAPSED);
                 // hide modal view
                 mapsFragment.hideModalFragment();
                 mapsFragment.showOverlayBtns();
@@ -136,11 +129,12 @@ public class MainActivity extends AppCompatActivity {
                     mapsFragment.showOverlayBtns();
                 }
             }
-
             Log.i(TAG, "Maps");
-        } else if (composeFragment.isVisible()) {
+        } else if (currentFragment instanceof ComposeFragment) {
             Log.i(TAG, "Compose");
         } else {
+            profileFragment.getChildFragmentManager().popBackStack();
+            Log.i(TAG, "Stack size "+profileFragment.getChildFragmentManager().getBackStackEntryCount());
             Log.i(TAG, "Profile");
         }
 

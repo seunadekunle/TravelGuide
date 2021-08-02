@@ -43,7 +43,9 @@ public class EntryActivity extends AppCompatActivity {
         if (ParseUser.getCurrentUser() != null)
             navigateToMapView();
 
-        getSupportActionBar().hide();
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
 
         entryFrameId = R.id.entryForm;
         loginBtn = binding.loginBtn;
@@ -58,10 +60,8 @@ public class EntryActivity extends AppCompatActivity {
         loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                Log.i(TAG, "login");
                 // goes to login fragment
-                HelperClass.replaceFragment(fragmentManager, entryFrameId, loginFormFragment, loginFormFragment.TAG);
+                HelperClass.replaceFragment(fragmentManager, entryFrameId, loginFormFragment, EntryFormFragment.TAG);
             }
         });
 
@@ -69,15 +69,17 @@ public class EntryActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // goes to signup fragment
-                HelperClass.replaceFragment(fragmentManager, entryFrameId, signUpFragment, signUpFragment.TAG);
+                HelperClass.replaceFragment(fragmentManager, entryFrameId, signUpFragment, EntryFormFragment.TAG);
             }
         });
     }
 
     // navigates to the Map Stream view
     public void navigateToMapView() {
+
         Intent toMap = new Intent(EntryActivity.this, MainActivity.class);
         startActivity(toMap);
+
         finish();
     }
 

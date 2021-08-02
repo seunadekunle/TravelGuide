@@ -125,8 +125,6 @@ public class ProfileFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
-
-
         ibAvatar = view.findViewById(R.id.ibAvatar);
         tvProfile = view.findViewById(R.id.tvProfile);
         logOutBtn = view.findViewById(R.id.logOutBtn);
@@ -136,8 +134,8 @@ public class ProfileFragment extends Fragment {
         fragmentManager = getChildFragmentManager();;
         changeAvatarFragment = ChangeAvatarFragment.newInstance(true);
 
-//        ibAvatar.setOnClickListener(v ->
-//                HelperClass.replaceFragment(fragmentManager, frameID, changeAvatarFragment, changeAvatarFragment.TAG));
+        ibAvatar.setOnClickListener(v ->
+                HelperClass.addFragment(fragmentManager, R.id.childFrame, changeAvatarFragment, changeAvatarFragment.TAG));
 
         // handles logout button click
         logOutBtn.setOnClickListener(v -> logOutUser());

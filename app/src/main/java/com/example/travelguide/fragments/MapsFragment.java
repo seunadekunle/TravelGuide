@@ -500,7 +500,6 @@ public class MapsFragment extends Fragment {
     private void setupSheetBehavior() {
 
         sheetBehavior.setDraggable(modalLocationGuideFragment != null);
-
         sheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull @NotNull View bottomSheet, int newState) {
@@ -734,7 +733,11 @@ public class MapsFragment extends Fragment {
         return modalLocationGuideFragment;
     }
 
-    public void resetSheetState() {
-        sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+    public void setSheetState(int newState) {
+        sheetBehavior.setState(newState);
+    }
+
+    public BottomSheetBehavior getSheetBehavior() {
+        return sheetBehavior;
     }
 }
