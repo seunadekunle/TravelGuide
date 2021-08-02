@@ -5,25 +5,26 @@
     android:layout_height="match_parent"
     android:background="@color/white"
     android:clickable="true"
+    android:fitsSystemWindows="true"
     android:focusable="true"
-    tools:context=".fragments.ChangeAvatarFragment"
-    android:fitsSystemWindows="true">
+    tools:context=".fragments.ChangeAvatarFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        tools:ignore="ExtraText">
 
         <TextView
             android:id="@+id/textView5"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="25dp"
             android:fontFamily="sans-serif-medium"
             android:gravity="center_horizontal|center_vertical"
             android:text="@string/change_profile_photo"
             android:textColor="#000000"
-            android:textSize="20sp"
-            android:layout_marginTop="25dp"/>
+            android:textSize="20sp" />
 
         <ImageView
             android:id="@+id/ivTempAvatar"
@@ -38,31 +39,49 @@
             android:contentDescription="@string/profile_icon"
             tools:src="@tools:sample/avatars" />
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/photoBtn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/get_photo" />
+            android:layout_marginLeft="50dp"
+            android:layout_marginRight="50dp"
+            android:background="@drawable/btn_bg"
+            android:text="@string/get_photo"
+            android:textColor="#FFFFFF" />
+        />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_weight="2"
             android:orientation="horizontal"
-            android:layout_weight="5">
+            android:layout_marginTop="15dp">
 
-            <Button
+            <ImageButton
                 android:id="@+id/discardBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Discard Photo" />
+                android:layout_weight="7.5"
+                android:background="@null"
+                android:src="@drawable/discard_icon"
+                android:text="Discard Photo"
+                tools:ignore="NestedWeights"/>
 
-            <Button
+            <View
+                android:id="@+id/view2"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="5" />
+
+            <ImageButton
                 android:id="@+id/useBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Use Photo" />
+                android:layout_weight="7.5"
+                android:background="@null"
+                android:src="@drawable/use_icon"
+                android:text="Use Photo"/>
+
         </LinearLayout>
     </LinearLayout>
 </FrameLayout>

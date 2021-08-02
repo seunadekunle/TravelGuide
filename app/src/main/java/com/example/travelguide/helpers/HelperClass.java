@@ -162,7 +162,7 @@ public class HelperClass {
         // Begin the transaction
         FragmentTransaction ft = fragmentManager.beginTransaction();
 
-        ft.setTransition(FragmentTransaction.TRANSIT_ENTER_MASK);
+//        ft.setTransition(FragmentTransaction.TRANSIT_ENTER_MASK);
         // replace fragment in container
         ft.replace(fragmentsFrameId, fragment);
 

@@ -21,4 +21,5 @@
     <dimen name="searchview_left_margin">7.5dp</dimen>
     <dimen name="recommended_view_margin">5dp</dimen>
     <dimen name="location_header_margin">7.5dp</dimen>
+    <dimen name="confirm_icon_size">60dp</dimen>
 </resources>

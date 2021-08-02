@@ -177,7 +177,7 @@ public class ProfileFragment extends Fragment {
     }
 
     public void loadViewPager() {
-        profilePagerAdapter = new ProfilePagerAdapter(getChildFragmentManager(), getLifecycle(), ivExpanded, imageBG, userID);
+        profilePagerAdapter = new ProfilePagerAdapter(fragmentManager, getLifecycle(), ivExpanded, imageBG, userID);
         viewPager2.setAdapter(profilePagerAdapter);
 
         viewPager2.setSaveEnabled(false);

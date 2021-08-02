@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import androidx.activity.result.ActivityResult;
@@ -22,7 +23,6 @@ import androidx.fragment.app.Fragment;
 import com.example.travelguide.R;
 import com.example.travelguide.activities.EntryActivity;
 import com.example.travelguide.activities.MainActivity;
-import com.example.travelguide.activities.MapsActivity;
 import com.example.travelguide.helpers.HelperClass;
 import com.parse.ParseFile;
 import com.parse.ParseUser;
@@ -50,8 +50,8 @@ public class ChangeAvatarFragment extends Fragment {
 
     private ImageView ivTempAvatar;
     private Button photoBtn;
-    private Button useBtn;
-    private Button discardBtn;
+    private ImageButton useBtn;
+    private ImageButton discardBtn;
 
     private File avatarFile;
 
@@ -143,12 +143,13 @@ public class ChangeAvatarFragment extends Fragment {
         });
 
         discardBtn.setOnClickListener(v -> {
-            if (inProfile)
-                getParentFragment().getParentFragmentManager().popBackStack();
-            else {
+            if (inProfile) {
+                if (getParentFragment() != null) {
+                    getParentFragment().getChildFragmentManager().popBackStack();
+                }
+            } else {
                 // goes to map activity
                 ((EntryActivity) requireActivity()).navigateToMapView();
-
             }
         });
 
@@ -163,11 +164,21 @@ public class ChangeAvatarFragment extends Fragment {
                     Log.i(TAG, "there was an error saving the profile photo");
                 } else {
 
+
                     // navigates to different sections depending on where it is shown
-                    if (inProfile)
-                        ((MainActivity) requireActivity()).onBackPressed();
-                    else
+                    if (inProfile) {
+
+                        if (getParentFragment() != null) {
+
+                            // reload avatar
+                            ((ProfileFragment) getParentFragment()).loadAvatar();
+                            ((ProfileFragment) getParentFragment()).loadViewPager();
+
+                            ((MainActivity) getActivity()).onBackPressed();
+                        }
+                    } else {
                         ((EntryActivity) requireActivity()).navigateToMapView();
+                    }
                 }
             });
         });

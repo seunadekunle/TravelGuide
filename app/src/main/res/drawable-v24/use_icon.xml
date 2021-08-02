@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+
+            <padding
+                android:bottom="@dimen/img_btn_padding"
+                android:left="@dimen/img_btn_padding"
+                android:right="@dimen/img_btn_padding"
+                android:top="@dimen/img_btn_padding" />
+            <size
+                android:width="@dimen/confirm_icon_size"
+                android:height="@dimen/confirm_icon_size" />
+            <solid android:color="@color/secondary_color" />
+            <corners android:radius="@dimen/corner_radius" />
+        </shape>
+    </item>
+
+
+    <item android:drawable="@drawable/ic_baseline_check_24" />
+
+</layer-list>

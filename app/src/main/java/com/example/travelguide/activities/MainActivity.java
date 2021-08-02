@@ -91,6 +91,11 @@ public class MainActivity extends AppCompatActivity {
         HelperClass.addFragment(fragmentManager, tabFrameID, shownFragment, shownFragment.getTag());
     }
 
+    // show profile fragment
+    public void showProfileFragment() {
+        getSupportFragmentManager().beginTransaction().show(profileFragment).commit();
+    }
+
     @Override
     public void onBackPressed() {
 
@@ -120,10 +125,8 @@ public class MainActivity extends AppCompatActivity {
 
                 // shows last fragment
                 mapsFragmentManager.popBackStack();
-
                 // is back stack empty set addGuide button to be visible and refresh page
                 if (mapsFragmentManager.getBackStackEntryCount() == 1) {
-
                     // reload data
                     mapsFragment.getGuides(false);
                     mapsFragment.showOverlayBtns();
@@ -133,8 +136,8 @@ public class MainActivity extends AppCompatActivity {
         } else if (currentFragment instanceof ComposeFragment) {
             Log.i(TAG, "Compose");
         } else {
+            // if you are returning to profile fragment from ChangeAvatarFragment
             profileFragment.getChildFragmentManager().popBackStack();
-            Log.i(TAG, "Stack size "+profileFragment.getChildFragmentManager().getBackStackEntryCount());
             Log.i(TAG, "Profile");
         }
 
