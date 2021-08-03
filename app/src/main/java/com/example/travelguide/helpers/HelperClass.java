@@ -19,7 +19,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
-import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 import androidx.core.graphics.drawable.RoundedBitmapDrawable;
@@ -164,10 +163,20 @@ public class HelperClass {
     }
 
     // shows fragment in container
-    public static void addFragment(FragmentManager fragmentManager, int fragmentsFrameId, Fragment fragment, String tag, Boolean addToBackStack) {
+    public static void addFragment(FragmentManager fragmentManager, int fragmentsFrameId, Fragment fragment, String tag, Boolean addToBackStack, boolean animated) {
 
         // Begin the transaction
         FragmentTransaction ft = fragmentManager.beginTransaction();
+
+        // if the user wants it animated
+        if (animated) {
+            ft.setCustomAnimations(
+                    R.anim.slide_in_horizontal,  // enter
+                    R.anim.slide_out_horizontal,  // exit
+                    R.anim.slide_in_horizontal,   // popEnter
+                    R.anim.slide_out_horizontal  // popExit
+            );
+        }
 
         // add fragment to container
         if (!fragment.isAdded())

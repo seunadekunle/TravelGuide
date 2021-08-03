@@ -4,19 +4,21 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.transition.TransitionInflater;
 
-import com.example.travelguide.activities.MainActivity;
-import com.example.travelguide.activities.MapsActivity;
+import com.example.travelguide.R;
 import com.example.travelguide.adapters.TopLocationAdapter;
 import com.example.travelguide.classes.Location;
 import com.example.travelguide.databinding.FragmentTopLocationsBinding;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import com.parse.ParseUser;
 
 import java.util.Arrays;
 
@@ -31,9 +33,12 @@ public class TopLocationsFragment extends BottomSheetDialogFragment {
 
     private static final String ARG_LOCATIONS = "locations";
     private static final String TAG = "TopLocationsFragment";
+
+
     private FragmentTopLocationsBinding binding;
     private Location[] topLocations;
     private RecyclerView recyclerView;
+    private TextView tvMessage;
 
     public static TopLocationsFragment newInstance(Location[] topLocations) {
 
@@ -55,6 +60,10 @@ public class TopLocationsFragment extends BottomSheetDialogFragment {
         }
 
         super.onCreate(savedInstanceState);
+
+        // sets entry transition
+        TransitionInflater inflater = TransitionInflater.from(requireContext());
+        setEnterTransition(inflater.inflateTransition(R.transition.slide_up));
     }
 
     @Nullable
@@ -71,6 +80,8 @@ public class TopLocationsFragment extends BottomSheetDialogFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
         recyclerView = binding.rvTop;
+        tvMessage = binding.tvMessage;
+
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(new TopLocationAdapter(requireContext(), Arrays.asList(topLocations.clone()), 0, new TopLocationAdapter.OnItemClickListener() {
 
@@ -78,13 +89,17 @@ public class TopLocationsFragment extends BottomSheetDialogFragment {
             @Override
             public void onItemClick(Location location) {
 
-                // zoom to location
-                ((MapsFragment) getParentFragment()).zoomToLocation(new LatLng(location.getCoord().latitude, location.getCoord().longitude));
+                if (getParentFragment() != null) {
 
-                // shows bottom getFragmentsFrameId
-                ((MapsFragment) getParentFragment()).setModalLocationGuideFragment(
-                        (LocationGuideFragment.newInstance(location, ((MapsFragment) getParentFragment()).getFragmentsFrameId(), true)));
+                    dismiss();
+                    // zoom to location
+                    ((MapsFragment) getParentFragment()).zoomToLocation(new LatLng(location.getCoord().latitude, location.getCoord().longitude));
+                    // shows bottom getFragmentsFrameId
+                    ((MapsFragment) getParentFragment()).setModalLocationGuideFragment(
+                            (LocationGuideFragment.newInstance(location, ((MapsFragment) getParentFragment()).getFragmentsFrameId(), true)));
+                }
             }
+
         }));
 
         // sets button to dismiss the button
@@ -93,6 +108,8 @@ public class TopLocationsFragment extends BottomSheetDialogFragment {
             dismiss();
         }));
 
+        // sets message text
+        tvMessage.setText(String.format("Hey %s", ParseUser.getCurrentUser().getUsername()));
     }
 
     @Override

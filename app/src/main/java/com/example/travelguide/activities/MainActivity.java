@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
     private void showFragment(Fragment shownFragment, String tag) {
 
         // shows map fragment initially
-        HelperClass.addFragment(fragmentManager, tabFrameID, shownFragment, tag, false);
+        HelperClass.addFragment(fragmentManager, tabFrameID, shownFragment, tag, false, false);
     }
 
     // show profile fragment
@@ -132,19 +132,37 @@ public class MainActivity extends AppCompatActivity {
             if (mapsFragment.getModalFragment() != null && mapModalFragment.isVisible()) {
 
                 if (mapsFragment.getSheetBehavior().getState() == BottomSheetBehavior.STATE_EXPANDED) {
-                    // resets the modal state
-                    mapsFragment.setSheetState(BottomSheetBehavior.STATE_HALF_EXPANDED);
+
+                    if (mapsFragmentManager.getBackStackEntryCount() > 1) {
+                        mapsFragmentManager.popBackStack();
+                    }
+                    else {
+                        // resets the modal state
+                        mapsFragment.setSheetState(BottomSheetBehavior.STATE_HALF_EXPANDED);
+                        mapsFragment.showOverlayBtns();
+                    }
                     return;
                 }
 
-                // resets the modal state
-                mapsFragment.setSheetState(BottomSheetBehavior.STATE_COLLAPSED);
-                // hide modal view
-                mapsFragment.hideModalFragment();
-                mapsFragment.showOverlayBtns();
+                if (mapsFragment.getSheetBehavior().getState() == BottomSheetBehavior.STATE_HALF_EXPANDED) {
+
+                    // resets the modal state
+                    mapsFragment.setSheetState(BottomSheetBehavior.STATE_COLLAPSED);
+                    // hide modal view
+                    mapsFragment.hideModalFragment();
+                    mapsFragment.showOverlayBtns();
+
+                    return;
+                }
+                if (mapsFragment.getSheetBehavior().getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+
+                    // hide modal view
+                    mapsFragment.hideModalFragment();
+
+                    return;
+                }
 
             } else {
-
                 // shows last fragment
                 mapsFragmentManager.popBackStack();
                 // is back stack empty set addGuide button to be visible and refresh page

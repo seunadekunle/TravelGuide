@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.iammert.library.ui.multisearchviewlib.MultiSearchView
+    <SearchView
         android:id="@+id/searchView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -14,7 +14,7 @@
         android:iconifiedByDefault="true"
         android:layoutDirection="rtl"
         android:padding="0dp"
-        android:background="@drawable/searchview_bg"
+        android:queryBackground="@drawable/searchview_bg"
         android:queryHint="@string/search"
         android:searchIcon="@drawable/search_icon"
         android:visibility="visible"

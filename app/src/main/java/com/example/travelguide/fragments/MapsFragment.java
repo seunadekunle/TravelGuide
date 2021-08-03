@@ -45,7 +45,6 @@ import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.FetchPlaceRequest;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.iammert.library.ui.multisearchviewlib.MultiSearchView;
 import com.parse.FunctionCallback;
 import com.parse.GetCallback;
 import com.parse.ParseCloud;
@@ -69,7 +68,7 @@ public class MapsFragment extends Fragment {
     private GoogleMap map;
     private FragmentManager fragmentManager;
     private ProgressBar pbMaps;
-    private MultiSearchView searchView;
+    private SearchView searchView;
     private RecyclerView rvSearchList;
     private View frameLayout;
 
@@ -262,6 +261,13 @@ public class MapsFragment extends Fragment {
 
         setupSheetBehavior();
 
+        setupSearchList();
+        setupSearchView();
+
+        hideOverlayBtns();
+    }
+
+    public void setupSearchList() {
         // elements needed for the search recyclerview
         SearchListAdapter.onItemClickListener onItemClickListener = new SearchListAdapter.onItemClickListener() {
             @Override
@@ -269,12 +275,8 @@ public class MapsFragment extends Fragment {
                 showPredictionInfo(prediction);
             }
         };
-
         predictions = new ArrayList<>();
         adapter = new SearchListAdapter(predictions, requireContext(), onItemClickListener);
-        setupSearchView();
-
-        hideOverlayBtns();
     }
 
     private void initializeMap() {
@@ -574,79 +576,58 @@ public class MapsFragment extends Fragment {
         // Creates a new token for the autocomplete session
         AutocompleteSessionToken token = AutocompleteSessionToken.newInstance();
 
-
-        searchView.setSearchViewListener(new MultiSearchView.MultiSearchViewListener() {
+        searchView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
-            public void onTextChanged(int i, @NotNull CharSequence charSequence) {
-                Log.i(TAG, charSequence.toString());
-            }
+            public void onFocusChange(View v, boolean hasFocus) {
 
-            @Override
-            public void onSearchComplete(int i, @NotNull CharSequence charSequence) {
-
-            }
-
-            @Override
-            public void onSearchItemRemoved(int i) {
-
-            }
-
-            @Override
-            public void onItemSelected(int i, @NotNull CharSequence charSequence) {
-
+                // if the search view has focus
+                if (hasFocus) {
+                    hideModalFragment();
+                }
             }
         });
-//        searchView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-//            @Override
-//            public void onFocusChange(View v, boolean hasFocus) {
-//
-//                // if the search view has focus
-//                if (hasFocus) {
-//                    hideModalFragment();
-//                }
-//            }
-//        });
-//
-//        // Get the SearchView and set the searchable configuration
-//        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-//
-//            @Override
-//            public boolean onQueryTextSubmit(String query) {
-//
-//                // clears focus and hides keyboard
-//                searchView.clearFocus();
-//                HelperClass.hideKeyboard(requireActivity());
-//
-//                return false;
-//            }
-//
-//            @Override
-//            public boolean onQueryTextChange(String newText) {
-//
-//                if (lastKnownLocation != null) {
-//                    FindAutocompletePredictionsRequest request = FindAutocompletePredictionsRequest.builder()
-//                            .setOrigin(new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()))
-//                            .setSessionToken(token).setQuery(newText).build();
-//
-//                    HelperClass.getPlacesClient().findAutocompletePredictions(request).addOnSuccessListener((response) -> {
-//
-//                        predictions = response.getAutocompletePredictions();
-//
-//                        // updates the recyclerview
-//                        adapter.clear();
-//                        adapter.addAll(predictions);
-//
-//                    }).addOnFailureListener((exception) -> {
-//                        if (exception instanceof ApiException) {
-//                            ApiException apiException = (ApiException) exception;
-//                            Log.e(TAG, "Place not found: " + apiException.getStatusCode());
-//                        }
-//                    });
-//                }
-//
-//                return false;
-//            }
-//        });
+
+
+        // Get the SearchView and set the searchable configuration
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+
+                // clears focus and hides keyboard
+                searchView.clearFocus();
+                HelperClass.hideKeyboard(requireActivity());
+
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+
+                if (lastKnownLocation != null) {
+                    FindAutocompletePredictionsRequest request = FindAutocompletePredictionsRequest.builder()
+                            .setOrigin(new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()))
+                            .setSessionToken(token).setQuery(newText).build();
+
+                    HelperClass.getPlacesClient().findAutocompletePredictions(request).addOnSuccessListener((response) -> {
+
+                        predictions = response.getAutocompletePredictions();
+
+                        // updates the recyclerview
+                        adapter.clear();
+                        adapter.addAll(predictions);
+
+                    }).addOnFailureListener((exception) -> {
+                        if (exception instanceof ApiException) {
+                            ApiException apiException = (ApiException) exception;
+                            Log.e(TAG, "Place not found: " + apiException.getStatusCode());
+                        }
+                    });
+                }
+
+                return false;
+            }
+        });
     }
 
     private void showTopLocations() {
@@ -684,7 +665,6 @@ public class MapsFragment extends Fragment {
             // add fragment to backstack
             ft.addToBackStack("ModalFragment");
         }
-
         // add fragment to container
         ft.replace(modalFrameId, modalFragment);
         // complete the transaction
@@ -737,9 +717,9 @@ public class MapsFragment extends Fragment {
     /// close the searchview element
     public void closeSearchView() {
         searchView.clearFocus();
-//        searchView.setQuery("", false);
-//        searchView.setIconified(true);
-//        searchView.onActionViewCollapsed();
+        searchView.setQuery("", false);
+        searchView.setIconified(true);
+        searchView.onActionViewCollapsed();
     }
 
     public void setModalLocationGuideFragment(LocationGuideFragment locationGuideFragment) {

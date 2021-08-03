@@ -24,9 +24,9 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.transition.TransitionInflater;
 
 import com.example.travelguide.R;
-import com.example.travelguide.activities.MapsActivity;
 import com.example.travelguide.adapters.GuidesAdapter;
 import com.example.travelguide.adapters.TopLocationAdapter;
 import com.example.travelguide.classes.Activity;
@@ -101,8 +101,6 @@ public class LocationGuideFragment extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
         // there are arguments to be gotten
         if (getArguments() != null) {
             // initializes local Parse variable
@@ -111,7 +109,14 @@ public class LocationGuideFragment extends Fragment {
 
             // shows expand indicator
             expandable = getArguments().getBoolean(ARG_MODAL);
+
+            // sets entry and exit transition
+            TransitionInflater inflater = TransitionInflater.from(requireContext());
+            setEnterTransition(inflater.inflateTransition(R.transition.slide_up));
+            setExitTransition(inflater.inflateTransition(R.transition.slide_down));
         }
+
+        super.onCreate(savedInstanceState);
     }
 
     @Override
@@ -209,7 +214,7 @@ public class LocationGuideFragment extends Fragment {
 
                                 //set variables for recommended locations
                                 rvRecommended.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
-                                rvRecommended.setAdapter(new TopLocationAdapter(requireContext(), (ArrayList<Location>) objects, 1,new TopLocationAdapter.OnItemClickListener() {
+                                rvRecommended.setAdapter(new TopLocationAdapter(requireContext(), (ArrayList<Location>) objects, 1, new TopLocationAdapter.OnItemClickListener() {
 
                                     @Override
                                     public void onItemClick(Location location) {
