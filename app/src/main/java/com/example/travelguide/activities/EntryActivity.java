@@ -55,13 +55,12 @@ public class EntryActivity extends AppCompatActivity {
         loginFormFragment = EntryFormFragment.newInstance(entryFrameId, "Login");
         signUpFragment = EntryFormFragment.newInstance(entryFrameId, "Signup");
 
-
         // on click listener for login button
         loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // goes to login fragment
-                HelperClass.replaceFragment(fragmentManager, entryFrameId, loginFormFragment, EntryFormFragment.TAG);
+                HelperClass.replaceFragment(fragmentManager, entryFrameId, loginFormFragment, EntryFormFragment.TAG, true);
             }
         });
 
@@ -69,9 +68,20 @@ public class EntryActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // goes to signup fragment
-                HelperClass.replaceFragment(fragmentManager, entryFrameId, signUpFragment, EntryFormFragment.TAG);
+                HelperClass.replaceFragment(fragmentManager, entryFrameId, signUpFragment, EntryFormFragment.TAG, true);
             }
         });
+
+        animateButton(loginBtn);
+        animateButton(signupBtn);
+    }
+
+    // creates entrance animation in the login screen
+    private void animateButton(Button btn) {
+        btn.setAlpha(0f);
+        btn.setTranslationY(50);
+
+        btn.animate().alpha(1f).translationYBy(-50).setDuration(1500);
     }
 
     // navigates to the Map Stream view

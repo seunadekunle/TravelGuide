@@ -3,16 +3,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/splash_background"
     tools:context=".activities.EntryActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="50dp"
+        android:clickable="false"
         android:gravity="center"
         android:orientation="vertical"
-        android:paddingBottom="@dimen/margin_start_screen_text"
-        android:clickable="false">
+        android:paddingBottom="@dimen/margin_start_screen_text">
 
         <TextView
             android:id="@+id/textView4"
@@ -26,25 +27,31 @@
             android:textColor="@color/black"
             android:textSize="@dimen/header_text_size" />
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/loginBtn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/log_up_bg"
             android:text="@string/log_in"
-            android:textAllCaps="false" />
+            android:textAllCaps="false"
+            android:textColor="@color/black"
+            android:textSize="15sp" />
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/signupBtn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="25dp"
+            android:background="@drawable/sign_up_bg"
+            android:padding="10dp"
             android:text="@string/sign_up"
-            android:textAllCaps="false" />
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="15sp" />
     </LinearLayout>
 
     <FrameLayout
         android:id="@+id/entryForm"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-    </FrameLayout>
+        android:layout_height="match_parent"></FrameLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

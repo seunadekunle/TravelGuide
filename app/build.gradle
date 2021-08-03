@@ -84,4 +84,5 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics'
 
     implementation 'com.github.ibrahimsn98:SmoothBottomBar:1.7.8'
+    implementation 'com.github.iammert:MultiSearchView:0.3'
 }

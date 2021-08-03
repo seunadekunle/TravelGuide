@@ -10,7 +10,6 @@
     <dimen name="corner_radius">7.5dp</dimen>
     <dimen name="add_guide_media_btn">50dp</dimen>
     <dimen name="img_btn_padding">10dp</dimen>
-    <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="fragment_horizontal_margin">16dp</dimen>
     <dimen name="fragment_vertical_margin">16dp</dimen>
     <dimen name="header_text_size">30sp</dimen>
@@ -22,4 +21,5 @@
     <dimen name="recommended_view_margin">5dp</dimen>
     <dimen name="location_header_margin">7.5dp</dimen>
     <dimen name="confirm_icon_size">60dp</dimen>
+    <dimen name="entry_margin">20dp</dimen>
 </resources>

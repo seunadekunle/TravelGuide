@@ -164,7 +164,7 @@ public class EntryFormFragment extends Fragment {
                     // goes to change avatar
                     if (getArguments() != null) {
                         HelperClass.replaceFragment(requireActivity().getSupportFragmentManager(),
-                                getArguments().getInt(ARG_ID), newUserAvatar, ChangeAvatarFragment.TAG);
+                                getArguments().getInt(ARG_ID), newUserAvatar, ChangeAvatarFragment.TAG, true);
                     }
                     
                 } else {

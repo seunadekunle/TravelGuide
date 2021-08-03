@@ -166,6 +166,7 @@ public class ComposeFragment extends Fragment {
                 FindCurrentPlaceResponse response = task.getResult();
                 Place likelyPlace = response.getPlaceLikelihoods().get(0).getPlace();
 
+                Log.i(TAG, likelyPlace.getLatLng().toString());
                 // set the variables needed in the Fragment
                 placeName = likelyPlace.getName();
                 location = likelyPlace.getLatLng();
@@ -568,6 +569,7 @@ public class ComposeFragment extends Fragment {
                 photoFile = new File("");
                 videoFile = new File("");
                 audioFile = new File("");
+                getInfo();
 
                 sendNotification(guideLocation[0]);
             });

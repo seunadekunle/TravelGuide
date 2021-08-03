@@ -25,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
     private SmoothBottomBar smoothBottomBar;
     private FragmentManager fragmentManager;
     private int tabFrameID;
+    private String fragmentTAG;
 
     // different fragments
     private ComposeFragment composeFragment;
@@ -48,9 +49,13 @@ public class MainActivity extends AppCompatActivity {
         mapsFragment = new MapsFragment();
         profileFragment = ProfileFragment.newInstance(tabFrameID, ParseUser.getCurrentUser().getObjectId());
 
-        showFragment(mapsFragment);
+        shownFragment = mapsFragment;
+        showFragment(shownFragment, MapsFragment.TAG);
         // sets up bottom navbar
         smoothBottomBar = findViewById(R.id.bottomBar);
+
+//        smoothBottomBar.setSelected(true);
+//        smoothBottomBar.setItemActiveIndex(0);
 
         // sets bottom bar state
         smoothBottomBar.setOnItemSelectedListener((OnItemSelectedListener) i -> {
@@ -68,27 +73,30 @@ public class MainActivity extends AppCompatActivity {
             switch (i) {
                 case 1:
                     shownFragment = composeFragment;
+                    fragmentTAG = ComposeFragment.TAG;
                     break;
                 case 2:
                     shownFragment = profileFragment;
+                    fragmentTAG = ProfileFragment.TAG;
                     break;
                 default:
-
                     shownFragment = mapsFragment;
+                    fragmentTAG = MapsFragment.TAG;
                     break;
             }
 
             // replaces the fragment container
-            showFragment(shownFragment);
+            showFragment(shownFragment, fragmentTAG);
             return true;
         });
 
         smoothBottomBar.setSelected(true);
     }
 
-    private void showFragment(Fragment shownFragment) {
+    private void showFragment(Fragment shownFragment, String tag) {
+
         // shows map fragment initially
-        HelperClass.addFragment(fragmentManager, tabFrameID, shownFragment, shownFragment.getTag());
+        HelperClass.addFragment(fragmentManager, tabFrameID, shownFragment, tag, false);
     }
 
     // show profile fragment
@@ -99,12 +107,26 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
 
-        Fragment currentFragment = getSupportFragmentManager().findFragmentById(tabFrameID);
+        Fragment currentFragment;
+
+        // sets currentFragment based on what's shown
+        if (shownFragment != null) {
+            currentFragment = shownFragment;
+        } else {
+            currentFragment = mapsFragment;
+        }
 
         if (currentFragment instanceof MapsFragment) {
 
+            // maps fragment manager
             FragmentManager mapsFragmentManager = mapsFragment.getChildFragmentManager();
             Fragment mapModalFragment = mapsFragment.getModalFragment();
+
+            if (HelperClass.emptyBackStack(mapsFragmentManager)) {
+                Log.i(TAG, "empty");
+                super.onBackPressed();
+                return;
+            }
 
             // if the modal fragment is visible
             if (mapsFragment.getModalFragment() != null && mapModalFragment.isVisible()) {
@@ -134,13 +156,22 @@ public class MainActivity extends AppCompatActivity {
             }
             Log.i(TAG, "Maps");
         } else if (currentFragment instanceof ComposeFragment) {
-            Log.i(TAG, "Compose");
+
+            super.onBackPressed();
+            Log.i(TAG, "ComposeFragment");
         } else {
-            // if you are returning to profile fragment from ChangeAvatarFragment
-            profileFragment.getChildFragmentManager().popBackStack();
+
+            // profile fragment manager
+            FragmentManager profileFragmentManager = profileFragment.getChildFragmentManager();
+
+            if (HelperClass.emptyBackStack(profileFragmentManager)) {
+                super.onBackPressed();
+            } else {
+                // if you are returning to profile fragment from ChangeAvatarFragment
+                profileFragmentManager.popBackStack();
+            }
+
             Log.i(TAG, "Profile");
         }
-
-//        super.onBackPressed();
     }
 }

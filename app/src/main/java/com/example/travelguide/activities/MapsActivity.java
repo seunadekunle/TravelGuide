@@ -51,6 +51,7 @@ import com.google.android.libraries.places.api.net.FetchPlaceRequest;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.iammert.library.ui.multisearchviewlib.MultiSearchView;
 import com.parse.FunctionCallback;
 import com.parse.GetCallback;
 import com.parse.ParseCloud;
@@ -77,7 +78,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private FloatingActionButton addGuide;
     private FragmentManager fragmentManager;
     private ProgressBar pbMaps;
-    private SearchView searchView;
+    private MultiSearchView searchView;
     private RecyclerView rvSearchList;
     private ImageButton ibProfile;
     private SearchviewUiBinding searchviewUiBinding;
@@ -191,20 +192,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         adapter = new SearchListAdapter(predictions, this, onItemClickListener);
         setupSearchView();
 
-        // profile button on click listener
-        ibProfile.setOnClickListener(v -> {
-
-            HelperClass.addFragment(fragmentManager, fragmentsFrameId, profileFragment, ProfileFragment.TAG);
-            hideOverlayBtns();
-        });
-
-        // add button on click listener
-        addGuide.setOnClickListener(v -> {
-
-            HelperClass.addFragment(fragmentManager, fragmentsFrameId, composeFragment, ComposeFragment.TAG);
-            hideOverlayBtns();
-
-        });
 
         hideOverlayBtns();
     }
@@ -351,48 +338,69 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // adds lines between the recyclerview elements
         rvSearchList.addItemDecoration(dividerItemDecoration);
 
-        // Creates a new token for the autocomplete session
-        AutocompleteSessionToken token = AutocompleteSessionToken.newInstance();
-        // Get the SearchView and set the searchable configuration
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-
+        searchView.setSearchViewListener(new MultiSearchView.MultiSearchViewListener() {
             @Override
-            public boolean onQueryTextSubmit(String query) {
-
-                // clears focus and hides keyboard
-                searchView.clearFocus();
-                HelperClass.hideKeyboard(MapsActivity.this);
-
-                return false;
+            public void onTextChanged(int i, @NotNull CharSequence charSequence) {
+                Log.i(TAG, (String) charSequence);
             }
 
             @Override
-            public boolean onQueryTextChange(String newText) {
+            public void onSearchComplete(int i, @NotNull CharSequence charSequence) {
 
-                if (lastKnownLocation != null) {
-                    FindAutocompletePredictionsRequest request = FindAutocompletePredictionsRequest.builder()
-                            .setOrigin(new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()))
-                            .setSessionToken(token).setQuery(newText).build();
+            }
 
-                    HelperClass.getPlacesClient().findAutocompletePredictions(request).addOnSuccessListener((response) -> {
+            @Override
+            public void onSearchItemRemoved(int i) {
 
-                        predictions = response.getAutocompletePredictions();
+            }
 
-                        // updates the recyclerview
-                        adapter.clear();
-                        adapter.addAll(predictions);
+            @Override
+            public void onItemSelected(int i, @NotNull CharSequence charSequence) {
 
-                    }).addOnFailureListener((exception) -> {
-                        if (exception instanceof ApiException) {
-                            ApiException apiException = (ApiException) exception;
-                            Log.e(TAG, "Place not found: " + apiException.getStatusCode());
-                        }
-                    });
-                }
-
-                return false;
             }
         });
+//        // Creates a new token for the autocomplete session
+//        AutocompleteSessionToken token = AutocompleteSessionToken.newInstance();
+//        // Get the SearchView and set the searchable configuration
+//        searchView(new SearchView.OnQueryTextListener() {
+//
+//            @Override
+//            public boolean onQueryTextSubmit(String query) {
+//
+//                // clears focus and hides keyboard
+//                searchView.clearFocus();
+//                HelperClass.hideKeyboard(MapsActivity.this);
+//
+//                return false;
+//            }
+//
+//            @Override
+//            public boolean onQueryTextChange(String newText) {
+//
+//                if (lastKnownLocation != null) {
+//                    FindAutocompletePredictionsRequest request = FindAutocompletePredictionsRequest.builder()
+//                            .setOrigin(new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()))
+//                            .setSessionToken(token).setQuery(newText).build();
+//
+//                    HelperClass.getPlacesClient().findAutocompletePredictions(request).addOnSuccessListener((response) -> {
+//
+//                        predictions = response.getAutocompletePredictions();
+//
+//                        // updates the recyclerview
+//                        adapter.clear();
+//                        adapter.addAll(predictions);
+//
+//                    }).addOnFailureListener((exception) -> {
+//                        if (exception instanceof ApiException) {
+//                            ApiException apiException = (ApiException) exception;
+//                            Log.e(TAG, "Place not found: " + apiException.getStatusCode());
+//                        }
+//                    });
+//                }
+//
+//                return false;
+//            }
+//        });
     }
 
     private void initializeMap() {
@@ -445,7 +453,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 ft.replace(fragmentsFrameId, locationGuideFragment);
 
                 // complete the transaction
-                HelperClass.finishTransaction(ft, LocationGuideFragment.TAG, (Fragment) locationGuideFragment);
+                HelperClass.finishTransaction(ft, LocationGuideFragment.TAG, (Fragment) locationGuideFragment, false);
                 hideOverlayBtns();
 
                 return true;
@@ -689,10 +697,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             return;
         }
 
-        if (!(searchView.isIconified())) {
-            closeSearchView();
-        } else {
-
             // if there are no stacks showing go to home screen
             if (HelperClass.emptyBackStack(fragmentManager)) {
                 super.onBackPressed();
@@ -707,7 +711,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     showOverlayBtns();
                 }
             }
-        }
     }
 
     // TODO: Add transition
@@ -741,9 +744,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     /// close the searchview element
     public void closeSearchView() {
         searchView.clearFocus();
-        searchView.setQuery("", false);
-        searchView.setIconified(true);
-        searchView.onActionViewCollapsed();
+//        searchView.setQuery("", false);
+//        searchView.setIconified(true);
+//        searchView.onActionViewCollapsed();
     }
 
     public void setModalLocationGuideFragment(LocationGuideFragment locationGuideFragment) {

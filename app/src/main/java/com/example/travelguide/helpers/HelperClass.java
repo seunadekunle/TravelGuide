@@ -164,7 +164,7 @@ public class HelperClass {
     }
 
     // shows fragment in container
-    public static void addFragment(FragmentManager fragmentManager, int fragmentsFrameId, Fragment fragment, String tag) {
+    public static void addFragment(FragmentManager fragmentManager, int fragmentsFrameId, Fragment fragment, String tag, Boolean addToBackStack) {
 
         // Begin the transaction
         FragmentTransaction ft = fragmentManager.beginTransaction();
@@ -173,11 +173,11 @@ public class HelperClass {
         if (!fragment.isAdded())
             ft.add(fragmentsFrameId, fragment);
 
-        finishTransaction(ft, tag, fragment);
+        finishTransaction(ft, tag, fragment, addToBackStack);
     }
 
     // shows fragment in container
-    public static void replaceFragment(FragmentManager fragmentManager, int fragmentsFrameId, Fragment fragment, String tag) {
+    public static void replaceFragment(FragmentManager fragmentManager, int fragmentsFrameId, Fragment fragment, String tag, Boolean addToBackStack) {
 
         // Begin the transaction
         FragmentTransaction ft = fragmentManager.beginTransaction();
@@ -185,16 +185,19 @@ public class HelperClass {
         // replace fragment in container
         ft.replace(fragmentsFrameId, fragment);
 
-        finishTransaction(ft, tag, fragment);
+        finishTransaction(ft, tag, fragment, addToBackStack);
     }
 
 
     // completes fragment transaction
-    public static void finishTransaction(FragmentTransaction ft, String name, Fragment fragment) {
+    public static void finishTransaction(FragmentTransaction ft, String name, Fragment fragment,Boolean addToBackStack) {
 
-        // add transaction to backstack
-        ft.addToBackStack(name);
+        Log.i(TAG, " " + name);
 
+        if (addToBackStack) {
+            // add transaction to backstack
+            ft.addToBackStack(name);
+        }
         // show fragment
         ft.show(fragment);
 

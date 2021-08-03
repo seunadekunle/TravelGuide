@@ -150,7 +150,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
 
     private void goToProfile(Guide guide) {
         ProfileFragment userProfile = ProfileFragment.newInstance(guide.getAuthor().getObjectId());
-        HelperClass.addFragment(fragmentManager, frameID, userProfile, ProfileFragment.TAG);
+        HelperClass.addFragment(fragmentManager, frameID, userProfile, ProfileFragment.TAG, true);
     }
 
     // clear all elements of the RecyclerView

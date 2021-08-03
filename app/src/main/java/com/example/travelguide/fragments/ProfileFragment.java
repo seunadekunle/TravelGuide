@@ -135,7 +135,7 @@ public class ProfileFragment extends Fragment {
         changeAvatarFragment = ChangeAvatarFragment.newInstance(true);
 
         ibAvatar.setOnClickListener(v ->
-                HelperClass.addFragment(fragmentManager, R.id.childFrame, changeAvatarFragment, changeAvatarFragment.TAG));
+                HelperClass.addFragment(fragmentManager, R.id.childFrame, changeAvatarFragment, changeAvatarFragment.TAG, true));
 
         // handles logout button click
         logOutBtn.setOnClickListener(v -> logOutUser());
