@@ -2,6 +2,7 @@ package com.example.travelguide.fragments;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
@@ -31,9 +32,14 @@ import com.example.travelguide.R;
 import com.example.travelguide.classes.Guide;
 import com.example.travelguide.classes.Location;
 import com.example.travelguide.helpers.HelperClass;
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.PlaceLikelihood;
+import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
@@ -118,6 +124,7 @@ public class ComposeFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_compose, container, false);
     }
@@ -143,14 +150,38 @@ public class ComposeFragment extends Fragment {
         recordBtn = view.findViewById(R.id.recordBtn);
         playBtn = view.findViewById(R.id.playBtn);
 
-        if (latParam != null && longParam != null) {
-            // gets location info from coordinates and sets button text
-            placeName = HelperClass.getAddress(getContext(), latParam, longParam);
-            setButtonText(placeName);
-        }
-
         setActivityLaunchers();
         setClickListeners();
+
+        getInfo();
+    }
+
+    public void getInfo() {
+
+        // gets the current place using the places API
+        HelperClass.fetchCurrentPlace(requireContext(), task -> {
+            if (task.isSuccessful()){
+
+                // get the response
+                FindCurrentPlaceResponse response = task.getResult();
+                Place likelyPlace = response.getPlaceLikelihoods().get(0).getPlace();
+
+                // set the variables needed in the Fragment
+                placeName = likelyPlace.getName();
+                location = likelyPlace.getLatLng();
+                placeID = likelyPlace.getId();
+
+                setButtonText(placeName);
+
+            } else {
+
+                Exception exception = task.getException();
+                if (exception instanceof ApiException) {
+                    ApiException apiException = (ApiException) exception;
+                    Log.e(TAG, "Place not found: " + apiException.getStatusCode());
+                }
+            }
+        });
     }
 
 
@@ -385,19 +416,19 @@ public class ComposeFragment extends Fragment {
         addBtn.setOnClickListener(v -> {
             String text = etText.getText().toString();
 
-//            // if the text field is empty
-//            if (text.isEmpty()) {
-//                Snackbar emptyText = Snackbar.make(etText, empty_text, Snackbar.LENGTH_SHORT);
-//                HelperClass.displaySnackBarWithBottomMargin(emptyText, 80, getActivity());
-//                return;
-//            }
-//
-//            // if no location is selected
-//            if (location == null) {
-//                Snackbar emptyLocation = Snackbar.make(etText, R.string.no_location, Snackbar.LENGTH_SHORT);
-//                HelperClass.displaySnackBarWithBottomMargin(emptyLocation, 80, getActivity());
-//                return;
-//            }
+            // if the text field is empty
+            if (text.isEmpty()) {
+                Snackbar emptyText = Snackbar.make(etText, R.string.empty_text, Snackbar.LENGTH_SHORT);
+                HelperClass.displaySnackBarWithBottomMargin(emptyText, 80, getActivity());
+                return;
+            }
+
+            // if no location is selected
+            if (location == null) {
+                Snackbar emptyLocation = Snackbar.make(etText, R.string.no_location, Snackbar.LENGTH_SHORT);
+                HelperClass.displaySnackBarWithBottomMargin(emptyLocation, 80, getActivity());
+                return;
+            }
 
             ParseUser user = ParseUser.getCurrentUser();
             saveGuide(text, user, photoFile, videoFile, audioFile);
@@ -530,7 +561,7 @@ public class ComposeFragment extends Fragment {
                 }
 
                 // clears guide and goes back to main fragment
-                guide.setText("");
+                etText.setText("");
                 ivPreview.setImageResource(0);
                 controller = null;
                 vvPreview.setVideoPath("");
@@ -630,6 +661,7 @@ public class ComposeFragment extends Fragment {
     // sets the button text given String
     private void setButtonText(String newText) {
         locationBtn.setText(newText);
+        locationBtn.setTextColor(Color.parseColor("#000000"));
     }
 
     /*

@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.ImageDecoder;
 import android.location.Address;
@@ -18,6 +19,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 import androidx.core.graphics.drawable.RoundedBitmapDrawable;
@@ -30,19 +32,20 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.example.travelguide.R;
 import com.example.travelguide.classes.GlideApp;
-import com.example.travelguide.classes.GlideModule;
 import com.example.travelguide.classes.Location;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.FetchPlaceRequest;
 import com.google.android.libraries.places.api.net.FetchPlaceResponse;
+import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
+import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.material.snackbar.Snackbar;
-import com.parse.FindCallback;
 import com.parse.GetCallback;
-import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseQuery;
@@ -102,8 +105,23 @@ public class HelperClass {
         FetchPlaceRequest request = FetchPlaceRequest.newInstance(placeID, HelperClass.placesFields);
         HelperClass.getPlacesClient().fetchPlace(request)
                 .addOnSuccessListener(responseListener);
-
     }
+
+
+    public static void fetchCurrentPlace(Context context, OnCompleteListener<FindCurrentPlaceResponse> currentPlaceResponseOnCompleteListener) {
+
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            return;
+        }
+
+        FindCurrentPlaceRequest request = FindCurrentPlaceRequest.newInstance(HelperClass.placesFields);
+        Task<FindCurrentPlaceResponse> findCurrentPlaceResponseTask = HelperClass.getPlacesClient().findCurrentPlace(request);
+        findCurrentPlaceResponseTask.addOnCompleteListener(currentPlaceResponseOnCompleteListener);
+    }
+
 
     /*
      * displays snackbar with margin
@@ -147,6 +165,7 @@ public class HelperClass {
 
     // shows fragment in container
     public static void addFragment(FragmentManager fragmentManager, int fragmentsFrameId, Fragment fragment, String tag) {
+
         // Begin the transaction
         FragmentTransaction ft = fragmentManager.beginTransaction();
 
@@ -159,10 +178,10 @@ public class HelperClass {
 
     // shows fragment in container
     public static void replaceFragment(FragmentManager fragmentManager, int fragmentsFrameId, Fragment fragment, String tag) {
+
         // Begin the transaction
         FragmentTransaction ft = fragmentManager.beginTransaction();
 
-//        ft.setTransition(FragmentTransaction.TRANSIT_ENTER_MASK);
         // replace fragment in container
         ft.replace(fragmentsFrameId, fragment);
 
@@ -394,7 +413,6 @@ public class HelperClass {
 
     // returns location based on LatLng object
     public static void fetchLocation(LatLng location, GetCallback<Location> callback) {
-
         ParseQuery<Location> query = ParseQuery.getQuery(Location.class);
         query.whereEqualTo(Location.getKeyCoord(), new ParseGeoPoint(location.latitude, location.longitude));
         query.getFirstInBackground(callback);

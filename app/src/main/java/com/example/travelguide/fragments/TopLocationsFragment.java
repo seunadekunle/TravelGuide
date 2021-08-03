@@ -89,7 +89,7 @@ public class TopLocationsFragment extends BottomSheetDialogFragment {
 
         // sets button to dismiss the button
         binding.dismiss.setOnClickListener((v -> {
-            ((MapsFragment) getParentFragment()).hideModalFragment();
+//            ((MapsFragment) getParentFragment()).hideModalFragment();
             dismiss();
         }));
 
