@@ -453,7 +453,7 @@ public class LocationGuideFragment extends Fragment {
         // include data referred by user key
         query.include(Guide.getKeyAuthor());
         // limit query to latest 20 items
-        query.setLimit(20);
+        query.setLimit(50);
         // get posts that are specific to the location
         query.whereEqualTo("locationID", parseLocation);
         // order posts by creation date (newest first)

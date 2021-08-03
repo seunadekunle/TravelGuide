@@ -22,7 +22,6 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.travelguide.R;
 import com.example.travelguide.classes.GlideApp;
 import com.example.travelguide.classes.Guide;
 import com.example.travelguide.databinding.LocationGuideBinding;
@@ -34,6 +33,7 @@ import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.audio.AudioAttributes;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.parse.FindCallback;
 import com.parse.ParseException;
@@ -70,7 +70,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
     private Animator currentAnimator;
     // The system "short" animation time duration, in milliseconds.
     private final int shortAnimationDuration = 100;
-    private final int playerHeightMult = 12;
+    private final int playerHeightMult = 6;
 
 
     public GuidesAdapter(List<Guide> items, Context context, ImageView expandedImageView, View expandedImageViewBG, Activity activity, SimpleExoPlayer exoPlayer, boolean inProfile
@@ -150,7 +150,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
 
     private void goToProfile(Guide guide) {
         ProfileFragment userProfile = ProfileFragment.newInstance(guide.getAuthor().getObjectId());
-        HelperClass.addFragment(fragmentManager, frameID, userProfile, ProfileFragment.TAG, true);
+        HelperClass.addFragment(fragmentManager, frameID, userProfile, ProfileFragment.TAG, true, true);
     }
 
     // clear all elements of the RecyclerView
@@ -225,6 +225,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
         private final ConstraintLayout mediaLayout;
         private final ImageButton ibThumb;
         public PlayerView epPlayerView;
+        private PlayerControlView epPlayerControlView;
 
         public ViewHolder(LocationGuideBinding binding) {
             super(binding.getRoot());
@@ -239,7 +240,8 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
 
             mediaLayout = binding.mediaContainer.mediaLayout;
             ibThumb = binding.mediaContainer.ibThumb;
-            epPlayerView = binding.mediaContainer.epPlayer;
+            epPlayerView = binding.mediaContainer.epVideo;
+            epPlayerControlView = binding.mediaContainer.epAudio;
         }
     }
 
@@ -368,9 +370,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
             if (guide.getVideo() != null || guide.getAudio() != null) {
 
                 Uri mediaUri;
-
                 // shows the media view
-                holder.epPlayerView.setVisibility(View.VISIBLE);
                 holder.ibThumb.setVisibility(View.GONE);
 
                 // creates a track selector an pick media that is only sd quality or lower
@@ -387,11 +387,15 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
                         .build();
 
                 if (guide.getAudio() != null) {
+
+                    holder.epPlayerControlView.setVisibility(View.VISIBLE);
+                    holder.epPlayerView.setVisibility(View.GONE);
+
                     // shortens the player height if it is video
-                    holder.epPlayerView.getLayoutParams().height = DeviceDimenHelper.getDisplayHeight(context) / playerHeightMult;
+                    holder.epPlayerControlView.getLayoutParams().height = DeviceDimenHelper.getDisplayHeight(context) / playerHeightMult;
 
                     mediaUri = Uri.parse(guide.getAudio().getUrl());
-                    holder.epPlayerView.setShutterBackgroundColor(R.color.black);
+//                    holder.epPlayerView.setShutterBackgroundColor(R.color.black);
 
                     // set audio attributes for guide audio
                     AudioAttributes audioAttributes = new AudioAttributes.Builder()
@@ -401,17 +405,24 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
 
                     exoPlayer.setAudioAttributes(audioAttributes, true);
                 } else {
+
+                    holder.epPlayerView.setVisibility(View.VISIBLE);
+                    holder.epPlayerControlView.setVisibility(View.GONE);
+
                     mediaUri = Uri.parse(guide.getVideo().getUrl());
                 }
 
                 // creates a new MediaItem
                 MediaItem mediaItem = MediaItem.fromUri(mediaUri);
-
                 // sets exoPlayer media item
                 exoPlayer.setMediaItem(mediaItem);
 
                 // sets playerView player
-                holder.epPlayerView.setPlayer(exoPlayer);
+                if (guide.getAudio() != null) {
+                    holder.epPlayerControlView.setPlayer(exoPlayer);
+                } else {
+                    holder.epPlayerView.setPlayer(exoPlayer);
+                }
 
                 // prepares the media
                 exoPlayer.prepare();

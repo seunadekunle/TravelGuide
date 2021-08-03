@@ -576,7 +576,6 @@ public class ComposeFragment extends Fragment {
         };
 
         HelperClass.fetchLocation(location, composeCallback);
-        requireActivity().onBackPressed();
     }
 
     private void sendNotification(Location location1) {

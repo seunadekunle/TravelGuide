@@ -21,7 +21,10 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="7.5dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="0dp"
         android:orientation="vertical">
 
         <ImageView
@@ -123,15 +126,14 @@
                 android:layout_height="match_parent"
                 android:padding="@dimen/progress_bar_padding" />
 
-            <include
-                android:id="@+id/imgExpanded"
-                layout="@layout/image_expanded"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:visibility="visible" />
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
     </LinearLayout>
 
+    <include
+        android:id="@+id/imgExpanded"
+        layout="@layout/image_expanded"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible" />
 </FrameLayout>

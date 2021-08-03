@@ -1,6 +1,7 @@
 package com.example.travelguide.fragments;
 
 import android.content.pm.PackageManager;
+import android.graphics.Point;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -31,6 +32,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
@@ -71,6 +73,7 @@ public class MapsFragment extends Fragment {
     private SearchView searchView;
     private RecyclerView rvSearchList;
     private View frameLayout;
+    private androidx.fragment.app.FragmentContainerView mapContainer;
 
     // search ui elements
     private SearchListAdapter adapter;
@@ -78,7 +81,6 @@ public class MapsFragment extends Fragment {
     private BottomSheetBehavior<View> sheetBehavior;
 
     // different fragments
-    private ComposeFragment composeFragment;
     private LocationGuideFragment locationGuideFragment;
     private LocationGuideFragment modalLocationGuideFragment;
     private TopLocationsFragment topLocationsFragment;
@@ -127,7 +129,6 @@ public class MapsFragment extends Fragment {
 
             // Prompt the user for permission.
             getLocationPermission();
-
             getLocationsandGuides();
 
             // Turn on the My Location layer and the related control on the map.
@@ -244,6 +245,7 @@ public class MapsFragment extends Fragment {
         searchView = view.findViewById(R.id.searchView);
         rvSearchList = view.findViewById(R.id.rvSearchList);
         frameLayout = view.findViewById(modalFrameId);
+        mapContainer = view.findViewById(R.id.map);
         sheetBehavior = BottomSheetBehavior.from(view.findViewById(R.id.modalLocationView));
 
         fragmentManager = getChildFragmentManager();
@@ -378,10 +380,9 @@ public class MapsFragment extends Fragment {
                     public void onComplete(@NonNull Task<Location> task) {
                         if (task.isSuccessful()) {
 
-                            GoogleMap.CancelableCallback zoomCallback  = new GoogleMap.CancelableCallback() {
+                            GoogleMap.CancelableCallback zoomCallback = new GoogleMap.CancelableCallback() {
                                 @Override
                                 public void onFinish() {
-
                                     // show top locations after zoom;
                                     showTopLocations();
                                 }
@@ -391,21 +392,19 @@ public class MapsFragment extends Fragment {
 
                                 }
                             };
+
                             // Set the map's camera position to the current location of the device.
                             lastKnownLocation = task.getResult();
-
                             if (lastKnownLocation != null) {
 
                                 LatLng currentLocation = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
                                 zoomToLocation(currentLocation, zoomCallback);
-
-                                // sends current location data to compose fragment
-//                                composeFragment.setLocation(new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()));
                             }
                         } else {
                             Log.e(TAG, "Exception: %s", task.getException());
+
+                            // moves camera to the location
                             zoomToLocation(defaultLocation);
-                            map.getUiSettings().setMyLocationButtonEnabled(false);
                         }
                     }
                 });
@@ -531,7 +530,7 @@ public class MapsFragment extends Fragment {
         });
 
         // sets sheet behavior height
-        sheetBehavior.setPeekHeight((int) (DeviceDimenHelper.getDisplayHeight(requireContext()) / 2.5));
+        sheetBehavior.setPeekHeight((int) (height / 2.25));
     }
 
 
@@ -552,8 +551,6 @@ public class MapsFragment extends Fragment {
                 map.getUiSettings().setMyLocationButtonEnabled(false);
                 lastKnownLocation = null;
 
-                // call location permissions dialog again
-//                getLocationPermission();
             }
         } catch (SecurityException e) {
             Log.e("Exception: %s", e.getMessage());
@@ -696,13 +693,29 @@ public class MapsFragment extends Fragment {
 
     // TODO: add zoom when navigating from adding new guide
     public void zoomToLocation(LatLng location) {
-        map.animateCamera(CameraUpdateFactory.newLatLngZoom(location, DEFAULT_ZOOM));
+        map.animateCamera(CameraUpdateFactory.newLatLngZoom(returnAdjustedLocation(location), DEFAULT_ZOOM));
 //        lastKnownLocation = (Location) location;
     }
 
     // overloaded function with callback
     public void zoomToLocation(LatLng location, GoogleMap.CancelableCallback callback) {
-        map.animateCamera(CameraUpdateFactory.newLatLngZoom(location, DEFAULT_ZOOM), callback);
+        map.animateCamera(CameraUpdateFactory.newLatLngZoom(returnAdjustedLocation(location), DEFAULT_ZOOM), callback);
+    }
+
+    /*
+     * ref: https://stackoverflow.com/questions/16764002/how-to-center-the-camera-so-that-marker-is-at-the-bottom-of-screen-google-map
+     * functions to move camera up the screen using the location
+     */
+    @NotNull
+    public LatLng returnAdjustedLocation(LatLng location) {
+
+        double dpPerdegree = 256.0 * Math.pow(2, DEFAULT_ZOOM) / 170.0;
+        double screen_height = mapContainer.getHeight();
+
+        double adjusted_screen_height = -27.5 * screen_height / 100.0;
+        double adjusted_degree = adjusted_screen_height / dpPerdegree;
+
+        return new LatLng(location.latitude + adjusted_degree, location.longitude);
     }
 
     // add new marker to the map along with tag

@@ -85,4 +85,5 @@ dependencies {
 
     implementation 'com.github.ibrahimsn98:SmoothBottomBar:1.7.8'
     implementation 'com.github.iammert:MultiSearchView:0.3'
+    implementation 'com.jackandphantom.android:androidlikebutton:1.2.0'
 }
