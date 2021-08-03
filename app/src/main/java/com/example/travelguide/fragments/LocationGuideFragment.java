@@ -221,10 +221,13 @@ public class LocationGuideFragment extends Fragment {
 
                                         // zooms to location and dismisses fragment
                                         if (getParentFragment() != null) {
+
                                             ((MapsFragment) getParentFragment()).zoomToLocation(new LatLng(location.getCoord().latitude, location.getCoord().longitude));
 
-                                            // removes bottom modal frame
+                                            // hide bottom view
                                             ((MapsFragment) getParentFragment()).hideModalFragment();
+                                            // shows modal view of location being selected
+                                            ((MapsFragment) getParentFragment()).setModalLocationGuideFragment(LocationGuideFragment.newInstance(location, frameParam, true));
                                         }
                                     }
                                 }));
