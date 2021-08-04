@@ -71,7 +71,7 @@ dependencies {
     implementation 'com.google.android.exoplayer:exoplayer-dash:2.14.2'
     implementation 'com.google.android.exoplayer:exoplayer-ui:2.14.2'
 
-    // put the parse libary before firebase (order matters)
+    // put the parse library before firebase (order matters)
     // Parse Bolt and Parse FCM sdk
     implementation "com.github.parse-community.Parse-SDK-Android:fcm:1.21.0"
     implementation 'com.parse.bolts:bolts-android:1.4.0'
@@ -83,7 +83,9 @@ dependencies {
     implementation 'com.google.firebase:firebase-messaging'
     implementation 'com.google.firebase:firebase-analytics'
 
+    // navigation bar
     implementation 'com.github.ibrahimsn98:SmoothBottomBar:1.7.8'
-    implementation 'com.github.iammert:MultiSearchView:0.3'
-    implementation 'com.jackandphantom.android:androidlikebutton:1.2.0'
+
+    // animation for like button
+    implementation 'pub.hanks:smallbang:1.2.2'
 }

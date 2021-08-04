@@ -98,7 +98,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="end"
-                android:layout_marginBottom="10dp"
                 android:orientation="horizontal">
 
                 <View
@@ -107,19 +106,25 @@
                     android:layout_height="0dp"
                     android:layout_weight="1" />
 
-                <ImageButton
-                    android:id="@+id/ibLikes"
+                <xyz.hanks.library.bang.SmallBangView
+                    android:id="@+id/likeAnimation"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:background="@drawable/like_btn_bg" />
+                    android:layout_gravity="center">
+
+                    <ImageButton
+                        android:id="@+id/ibLikes"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:background="@drawable/like_btn_bg" />
+                </xyz.hanks.library.bang.SmallBangView>
 
                 <TextView
                     android:id="@+id/tvLikes"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_marginStart="12.5dp"
                     android:layout_marginEnd="@dimen/guide_content_margin"
                     android:text="1"
                     android:textColor="@color/black"

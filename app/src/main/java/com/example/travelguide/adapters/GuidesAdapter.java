@@ -13,6 +13,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -22,6 +24,8 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.travelguide.R;
+import com.example.travelguide.classes.BounceInterpolator;
 import com.example.travelguide.classes.GlideApp;
 import com.example.travelguide.classes.Guide;
 import com.example.travelguide.databinding.LocationGuideBinding;
@@ -47,6 +51,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
+import xyz.hanks.library.bang.SmallBangView;
 
 /**
  * {@link RecyclerView.Adapter} that can display a {@link Guide}.
@@ -72,6 +77,9 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
     private final int shortAnimationDuration = 100;
     private final int playerHeightMult = 6;
 
+    // load bounce animation
+    Animation bounceAnim;
+
 
     public GuidesAdapter(List<Guide> items, Context context, ImageView expandedImageView, View expandedImageViewBG, Activity activity, SimpleExoPlayer exoPlayer, boolean inProfile
             , FragmentManager fragmentManager, int frameID) {
@@ -87,8 +95,17 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
         this.frameID = frameID;
 
         updateOriginalGuides();
+
+        // load bounce animation
+        bounceAnim = AnimationUtils.loadAnimation(context, R.anim.bounce);
+
+        // set interpolator for bounce animation
+        BounceInterpolator bounceInterpolator = new BounceInterpolator(0.1, 25);
+        bounceAnim.setInterpolator(bounceInterpolator);
+
     }
 
+    // sets original guides that will be used in the search functoin
     public void updateOriginalGuides() {
         originalGuides = guides;
     }
@@ -222,13 +239,13 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
         public TextView tvCreatedAt;
         public TextView tvLikes;
         public ImageButton ibLikes;
-
+        public SmallBangView likeView;
 
         // media ui elements
         private final ConstraintLayout mediaLayout;
         private final ImageButton ibThumb;
         public PlayerView epPlayerView;
-        private PlayerControlView epPlayerControlView;
+        public PlayerControlView epPlayerControlView;
 
         public ViewHolder(LocationGuideBinding binding) {
             super(binding.getRoot());
@@ -240,11 +257,15 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
             tvCreatedAt = binding.tvCreatedAt;
             tvLikes = binding.tvLikes;
             ibLikes = binding.ibLikes;
+            likeView = binding.likeAnimation;
 
             mediaLayout = binding.mediaContainer.mediaLayout;
             ibThumb = binding.mediaContainer.ibThumb;
             epPlayerView = binding.mediaContainer.epVideo;
             epPlayerControlView = binding.mediaContainer.epAudio;
+
+            // ensures that player control view doesn't disappear
+            epPlayerControlView.setShowTimeoutMs(0);
         }
     }
 
@@ -285,7 +306,6 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
                 if (inProfile) {
                     guides.remove(pos);
                     notifyDataSetChanged();
-
                     updateOriginalGuides();
                 }
             }
@@ -325,8 +345,18 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
                 });
             }
 
+            boolean newState = !holder.ibLikes.isSelected();
+            // shows animation based on new state
+            if (newState) {
+                // start the bounce animation
+                holder.ibLikes.startAnimation(bounceAnim);
+                holder.likeView.likeAnimation();
+            } else {
+                holder.ibLikes.startAnimation(AnimationUtils.loadAnimation(context, R.anim.like_fade));
+            }
+
             // toggle view state
-            holder.ibLikes.setSelected(!holder.ibLikes.isSelected());
+            holder.ibLikes.setSelected(newState);
         });
     }
 
@@ -343,7 +373,6 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
             if (guide.getPhoto() != null) {
 
                 String photoUrl = guide.getPhoto().getUrl();
-
                 if (photoUrl != null) {
 
                     // sets view to be visible
@@ -427,7 +456,6 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
                 // prepares the media
                 exoPlayer.prepare();
                 exoPlayer.setPlayWhenReady(false);
-                return;
             }
         }
     }
