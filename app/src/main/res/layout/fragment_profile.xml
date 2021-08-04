@@ -31,7 +31,7 @@
                 android:layout_margin="10dp"
                 android:background="@color/white"
                 android:contentDescription="@string/profile_icon"
-                android:foreground="@drawable/avatar_overlay"
+                android:foreground="@drawable/img_overlay"
                 tools:src="@tools:sample/avatars" />
         </FrameLayout>
 
