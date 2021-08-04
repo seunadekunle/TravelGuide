@@ -161,7 +161,7 @@ public class ComposeFragment extends Fragment {
         ivPreview.getLayoutParams().height = (int) (DeviceDimenHelper.getDisplayHeight(requireContext()) / 4);
         ivPreview.getLayoutParams().width = (int) (DeviceDimenHelper.getDisplayWidth(requireContext()) / 2);
 
-        ivPreview.getLayoutParams().width = (int) (DeviceDimenHelper.getDisplayWidth(requireContext()) / 2);
+        ivPreview.getLayoutParams().width = (int) (DeviceDimenHelper.getDisplayWidth(requireContext()));
         vvPreview.getLayoutParams().height = (int) (DeviceDimenHelper.getDisplayHeight(requireContext()) / 4);
     }
 

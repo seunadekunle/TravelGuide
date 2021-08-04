@@ -59,4 +59,5 @@
     <string name="dismiss">dismiss</string>
     <string name="recommended_locations">Recommended Locations</string>
     <string name="location">Location</string>
+    <string name="logo">logo</string>
 </resources>

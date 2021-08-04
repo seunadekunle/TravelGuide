@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/splash_background"
+    android:background="@drawable/splash_gradient"
     tools:context=".activities.EntryActivity">
 
     <LinearLayout
@@ -15,17 +16,14 @@
         android:orientation="vertical"
         android:paddingBottom="@dimen/margin_start_screen_text">
 
-        <TextView
-            android:id="@+id/textView4"
+        <ImageView
+            android:id="@+id/imageView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/margin_start_screen_text"
-            android:fontFamily="sans-serif-black"
-            android:includeFontPadding="true"
-            android:text="@string/app_name"
-            android:textAlignment="center"
-            android:textColor="@color/black"
-            android:textSize="@dimen/header_text_size" />
+            android:layout_marginBottom="85dp"
+            android:contentDescription="@string/logo"
+            android:paddingEnd="20dp"
+            app:srcCompat="@drawable/travel_guide_icon" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/loginBtn"
@@ -50,8 +48,8 @@
             android:textSize="15sp" />
     </LinearLayout>
 
-    <FrameLayout
+    <androidx.fragment.app.FragmentContainerView
         android:id="@+id/entryForm"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"></FrameLayout>
+        android:layout_height="match_parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

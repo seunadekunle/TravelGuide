@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item>
-        <shape>
-            <gradient
-                android:angle="-45"
-                android:endColor="@color/secondary_color"
-                android:startColor="@color/main_color"
-                android:type="linear" />
-        </shape>
-    </item>
-    <item>
+    <item android:drawable="@drawable/splash_gradient" />
+    <item
+        android:bottom="100dp"
+        android:left="100dp"
+        android:right="100dp"
+        android:top="100dp">
         <bitmap
             android:gravity="center"
             android:src="@drawable/travel_guide_icon" />
