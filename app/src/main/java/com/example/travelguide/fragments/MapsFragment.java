@@ -1,7 +1,6 @@
 package com.example.travelguide.fragments;
 
 import android.content.pm.PackageManager;
-import android.graphics.Point;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -32,7 +31,6 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
@@ -750,6 +748,12 @@ public class MapsFragment extends Fragment {
 
     public void setSheetState(int newState) {
         sheetBehavior.setState(newState);
+    }
+
+    public void showModalIndicator() {
+        if (modalLocationGuideFragment != null){
+            modalLocationGuideFragment.changeIndicatorState(View.VISIBLE);
+        }
     }
 
     public BottomSheetBehavior getSheetBehavior() {

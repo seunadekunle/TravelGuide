@@ -60,4 +60,5 @@
     <string name="recommended_locations">Recommended Locations</string>
     <string name="location">Location</string>
     <string name="logo">logo</string>
+    <string name="username">Username</string>
 </resources>

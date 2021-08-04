@@ -139,6 +139,7 @@ public class MainActivity extends AppCompatActivity {
                     else {
                         // resets the modal state
                         mapsFragment.setSheetState(BottomSheetBehavior.STATE_HALF_EXPANDED);
+                        mapsFragment.showModalIndicator();
                         mapsFragment.showOverlayBtns();
                     }
                     return;
