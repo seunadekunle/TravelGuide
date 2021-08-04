@@ -8,6 +8,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.transition.TransitionInflater;
@@ -23,11 +24,9 @@ import com.parse.ParseUser;
 import java.util.Arrays;
 
 /**
- * <p>A fragment that shows a list of items as a modal bottom sheet.</p>
- * <p>You can show this modal bottom sheet from your activity like this:</p>
- * <pre>
- *     TopLocationsFragment.newInstance(30).show(getSupportFragmentManager(), "dialog");
- * </pre>
+ * A simple {@link Fragment} subclass.
+ * Use the {@link TopLocationsFragment #newInstance} factory method to
+ * create an instance of this fragment.
  */
 public class TopLocationsFragment extends BottomSheetDialogFragment {
 
@@ -40,6 +39,13 @@ public class TopLocationsFragment extends BottomSheetDialogFragment {
     private RecyclerView recyclerView;
     private TextView tvMessage;
 
+
+    /**
+     * creates a new instance of this fragment using the provided parameters.
+     *
+     * @param topLocations array of top locations.
+     * @return A new instance of fragment TopLocationsFragment.
+     */
     public static TopLocationsFragment newInstance(Location[] topLocations) {
 
         final TopLocationsFragment fragment = new TopLocationsFragment();
@@ -54,7 +60,7 @@ public class TopLocationsFragment extends BottomSheetDialogFragment {
     @Override
     public void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
 
-        // get top location array
+        // get top location sarray
         if (getArguments() != null) {
             topLocations = (Location[]) getArguments().getParcelableArray(ARG_LOCATIONS);
         }
@@ -102,13 +108,13 @@ public class TopLocationsFragment extends BottomSheetDialogFragment {
 
         }));
 
-        // sets button to dismiss the button
+        // sets button to dismiss the view
         binding.dismiss.setOnClickListener((v -> {
             ((MapsFragment) getParentFragment()).hideModalFragment();
             dismiss();
         }));
 
-        // sets message text
+        // sets message text for the user
         tvMessage.setText(String.format("Hey %s", ParseUser.getCurrentUser().getUsername()));
     }
 

@@ -45,9 +45,8 @@ public class EntryFormFragment extends Fragment {
     private Button loginButton;
     private Button signUpButton;
 
-    // empty constructor is required
     public EntryFormFragment() {
-
+        // Required empty public constructor
     }
 
     /**

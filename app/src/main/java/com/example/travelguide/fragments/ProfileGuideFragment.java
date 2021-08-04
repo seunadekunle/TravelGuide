@@ -48,14 +48,12 @@ public class ProfileGuideFragment extends LocationGuideFragment {
     }
 
     /**
-     * factory method to create a new instance of
-     * this fragment using the provided parameters.
+     * creates a new instance of this fragment using the provided parameters.
      *
      * @param typeParam type of fragment.
      * @param idParam   user ID.
      * @return A new instance of fragment ProfileGuideFragment.
      */
-    // TODO: Rename and change types and number of parameters
     public static ProfileGuideFragment newInstance(String typeParam, String idParam) {
         ProfileGuideFragment fragment = new ProfileGuideFragment();
         Bundle args = new Bundle();

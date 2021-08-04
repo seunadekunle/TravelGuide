@@ -510,6 +510,9 @@ public class MapsFragment extends Fragment {
     private void setupSheetBehavior() {
 
         sheetBehavior.setDraggable(modalLocationGuideFragment != null);
+
+        // sets sheet behavior height
+        sheetBehavior.setPeekHeight((int) (height / 2.25));
         sheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull @NotNull View bottomSheet, int newState) {
@@ -523,9 +526,12 @@ public class MapsFragment extends Fragment {
                     }
                 }
 
-                if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
-                    searchView.setVisibility(View.VISIBLE);
+                if (newState == BottomSheetBehavior.STATE_HALF_EXPANDED){
+                    showOverlayBtns();
+                }
 
+                if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                    showOverlayBtns();
                     if (modalLocationGuideFragment != null) {
                         modalLocationGuideFragment.changeIndicatorState(View.VISIBLE);
                     }
@@ -534,18 +540,23 @@ public class MapsFragment extends Fragment {
 
             @Override
             public void onSlide(@NonNull @NotNull View bottomSheet, float slideOffset) {
-                Log.i(TAG, String.valueOf(slideOffset));
+                Log.i(TAG, String.valueOf(bottomSheet.getVisibility()));
 
-                // animate myLocationButton
-                myLocationBtn.animate().scaleX(1 - slideOffset).scaleY(1 - slideOffset).setDuration(0).start();
+                if (slideOffset > 0.5) {
+                    hideOverlayBtns();
+                }
+
+                // animates button based on if the modal view is visible
+                if (bottomSheet.getVisibility() == View.INVISIBLE){
+                    myLocationBtn.animate().scaleX(1).scaleY(1).setDuration(0).start();
+                }
+                else {
+                    // animate myLocationButton
+                    myLocationBtn.animate().scaleX(1 - slideOffset).scaleY(1 - slideOffset).setDuration(0).start();
+                }
             }
         });
-
-        // sets sheet behavior height
-        sheetBehavior.setPeekHeight((int) (height / 2.25));
     }
-
-
     /*
      * sets location enabled to be true and updates maps ui
      */
@@ -713,6 +724,8 @@ public class MapsFragment extends Fragment {
     // hides modal view making map draggable
     public void hideModalFragment() {
         if (frameLayout != null && fragmentManager != null) {
+
+            setSheetState(BottomSheetBehavior.STATE_COLLAPSED);
             fragmentManager.popBackStack();
             sheetBehavior.setPeekHeight(0);
             frameLayout.setVisibility(View.INVISIBLE);

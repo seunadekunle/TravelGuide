@@ -60,10 +60,9 @@ public class ChangeAvatarFragment extends Fragment {
     }
 
     /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
+     * creates a new instance of this fragment using the provided parameters.
      *
-     * @param inProfile Parameter 1.
+     * @param inProfile if the fragment is navigated to from the profile page.
      * @return A new instance of fragment ChangeAvatarFragment.
      */
     public static ChangeAvatarFragment newInstance(Boolean inProfile) {

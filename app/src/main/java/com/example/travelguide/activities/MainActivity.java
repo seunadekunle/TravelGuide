@@ -135,31 +135,17 @@ public class MainActivity extends AppCompatActivity {
 
                     if (mapsFragmentManager.getBackStackEntryCount() > 1) {
                         mapsFragmentManager.popBackStack();
-                    }
-                    else {
+                    } else {
                         // resets the modal state
-                        mapsFragment.setSheetState(BottomSheetBehavior.STATE_HALF_EXPANDED);
+                        mapsFragment.setSheetState(BottomSheetBehavior.STATE_COLLAPSED);
                         mapsFragment.showModalIndicator();
                         mapsFragment.showOverlayBtns();
                     }
                     return;
                 }
-
-                if (mapsFragment.getSheetBehavior().getState() == BottomSheetBehavior.STATE_HALF_EXPANDED) {
-
-                    // resets the modal state
-                    mapsFragment.setSheetState(BottomSheetBehavior.STATE_COLLAPSED);
-                    // hide modal view
-                    mapsFragment.hideModalFragment();
-                    mapsFragment.showOverlayBtns();
-
-                    return;
-                }
                 if (mapsFragment.getSheetBehavior().getState() == BottomSheetBehavior.STATE_COLLAPSED) {
-
                     // hide modal view
                     mapsFragment.hideModalFragment();
-
                     return;
                 }
 
