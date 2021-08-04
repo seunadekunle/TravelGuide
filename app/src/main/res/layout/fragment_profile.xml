@@ -67,7 +67,6 @@
             android:clickable="true"
             android:focusable="true"
             android:nestedScrollingEnabled="true">
-
         </androidx.viewpager2.widget.ViewPager2>
 
     </LinearLayout>

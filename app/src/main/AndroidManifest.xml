@@ -49,10 +49,18 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TravelGuide">
         <activity
+            android:name=".activities.SplashScreenActivity"
+            android:theme="@style/SplashTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".activities.MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="adjustPan">
-        </activity>
+            android:windowSoftInputMode="adjustPan"></activity>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -81,12 +89,7 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".activities.EntryActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity> <!-- make sure within the application tag, otherwise app will crash with XmlResourceParser errors -->
+        <activity android:name=".activities.EntryActivity"></activity> <!-- make sure within the application tag, otherwise app will crash with XmlResourceParser errors -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.travelguide.fileprovider"
@@ -105,7 +108,6 @@
         <meta-data
             android:name="com.parse.push.gcm_sender_id"
             android:value="@string/firebase_id" />
-
     </application>
 
 </manifest>

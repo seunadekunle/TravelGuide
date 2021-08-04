@@ -1,8 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <gradient
-        android:type="linear"
-        android:angle="-45"
-        android:startColor="@color/main_color"
-        android:endColor="@color/secondary_color" />
-</shape>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape>
+            <gradient
+                android:angle="-45"
+                android:endColor="@color/secondary_color"
+                android:startColor="@color/main_color"
+                android:type="linear" />
+        </shape>
+    </item>
+    <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/travel_guide_icon" />
+    </item>
+</layer-list>

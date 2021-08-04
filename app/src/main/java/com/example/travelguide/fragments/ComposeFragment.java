@@ -31,14 +31,12 @@ import androidx.fragment.app.Fragment;
 import com.example.travelguide.R;
 import com.example.travelguide.classes.Guide;
 import com.example.travelguide.classes.Location;
+import com.example.travelguide.helpers.DeviceDimenHelper;
 import com.example.travelguide.helpers.HelperClass;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.api.model.PlaceLikelihood;
 import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
@@ -150,17 +148,28 @@ public class ComposeFragment extends Fragment {
         recordBtn = view.findViewById(R.id.recordBtn);
         playBtn = view.findViewById(R.id.playBtn);
 
+        adjustPreviewHeight();
+
         setActivityLaunchers();
         setClickListeners();
 
         getInfo();
     }
 
+    public void adjustPreviewHeight() {
+
+        ivPreview.getLayoutParams().height = (int) (DeviceDimenHelper.getDisplayHeight(requireContext()) / 4);
+        ivPreview.getLayoutParams().width = (int) (DeviceDimenHelper.getDisplayWidth(requireContext()) / 2);
+
+        ivPreview.getLayoutParams().width = (int) (DeviceDimenHelper.getDisplayWidth(requireContext()) / 2);
+        vvPreview.getLayoutParams().height = (int) (DeviceDimenHelper.getDisplayHeight(requireContext()) / 4);
+    }
+
     public void getInfo() {
 
         // gets the current place using the places API
         HelperClass.fetchCurrentPlace(requireContext(), task -> {
-            if (task.isSuccessful()){
+            if (task.isSuccessful()) {
 
                 // get the response
                 FindCurrentPlaceResponse response = task.getResult();
@@ -326,12 +335,59 @@ public class ComposeFragment extends Fragment {
                 setupRecorder();
         });
 
+        setAudioBtnListeners();
+
+        // clears all the ui elements and associated variables
+        clearBtn.setOnClickListener(v -> {
+            mediaBtn.setSelected(false);
+            galleryBtn.setSelected(false);
+
+            if (audioBtn.isSelected()) {
+                toggleAudioView();
+            }
+
+            // buttons are all clickable
+            setBtnState(true);
+
+            // media variables are null
+            clearMediaVariables();
+
+            ivPreview.setImageResource(0);
+            ivPreview.setVisibility(View.GONE);
+            vvPreview.setVisibility(View.GONE);
+        });
+
+        addBtn.setOnClickListener(v -> {
+            String text = etText.getText().toString();
+
+            // if the text field is empty
+            if (text.isEmpty()) {
+                Snackbar emptyText = Snackbar.make(etText, R.string.empty_text, Snackbar.LENGTH_SHORT);
+                HelperClass.displaySnackBarWithBottomMargin(emptyText, 80, getActivity());
+                return;
+            }
+
+            // if no location is selected
+            if (location == null) {
+                Snackbar emptyLocation = Snackbar.make(etText, R.string.no_location, Snackbar.LENGTH_SHORT);
+                HelperClass.displaySnackBarWithBottomMargin(emptyLocation, 80, getActivity());
+                return;
+            }
+
+            ParseUser user = ParseUser.getCurrentUser();
+            saveGuide(text, user, photoFile, videoFile, audioFile);
+        });
+    }
+
+    private void setAudioBtnListeners() {
         // audio button on click
         recordBtn.setOnClickListener(v -> {
 
             HelperClass.toggleButtonState(recordBtn);
 
             if (recordBtn.isSelected()) {
+
+                Log.i(TAG, "recording started");
                 // Start recording the audio
                 try {
                     mediaRecorder.prepare();
@@ -393,47 +449,6 @@ public class ComposeFragment extends Fragment {
                 }
             }
         });
-
-        // clears all the ui elements and associated variables
-        clearBtn.setOnClickListener(v -> {
-            mediaBtn.setSelected(false);
-            galleryBtn.setSelected(false);
-
-            if (audioBtn.isSelected()) {
-                toggleAudioView();
-            }
-
-            // buttons are all clickable
-            setBtnState(true);
-
-            // media variables are null
-            clearMediaVariables();
-
-            ivPreview.setImageResource(0);
-            ivPreview.setVisibility(View.GONE);
-            vvPreview.setVisibility(View.GONE);
-        });
-
-        addBtn.setOnClickListener(v -> {
-            String text = etText.getText().toString();
-
-            // if the text field is empty
-            if (text.isEmpty()) {
-                Snackbar emptyText = Snackbar.make(etText, R.string.empty_text, Snackbar.LENGTH_SHORT);
-                HelperClass.displaySnackBarWithBottomMargin(emptyText, 80, getActivity());
-                return;
-            }
-
-            // if no location is selected
-            if (location == null) {
-                Snackbar emptyLocation = Snackbar.make(etText, R.string.no_location, Snackbar.LENGTH_SHORT);
-                HelperClass.displaySnackBarWithBottomMargin(emptyLocation, 80, getActivity());
-                return;
-            }
-
-            ParseUser user = ParseUser.getCurrentUser();
-            saveGuide(text, user, photoFile, videoFile, audioFile);
-        });
     }
 
     private void setupRecorder() {
@@ -468,9 +483,13 @@ public class ComposeFragment extends Fragment {
         if (!audioBtn.isSelected()) {
             audioBtn.setSelected(true);
             recordingLayout.setVisibility(View.VISIBLE);
+            setAudioBtnListeners();
         } else {
             audioBtn.setSelected(false);
+            recordBtn.setSelected(false);
+            playBtn.setSelected(false);
             recordingLayout.setVisibility(View.GONE);
+            recordingLayout.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -525,13 +544,11 @@ public class ComposeFragment extends Fragment {
             if (photo != null) {
                 guide.setPhoto(new ParseFile(photo));
                 Log.i(TAG, photo.toString());
-            }
-            else if (video != null) {
+            } else if (video != null) {
                 guide.setVideo(new ParseFile(video));
                 Log.i(TAG, video.toString());
 
-            }
-            else if (audio != null) {
+            } else if (audio != null) {
 
                 Log.i(TAG, audio.toString());
                 // Save sound using input stream
