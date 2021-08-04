@@ -61,4 +61,5 @@
     <string name="location">Location</string>
     <string name="logo">logo</string>
     <string name="username">Username</string>
+    <string name="home_button">Home Button</string>
 </resources>

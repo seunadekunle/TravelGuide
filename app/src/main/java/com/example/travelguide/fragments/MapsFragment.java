@@ -45,6 +45,7 @@ import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.FetchPlaceRequest;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.parse.FunctionCallback;
 import com.parse.GetCallback;
 import com.parse.ParseCloud;
@@ -72,6 +73,7 @@ public class MapsFragment extends Fragment {
     private RecyclerView rvSearchList;
     private View frameLayout;
     private androidx.fragment.app.FragmentContainerView mapContainer;
+    private FloatingActionButton myLocationBtn;
 
     // search ui elements
     private SearchListAdapter adapter;
@@ -101,6 +103,7 @@ public class MapsFragment extends Fragment {
     // The geographical location where the device is currently located. That is, the last-known
     // location retrieved by the Fused Location Provider.
     private Location lastKnownLocation;
+    private LatLng currentLocation;
 
     // variables for the window height and width
     private int height = 0;
@@ -118,8 +121,10 @@ public class MapsFragment extends Fragment {
         @Override
         public void onMapReady(GoogleMap googleMap) {
             map = googleMap;
+
             map.getUiSettings().setMapToolbarEnabled(false);
             map.getUiSettings().setScrollGesturesEnabled(true);
+            map.getUiSettings().setMyLocationButtonEnabled(false);
             // TODO: add map versions
 
             // sets padding to change position of map controls
@@ -244,6 +249,7 @@ public class MapsFragment extends Fragment {
         rvSearchList = view.findViewById(R.id.rvSearchList);
         frameLayout = view.findViewById(modalFrameId);
         mapContainer = view.findViewById(R.id.map);
+        myLocationBtn = view.findViewById(R.id.myLocationBtn);
         sheetBehavior = BottomSheetBehavior.from(view.findViewById(R.id.modalLocationView));
 
         fragmentManager = getChildFragmentManager();
@@ -265,6 +271,8 @@ public class MapsFragment extends Fragment {
         setupSearchView();
 
         hideOverlayBtns();
+
+        myLocationBtn.setOnClickListener((v -> goToMyLocation()));
     }
 
     public void setupSearchList() {
@@ -381,13 +389,15 @@ public class MapsFragment extends Fragment {
                             GoogleMap.CancelableCallback zoomCallback = new GoogleMap.CancelableCallback() {
                                 @Override
                                 public void onFinish() {
-                                    // show top locations after zoom;
+                                    // show top locations after zoom
                                     showTopLocations();
+                                    showMyLocationBtn();
                                 }
 
                                 @Override
                                 public void onCancel() {
-
+                                    // show top locations after zoom
+                                    showTopLocations();
                                 }
                             };
 
@@ -395,7 +405,7 @@ public class MapsFragment extends Fragment {
                             lastKnownLocation = task.getResult();
                             if (lastKnownLocation != null) {
 
-                                LatLng currentLocation = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
+                                currentLocation = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
                                 zoomToLocation(currentLocation, zoomCallback);
                             }
                         } else {
@@ -524,6 +534,10 @@ public class MapsFragment extends Fragment {
 
             @Override
             public void onSlide(@NonNull @NotNull View bottomSheet, float slideOffset) {
+                Log.i(TAG, String.valueOf(slideOffset));
+
+                // animate myLocationButton
+                myLocationBtn.animate().scaleX(1 - slideOffset).scaleY(1 - slideOffset).setDuration(0).start();
             }
         });
 
@@ -542,17 +556,42 @@ public class MapsFragment extends Fragment {
         try {
             if (locationPermissionGranted) {
                 map.setMyLocationEnabled(true);
-                map.getUiSettings().setMyLocationButtonEnabled(true);
                 getDeviceLocation();
             } else {
                 map.setMyLocationEnabled(false);
-                map.getUiSettings().setMyLocationButtonEnabled(false);
                 lastKnownLocation = null;
 
             }
         } catch (SecurityException e) {
             Log.e("Exception: %s", e.getMessage());
         }
+    }
+
+    private void hideMyLocationBtn() {
+        myLocationBtn.hide();
+    }
+
+    private void showMyLocationBtn() {
+        myLocationBtn.show();
+    }
+
+
+    // goes to the current location and shows the TopLocation Fragment
+    private void goToMyLocation() {
+
+        GoogleMap.CancelableCallback myLocation = new GoogleMap.CancelableCallback() {
+            @Override
+            public void onFinish() {
+                showTopLocations();
+            }
+
+            @Override
+            public void onCancel() {
+                showTopLocations();
+            }
+        };
+
+        zoomToLocation(currentLocation, myLocation);
     }
 
     private void setupSearchView() {
@@ -648,6 +687,9 @@ public class MapsFragment extends Fragment {
 
     public void showModalFragment(Fragment modalFragment, boolean isDraggable) {
 
+        // sets sheet behavior height
+        sheetBehavior.setPeekHeight((int) (height / 2.25));
+
         sheetBehavior.setDraggable(isDraggable);
         // shows modal view of location being selected
         frameLayout.setVisibility(View.VISIBLE);
@@ -672,6 +714,7 @@ public class MapsFragment extends Fragment {
     public void hideModalFragment() {
         if (frameLayout != null && fragmentManager != null) {
             fragmentManager.popBackStack();
+            sheetBehavior.setPeekHeight(0);
             frameLayout.setVisibility(View.INVISIBLE);
         }
     }
@@ -751,7 +794,8 @@ public class MapsFragment extends Fragment {
     }
 
     public void showModalIndicator() {
-        if (modalLocationGuideFragment != null){
+
+        if (modalLocationGuideFragment != null) {
             modalLocationGuideFragment.changeIndicatorState(View.VISIBLE);
         }
     }

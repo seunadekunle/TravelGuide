@@ -13,7 +13,7 @@
         android:layout_height="match_parent"
         android:fitsSystemWindows="true"
         map:cameraTilt="45"
-        map:uiCompass="false" />
+        map:uiCompass="false"/>
 
     <FrameLayout
         android:id="@+id/fragmentsFrame"
@@ -45,7 +45,27 @@
                 android:visibility="invisible"
                 app:behavior_hideable="false"
                 app:behavior_peekHeight="125dp"
-                app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior" />
+                app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+                app:layout_insetEdge="bottom" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/myLocationBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end|bottom"
+                android:layout_margin="20dp"
+                android:background="@null"
+                android:clickable="true"
+                android:contentDescription="@string/home_button"
+                android:focusable="true"
+                app:fabSize="normal"
+                android:backgroundTint="@color/main_color"
+                android:visibility="invisible"
+                app:layout_anchor="@id/modalLocationView"
+                app:layout_anchorGravity="top|end"
+                android:src="@drawable/my_location_bg"
+                app:tint="@null"
+                />
 
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
     </FrameLayout>
