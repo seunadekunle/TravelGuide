@@ -30,13 +30,30 @@
             android:layout_marginTop="47.5dp"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/textView2"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                android:text="@string/add_location"
-                android:textColor="@color/black" />
+                android:orientation="horizontal"
+                android:layout_marginBottom="5dp">
+
+                <ImageView
+                    android:id="@+id/imageView2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.35"
+                    android:alpha="0.75"
+                    android:src="@drawable/ic_baseline_location_on_24" />
+
+                <TextView
+                    android:id="@+id/textView2"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:text="@string/add_location"
+                    android:textColor="@color/black"
+                    android:layout_marginStart="@dimen/compose_section_header"/>
+            </LinearLayout>
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/locationBtn"
@@ -54,14 +71,31 @@
             android:layout_marginTop="30dp"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/textView3"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
+                android:orientation="horizontal"
+                android:layout_marginBottom="5dp">
 
-                android:text="@string/add_text"
-                android:textColor="@color/black" />
+                <ImageView
+                    android:id="@+id/imageView3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.35"
+                    android:alpha="0.75"
+                    android:src="@drawable/ic_baseline_text_fields_24" />
+
+                <TextView
+                    android:id="@+id/textView3"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:text="@string/add_text"
+                    android:textColor="@color/black"
+                    android:layout_marginStart="@dimen/compose_section_header"/>
+            </LinearLayout>
+
 
             <EditText
                 android:id="@+id/etText"

@@ -143,6 +143,9 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
             goToProfile(guide);
         });
 
+        // shortens the player height if it is audio
+        holder.epPlayerControlView.getLayoutParams().height = DeviceDimenHelper.getDisplayHeight(context) / playerHeightMult;
+
         // if there is any media
         fillMediaLayout(holder, guide);
         handleLikeButton(holder, guide, position);
@@ -390,9 +393,6 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
 
                     holder.epPlayerControlView.setVisibility(View.VISIBLE);
                     holder.epPlayerView.setVisibility(View.GONE);
-
-                    // shortens the player height if it is video
-                    holder.epPlayerControlView.getLayoutParams().height = DeviceDimenHelper.getDisplayHeight(context) / playerHeightMult;
 
                     mediaUri = Uri.parse(guide.getAudio().getUrl());
 //                    holder.epPlayerView.setShutterBackgroundColor(R.color.black);

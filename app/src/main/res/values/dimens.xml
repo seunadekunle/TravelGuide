@@ -23,4 +23,5 @@
     <dimen name="confirm_icon_size">60dp</dimen>
     <dimen name="entry_margin">20dp</dimen>
     <dimen name="player_btn_dimen">35dp</dimen>
+    <dimen name="compose_section_header" type="dimen" format="float">2.5dp</dimen>
 </resources>
