@@ -105,12 +105,14 @@ public class TopLocationsFragment extends BottomSheetDialogFragment {
                             (LocationGuideFragment.newInstance(location, ((MapsFragment) getParentFragment()).getFragmentsFrameId(), true)));
                 }
             }
-
         }));
 
         // sets button to dismiss the view
         binding.dismiss.setOnClickListener((v -> {
-            ((MapsFragment) getParentFragment()).hideModalFragment();
+
+            if (getParentFragment() != null) {
+                ((MapsFragment) getParentFragment()).hideModalFragment();
+            }
             dismiss();
         }));
 

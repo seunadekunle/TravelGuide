@@ -104,6 +104,10 @@ public class MainActivity extends AppCompatActivity {
         getSupportFragmentManager().beginTransaction().show(profileFragment).commit();
     }
 
+    public void updateGuides() {
+        mapsFragment.getGuides(false);
+    }
+
     @Override
     public void onBackPressed() {
 

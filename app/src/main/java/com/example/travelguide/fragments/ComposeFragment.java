@@ -29,12 +29,14 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.travelguide.R;
+import com.example.travelguide.activities.MainActivity;
 import com.example.travelguide.classes.Guide;
 import com.example.travelguide.classes.Location;
 import com.example.travelguide.helpers.DeviceDimenHelper;
 import com.example.travelguide.helpers.HelperClass;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
@@ -56,6 +58,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.Map;
 
 import static com.google.android.gms.common.util.IOUtils.toByteArray;
 
@@ -588,6 +591,7 @@ public class ComposeFragment extends Fragment {
                 getInfo();
 
                 sendNotification(guideLocation[0]);
+                ((MainActivity) requireActivity()).updateGuides();
             });
         };
 
