@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -70,6 +71,7 @@ public class LocationGuideFragment extends Fragment {
     protected SimpleExoPlayer globalPlayer;
     protected TextView tvEmptyList;
     private SearchView svGuide;
+    private LinearLayout locationLayout;
     protected int frameParam;
 
     private List<Guide> guideList;
@@ -113,11 +115,6 @@ public class LocationGuideFragment extends Fragment {
 
             // shows expand indicator
             expandable = getArguments().getBoolean(ARG_MODAL);
-
-            // sets entry and exit transition
-            TransitionInflater inflater = TransitionInflater.from(requireContext());
-            setEnterTransition(inflater.inflateTransition(R.transition.slide_up));
-            setExitTransition(inflater.inflateTransition(R.transition.slide_down));
         }
 
         super.onCreate(savedInstanceState);
@@ -126,6 +123,12 @@ public class LocationGuideFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        // sets entry and exit transition
+        TransitionInflater transitionInflater = TransitionInflater.from(requireContext());
+        setEnterTransition(transitionInflater.inflateTransition(R.transition.slide_up));
+        setExitTransition(transitionInflater.inflateTransition(R.transition.slide_down));
+
         return inflater.inflate(R.layout.fragment_location_guide_list, container, false);
     }
 
@@ -140,6 +143,7 @@ public class LocationGuideFragment extends Fragment {
         svGuide = view.findViewById(R.id.svGuide);
         rvRecommended = view.findViewById(R.id.rvRecommended);
         recommendedView = view.findViewById(R.id.recommended);
+        locationLayout = view.findViewById(R.id.locationFrame);
 
         context = view.getContext();
 
@@ -159,7 +163,7 @@ public class LocationGuideFragment extends Fragment {
         if (expandable) {
             changeIndicatorState(View.VISIBLE);
         } else {
-            ivExpandIndicator.setVisibility(View.INVISIBLE);
+            changeIndicatorState(View.INVISIBLE);
         }
     }
 
@@ -521,6 +525,18 @@ public class LocationGuideFragment extends Fragment {
     }
 
     public void changeIndicatorState(int state) {
+
+        if (state == View.INVISIBLE) {
+            setPaddingTop((int) getResources().getDimension(R.dimen.status_bar_height));
+        } else {
+            setPaddingTop(0);
+        }
+
+        // sets expand indicator visibility
         ivExpandIndicator.setVisibility(state);
+    }
+
+    public void setPaddingTop(int paddingTop) {
+        locationLayout.setPadding(0, paddingTop, 0, 0);
     }
 }

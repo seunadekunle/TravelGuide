@@ -36,7 +36,6 @@ import com.example.travelguide.helpers.DeviceDimenHelper;
 import com.example.travelguide.helpers.HelperClass;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
@@ -58,7 +57,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.Map;
 
 import static com.google.android.gms.common.util.IOUtils.toByteArray;
 
@@ -161,11 +159,11 @@ public class ComposeFragment extends Fragment {
 
     public void adjustPreviewHeight() {
 
-        ivPreview.getLayoutParams().height = (int) (DeviceDimenHelper.getDisplayHeight(requireContext()) / 4);
-        ivPreview.getLayoutParams().width = (int) (DeviceDimenHelper.getDisplayWidth(requireContext()) / 2);
+        ivPreview.getLayoutParams().height = (int) (DeviceDimenHelper.getDisplayHeightPixels(requireContext()) / 4);
+        ivPreview.getLayoutParams().width = (int) (DeviceDimenHelper.getDisplayWidthPixels(requireContext()) / 2);
 
-        ivPreview.getLayoutParams().width = (int) (DeviceDimenHelper.getDisplayWidth(requireContext()));
-        vvPreview.getLayoutParams().height = (int) (DeviceDimenHelper.getDisplayHeight(requireContext()) / 4);
+        ivPreview.getLayoutParams().width = (int) (DeviceDimenHelper.getDisplayWidthPixels(requireContext()));
+        vvPreview.getLayoutParams().height = (int) (DeviceDimenHelper.getDisplayHeightPixels(requireContext()) / 4);
     }
 
     public void getInfo() {

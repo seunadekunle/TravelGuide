@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -209,7 +208,7 @@ public class ProfileFragment extends Fragment {
         profileUrl = Objects.requireNonNull(parseUser.getParseFile("avatar")).getUrl();
 
         // sets profile image dimension based on screen size
-        int profileDimen = (int) (DeviceDimenHelper.getDisplayHeight(requireContext()) / 6.5);
+        int profileDimen = (int) (DeviceDimenHelper.getDisplayHeightPixels(requireContext()) / 6.5);
         // gets profile image and load it
         HelperClass.loadProfileImage(profileUrl, getContext(), profileDimen, profileDimen, ibAvatar);
     }

@@ -32,12 +32,15 @@ import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.example.travelguide.R;
 import com.example.travelguide.classes.GlideApp;
 import com.example.travelguide.classes.Location;
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.PhotoMetadata;
 import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.FetchPhotoRequest;
 import com.google.android.libraries.places.api.net.FetchPlaceRequest;
 import com.google.android.libraries.places.api.net.FetchPlaceResponse;
 import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
@@ -100,7 +103,7 @@ public class HelperClass {
 
 
     public static void fetchPlacesName(OnSuccessListener<FetchPlaceResponse> responseListener, String placeID) {
-        FetchPlaceRequest request = FetchPlaceRequest.newInstance(placeID, HelperClass.placesFields);
+        FetchPlaceRequest request = FetchPlaceRequest.newInstance(placeID, placesFields);
         HelperClass.getPlacesClient().fetchPlace(request)
                 .addOnSuccessListener(responseListener);
     }
@@ -111,13 +114,19 @@ public class HelperClass {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             //    ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
             return;
         }
 
         FindCurrentPlaceRequest request = FindCurrentPlaceRequest.newInstance(HelperClass.placesFields);
         Task<FindCurrentPlaceResponse> findCurrentPlaceResponseTask = HelperClass.getPlacesClient().findCurrentPlace(request);
         findCurrentPlaceResponseTask.addOnCompleteListener(currentPlaceResponseOnCompleteListener);
+    }
+
+    public static void fetchPlaceImage(Context context, String placeID, OnSuccessListener<FetchPlaceResponse> onSuccessListener) {
+
+        // get place object
+        final FetchPlaceRequest placeRequest = FetchPlaceRequest.newInstance(placeID, placesFields);
+        placesClient.fetchPlace(placeRequest).addOnSuccessListener(onSuccessListener);
     }
 
 
@@ -198,7 +207,7 @@ public class HelperClass {
 
 
     // completes fragment transaction
-    public static void finishTransaction(FragmentTransaction ft, String name, Fragment fragment,Boolean addToBackStack) {
+    public static void finishTransaction(FragmentTransaction ft, String name, Fragment fragment, Boolean addToBackStack) {
 
         if (addToBackStack) {
             // add transaction to backstack

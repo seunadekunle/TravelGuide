@@ -161,7 +161,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
         });
 
         // shortens the player height if it is audio
-        holder.epPlayerControlView.getLayoutParams().height = DeviceDimenHelper.getDisplayHeight(context) / playerHeightMult;
+        holder.epPlayerControlView.getLayoutParams().height = DeviceDimenHelper.getDisplayHeightPixels(context) / playerHeightMult;
 
         // if there is any media
         fillMediaLayout(holder, guide);

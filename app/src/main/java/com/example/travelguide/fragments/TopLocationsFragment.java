@@ -88,7 +88,7 @@ public class TopLocationsFragment extends BottomSheetDialogFragment {
         recyclerView = binding.rvTop;
         tvMessage = binding.tvMessage;
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         recyclerView.setAdapter(new TopLocationAdapter(requireContext(), Arrays.asList(topLocations.clone()), 0, new TopLocationAdapter.OnItemClickListener() {
 
             // zooms to the location

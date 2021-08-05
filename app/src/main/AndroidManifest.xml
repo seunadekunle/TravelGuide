@@ -59,8 +59,10 @@
         </activity>
         <activity
             android:name=".activities.MainActivity"
+            android:launchMode="singleTop"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="adjustPan"></activity>
+            android:windowSoftInputMode="adjustPan"
+            android:theme="@style/TranslucentTheme" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").

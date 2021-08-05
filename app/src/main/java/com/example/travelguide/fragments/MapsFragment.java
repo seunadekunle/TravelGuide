@@ -251,8 +251,8 @@ public class MapsFragment extends Fragment {
 
         fragmentManager = getChildFragmentManager();
 
-        height = DeviceDimenHelper.getDisplayHeight(requireContext());
-        width = DeviceDimenHelper.getDisplayWidth(requireContext());
+        height = DeviceDimenHelper.getDisplayHeightPixels(requireContext());
+        width = DeviceDimenHelper.getDisplayWidthPixels(requireContext());
 
         // initiates the trending location arraylist
         topLocations = new ArrayList<>();
@@ -704,6 +704,7 @@ public class MapsFragment extends Fragment {
             // add fragment to backstack
             ft.addToBackStack("ModalFragment");
         }
+
         // add fragment to container
         ft.replace(modalFrameId, modalFragment);
         // complete the transaction

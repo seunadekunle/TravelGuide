@@ -24,4 +24,5 @@
     <dimen name="entry_margin">20dp</dimen>
     <dimen name="player_btn_dimen">35dp</dimen>
     <dimen name="compose_section_header" type="dimen" format="float">2.5dp</dimen>
+    <dimen name="status_bar_height">24dp</dimen>
 </resources>
