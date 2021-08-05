@@ -1,6 +1,7 @@
 package com.example.travelguide.fragments;
 
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -30,7 +31,6 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.GoogleMapOptions;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -124,8 +124,20 @@ public class MapsFragment extends Fragment {
         public void onMapReady(GoogleMap googleMap) {
             map = googleMap;
 
-//            map.setMapStyle(MapStyleOptions.loadRawResourceStyle(requireContext(), MapStyleOptions.loadRawResourceStyle()))
-//            map.setMapType();
+            try {
+                // Customise the styling of the base map using a JSON object defined
+                // in a raw resource file.
+                boolean success = map.setMapStyle(
+                        MapStyleOptions.loadRawResourceStyle(
+                                requireContext(), R.raw.style_json));
+
+                if (!success) {
+                    Log.e(TAG, "Style parsing failed.");
+                }
+            } catch (Resources.NotFoundException e) {
+                Log.e(TAG, "Can't find style. Error: ", e);
+            }
+
             map.getUiSettings().setMapToolbarEnabled(false);
             map.getUiSettings().setScrollGesturesEnabled(true);
             map.getUiSettings().setMyLocationButtonEnabled(false);
