@@ -185,8 +185,6 @@ public class ProfileGuideFragment extends LocationGuideFragment {
             adapter.addAll(guideList);
             adapter.notifyDataSetChanged();
 
-            Log.i(TAG, String.valueOf(adapter.getItemCount()));
-
             showEmptyListText();
         });
     }

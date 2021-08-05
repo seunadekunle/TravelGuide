@@ -113,7 +113,6 @@ public class ProfileFragment extends Fragment {
                 displayUserDetails();
             } else {
                 HelperClass.fetchUser(userID, (object, e) -> {
-                    Log.i(TAG, object.getObjectId());
                     parseUser = object;
 
                     displayUserDetails();

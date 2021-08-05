@@ -90,7 +90,6 @@ public class HelperClass {
 
         try {
             likelyNames = geocoder.getFromLocation(latitude, longitude, 1);
-            Log.i(TAG, String.valueOf(likelyNames));
             return likelyNames.get(0).getAddressLine(0);
 
         } catch (IOException e) {
@@ -200,8 +199,6 @@ public class HelperClass {
 
     // completes fragment transaction
     public static void finishTransaction(FragmentTransaction ft, String name, Fragment fragment,Boolean addToBackStack) {
-
-        Log.i(TAG, " " + name);
 
         if (addToBackStack) {
             // add transaction to backstack

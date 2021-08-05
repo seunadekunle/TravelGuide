@@ -367,7 +367,6 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
     private void fillMediaLayout(ViewHolder holder, Guide guide) {
         if (guide.getPhoto() != null || guide.getVideo() != null || guide.getAudio() != null) {
 
-            Log.i(TAG, guide.getText());
             holder.mediaLayout.setVisibility(View.VISIBLE);
 
             if (guide.getPhoto() != null) {

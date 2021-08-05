@@ -116,8 +116,6 @@ public class EntryFormFragment extends Fragment {
 
     // logs in the user using Parse
     private void loginUser(String username, String password) {
-        Log.i(TAG, "username" + username);
-        Log.i(TAG, "password" + password);
 
         if (isInputValid(username, password)) {
 

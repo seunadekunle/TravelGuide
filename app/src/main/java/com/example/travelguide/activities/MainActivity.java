@@ -123,7 +123,6 @@ public class MainActivity extends AppCompatActivity {
             Fragment mapModalFragment = mapsFragment.getModalFragment();
 
             if (HelperClass.emptyBackStack(mapsFragmentManager)) {
-                Log.i(TAG, "empty");
                 super.onBackPressed();
                 return;
             }

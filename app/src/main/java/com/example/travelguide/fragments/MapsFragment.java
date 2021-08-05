@@ -139,23 +139,20 @@ public class MapsFragment extends Fragment {
             // Get the current location of the device and set the position of the map.
             getDeviceLocation();
 
-            map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-                @Override
-                public boolean onMarkerClick(@NonNull @NotNull Marker marker) {
+            map.setOnMarkerClickListener(marker -> {
 
-                    locationGuideFragment = LocationGuideFragment.newInstance(marker.getTag(), fragmentsFrameId, false);
+                locationGuideFragment = LocationGuideFragment.newInstance(marker.getTag(), fragmentsFrameId, false);
 
-                    // Begin the transaction
-                    FragmentTransaction ft = fragmentManager.beginTransaction();
-                    // add fragment to container
-                    ft.replace(fragmentsFrameId, locationGuideFragment);
+                // Begin the transaction
+                FragmentTransaction ft = fragmentManager.beginTransaction();
+                // add fragment to container
+                ft.replace(fragmentsFrameId, locationGuideFragment);
 
-                    // complete the transaction
-                    HelperClass.finishTransaction(ft, LocationGuideFragment.TAG, (Fragment) locationGuideFragment, true);
-                    hideOverlayBtns();
+                // complete the transaction
+                HelperClass.finishTransaction(ft, LocationGuideFragment.TAG, (Fragment) locationGuideFragment, true);
+                hideOverlayBtns();
 
-                    return true;
-                }
+                return true;
             });
         }
     };
@@ -277,12 +274,7 @@ public class MapsFragment extends Fragment {
 
     public void setupSearchList() {
         // elements needed for the search recyclerview
-        SearchListAdapter.onItemClickListener onItemClickListener = new SearchListAdapter.onItemClickListener() {
-            @Override
-            public void onItemClick(AutocompletePrediction prediction) {
-                showPredictionInfo(prediction);
-            }
-        };
+        SearchListAdapter.onItemClickListener onItemClickListener = prediction -> showPredictionInfo(prediction);
         predictions = new ArrayList<>();
         adapter = new SearchListAdapter(predictions, requireContext(), onItemClickListener);
     }
@@ -526,7 +518,7 @@ public class MapsFragment extends Fragment {
                     }
                 }
 
-                if (newState == BottomSheetBehavior.STATE_HALF_EXPANDED){
+                if (newState == BottomSheetBehavior.STATE_HALF_EXPANDED) {
                     showOverlayBtns();
                 }
 
@@ -540,23 +532,22 @@ public class MapsFragment extends Fragment {
 
             @Override
             public void onSlide(@NonNull @NotNull View bottomSheet, float slideOffset) {
-                Log.i(TAG, String.valueOf(bottomSheet.getVisibility()));
 
                 if (slideOffset > 0.5) {
                     hideOverlayBtns();
                 }
 
                 // animates button based on if the modal view is visible
-                if (bottomSheet.getVisibility() == View.INVISIBLE){
+                if (bottomSheet.getVisibility() == View.INVISIBLE) {
                     myLocationBtn.animate().scaleX(1).scaleY(1).setDuration(0).start();
-                }
-                else {
+                } else {
                     // animate myLocationButton
                     myLocationBtn.animate().scaleX(1 - slideOffset).scaleY(1 - slideOffset).setDuration(0).start();
                 }
             }
         });
     }
+
     /*
      * sets location enabled to be true and updates maps ui
      */

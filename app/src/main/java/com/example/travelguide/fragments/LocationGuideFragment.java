@@ -3,11 +3,14 @@ package com.example.travelguide.fragments;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -32,6 +35,7 @@ import com.example.travelguide.adapters.TopLocationAdapter;
 import com.example.travelguide.classes.Activity;
 import com.example.travelguide.classes.Guide;
 import com.example.travelguide.classes.Location;
+import com.example.travelguide.classes.OnDoubleTapListener;
 import com.example.travelguide.helpers.HelperClass;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.gms.maps.model.LatLng;
@@ -190,8 +194,6 @@ public class LocationGuideFragment extends Fragment {
                             locationIDs.add(responseList.get(i).get("id"));
                         }
                     }
-
-                    Log.i(TAG, String.valueOf(locationIDs));
 
                     // if there are surrounding locations
                     if (locationIDs.size() > 0) {
@@ -392,6 +394,7 @@ public class LocationGuideFragment extends Fragment {
         query.findInBackground(followCallback);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     public void setTitleText() {
 
         // callback to set ui text
@@ -403,6 +406,22 @@ public class LocationGuideFragment extends Fragment {
         } else {
             HelperClass.fetchPlacesName(textSuccess, parseLocation.getPlaceID());
         }
+
+        tvAddress.setOnTouchListener(new OnDoubleTapListener(context) {
+            @Override
+            public void onDoubleTap(MotionEvent e) {
+
+                String queryString = String.format("google.navigation:q=%f,%f", parseLocation.getCoord().latitude, parseLocation.getCoord().longitude);
+                Uri gmmIntentUri = Uri.parse(queryString);
+
+                // creates google maps intent that will load directions for the location
+                Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+                mapIntent.setPackage("com.google.android.apps.maps");
+
+                startActivity(mapIntent);
+                super.onDoubleTap(e);
+            }
+        });
     }
 
 
@@ -431,12 +450,7 @@ public class LocationGuideFragment extends Fragment {
         rvGuides.setItemAnimator(animator);
 
         // Setup refresh listener which triggers new data loading
-        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                fetchListAsync(0);
-            }
-        });
+        swipeContainer.setOnRefreshListener(() -> fetchListAsync(0));
 
         pbLoading.setVisibility(View.VISIBLE);
         tvEmptyList.setVisibility(View.INVISIBLE);
