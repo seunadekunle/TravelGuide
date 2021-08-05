@@ -3,11 +3,9 @@
     <item android:drawable="@drawable/splash_gradient" />
     <item
         android:bottom="100dp"
+        android:drawable="@drawable/ic_travel_guide_icon"
         android:left="100dp"
         android:right="100dp"
-        android:top="100dp">
-        <bitmap
-            android:gravity="center"
-            android:src="@drawable/travel_guide_icon" />
-    </item>
+        android:top="100dp"
+        android:gravity="center"/>
 </layer-list>

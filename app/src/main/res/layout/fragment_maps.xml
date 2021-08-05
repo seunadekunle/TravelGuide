@@ -59,7 +59,7 @@
                 android:contentDescription="@string/home_button"
                 android:focusable="true"
                 app:fabSize="normal"
-                android:backgroundTint="@color/main_color"
+                android:backgroundTint="@color/secondary_color"
                 android:visibility="invisible"
                 app:layout_anchor="@id/modalLocationView"
                 app:layout_anchorGravity="top|end"

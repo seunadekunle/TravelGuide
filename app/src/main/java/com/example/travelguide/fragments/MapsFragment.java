@@ -442,7 +442,7 @@ public class MapsFragment extends Fragment {
 
                     // adds a new marker with the LatLng object
                     MarkerOptions markerOptions = new MarkerOptions().position(location)
-                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_icon));
                     addMarker(markerOptions, locations.get(i));
                 }
 
