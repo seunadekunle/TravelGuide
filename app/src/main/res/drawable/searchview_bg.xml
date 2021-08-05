@@ -5,8 +5,8 @@
             android:shape="rectangle">
 
             <size
-                android:width="100dp"
-                android:height="10dp" />
+                android:width="0dp"
+                android:height="0dp" />
             <solid android:color="@color/white" />
             <corners android:radius="@dimen/corner_radius" />
             <stroke

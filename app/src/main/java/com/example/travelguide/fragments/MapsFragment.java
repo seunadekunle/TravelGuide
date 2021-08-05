@@ -125,8 +125,7 @@ public class MapsFragment extends Fragment {
             map = googleMap;
 
             try {
-                // Customise the styling of the base map using a JSON object defined
-                // in a raw resource file.
+                // Customise the styling of the base map using a JSON object
                 boolean success = map.setMapStyle(
                         MapStyleOptions.loadRawResourceStyle(
                                 requireContext(), R.raw.style_json));
@@ -627,10 +626,13 @@ public class MapsFragment extends Fragment {
         // Creates a new token for the autocomplete session
         AutocompleteSessionToken token = AutocompleteSessionToken.newInstance();
 
+        // set searchview height
+        searchView.getLayoutParams().height = (int) (DeviceDimenHelper.getDisplayHeightPixels(requireContext()) / 7.5);
         searchView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
 
+                Log.i(TAG, String.valueOf(hasFocus));
                 // if the search view has focus
                 if (hasFocus) {
                     hideModalFragment();
@@ -654,6 +656,10 @@ public class MapsFragment extends Fragment {
 
             @Override
             public boolean onQueryTextChange(String newText) {
+
+                if (!newText.isEmpty()) {
+                    hideModalFragment();
+                }
 
                 if (lastKnownLocation != null) {
                     FindAutocompletePredictionsRequest request = FindAutocompletePredictionsRequest.builder()
@@ -731,7 +737,6 @@ public class MapsFragment extends Fragment {
     // hides modal view making map draggable
     public void hideModalFragment() {
         if (frameLayout != null && fragmentManager != null) {
-
             setSheetState(BottomSheetBehavior.STATE_COLLAPSED);
             fragmentManager.popBackStack();
             sheetBehavior.setPeekHeight(0);
@@ -739,7 +744,6 @@ public class MapsFragment extends Fragment {
         }
     }
 
-    // TODO: Add transition
     // sets the view state for the ui elements
     public void hideOverlayBtns() {
         searchView.setVisibility(View.INVISIBLE);
@@ -752,10 +756,8 @@ public class MapsFragment extends Fragment {
         rvSearchList.setVisibility(View.VISIBLE);
     }
 
-    // TODO: add zoom when navigating from adding new guide
     public void zoomToLocation(LatLng location) {
         map.animateCamera(CameraUpdateFactory.newLatLngZoom(returnAdjustedLocation(location), DEFAULT_ZOOM));
-//        lastKnownLocation = (Location) location;
     }
 
     // overloaded function with callback
