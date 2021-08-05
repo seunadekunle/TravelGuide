@@ -1,14 +1,11 @@
 package com.example.travelguide.fragments;
 
 import android.annotation.SuppressLint;
-import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -20,7 +17,6 @@ import androidx.fragment.app.FragmentManager;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.travelguide.R;
-import com.example.travelguide.activities.EntryActivity;
 import com.example.travelguide.adapters.ProfilePagerAdapter;
 import com.example.travelguide.helpers.DeviceDimenHelper;
 import com.example.travelguide.helpers.HelperClass;
@@ -42,14 +38,14 @@ public class ProfileFragment extends Fragment {
     private ImageButton ibAvatar;
     private TextView tvProfile;
     private TextView tvDate;
-    private Button logOutBtn;
     private ImageView ivExpanded;
     private View imageBG;
-    private FrameLayout flContainer;
+    private ImageButton ibSettings;
 
     private int frameID;
     private FragmentManager fragmentManager;
     private ChangeAvatarFragment changeAvatarFragment;
+    private SettingsFragment settingsFragment;
     private ParseUser parseUser;
     private String userID;
 
@@ -140,22 +136,26 @@ public class ProfileFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
+
+        super.onViewCreated(view, savedInstanceState);
+
         ibAvatar = view.findViewById(R.id.ibAvatar);
         tvProfile = view.findViewById(R.id.tvProfile);
         tvDate = view.findViewById(R.id.tvDate);
-        logOutBtn = view.findViewById(R.id.logOutBtn);
+        ibSettings = view.findViewById(R.id.ibSettings);
         ivExpanded = view.findViewById(R.id.expandedImgView);
         imageBG = view.findViewById(R.id.expandedImgViewBG);
-        flContainer = view.findViewById(R.id.flContainer);
 
         fragmentManager = getChildFragmentManager();
         changeAvatarFragment = ChangeAvatarFragment.newInstance(true);
+        settingsFragment = new SettingsFragment();
 
         ibAvatar.setOnClickListener(v ->
                 HelperClass.addFragment(fragmentManager, R.id.childFrame, changeAvatarFragment, changeAvatarFragment.TAG, true, true));
 
-        // handles logout button click
-        logOutBtn.setOnClickListener(v -> logOutUser());
+
+        // handles setting page click
+        ibSettings.setOnClickListener(v -> HelperClass.addFragment(fragmentManager, R.id.childFrame, settingsFragment, SettingsFragment.TAG, true, true));
 
         viewPager2 = view.findViewById(R.id.viewPager);
         tabLayout = view.findViewById(R.id.tabLayout);
@@ -173,7 +173,7 @@ public class ProfileFragment extends Fragment {
 
     // hides ui information that only the logged in user can see
     private void hidePrivateInfo() {
-        logOutBtn.setVisibility(View.GONE);
+        ibSettings.setVisibility(View.GONE);
         ibAvatar.setClickable(false);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -211,16 +211,5 @@ public class ProfileFragment extends Fragment {
         int profileDimen = (int) (DeviceDimenHelper.getDisplayHeightPixels(requireContext()) / 6.5);
         // gets profile image and load it
         HelperClass.loadProfileImage(profileUrl, getContext(), profileDimen, profileDimen, ibAvatar);
-    }
-
-    // logs out the user
-    private void logOutUser() {
-
-        ParseUser.logOutInBackground(e -> {
-            // creates new intent to entry page and clears history
-            Intent toEntry = new Intent(getContext(), EntryActivity.class);
-            startActivity(toEntry);
-            requireActivity().finish();
-        });
     }
 }

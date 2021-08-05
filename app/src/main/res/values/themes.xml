@@ -4,7 +4,7 @@
 
         <!-- light theme navigation and status bar   -->
         <item name="android:windowTranslucentStatus" tools:ignore="DuplicateDefinition">true</item>
-        <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
 
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/main_color</item>

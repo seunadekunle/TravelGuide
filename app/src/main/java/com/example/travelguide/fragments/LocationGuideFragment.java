@@ -135,6 +135,7 @@ public class LocationGuideFragment extends Fragment {
     @SuppressLint({"ClickableViewAccessibility", "ResourceAsColor"})
     @Override
     public void onViewCreated(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
+
         super.onViewCreated(view, savedInstanceState);
 
         tvAddress = view.findViewById(R.id.tvAddress);
@@ -269,6 +270,7 @@ public class LocationGuideFragment extends Fragment {
                 if (!newText.isEmpty()) {
                     adapter.filter(newText);
                 } else {
+                    svGuide.clearFocus();
                     adapter.resetFilter();
                 }
 
