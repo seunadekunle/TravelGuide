@@ -28,8 +28,8 @@
         <item name="colorAccent">@color/tertiary_color</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
-
-    <style name="TranslucentTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+d
+    <style name="TranslucentTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
         <item name="android:windowTranslucentStatus">true</item>

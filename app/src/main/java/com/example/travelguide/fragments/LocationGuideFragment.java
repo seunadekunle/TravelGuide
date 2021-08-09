@@ -527,18 +527,8 @@ public class LocationGuideFragment extends Fragment {
     }
 
     public void changeIndicatorState(int state) {
-
-        if (state == View.INVISIBLE) {
-            setPaddingTop((int) getResources().getDimension(R.dimen.status_bar_height));
-        } else {
-            setPaddingTop(0);
-        }
-
+        
         // sets expand indicator visibility
         ivExpandIndicator.setVisibility(state);
-    }
-
-    public void setPaddingTop(int paddingTop) {
-        locationLayout.setPadding(0, paddingTop, 0, 0);
     }
 }

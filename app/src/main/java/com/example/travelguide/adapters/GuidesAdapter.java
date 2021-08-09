@@ -381,7 +381,7 @@ public class GuidesAdapter extends RecyclerView.Adapter<GuidesAdapter.ViewHolder
                     GlideApp.with(context)
                             .load(photoUrl).centerCrop()
                             .override((int) (HelperClass.detailImgDimen * 1.7), (int) (HelperClass.detailImgDimen * 1.7))
-                            .transform(new RoundedCornersTransformation(HelperClass.picRadius, 0)).into(holder.ibThumb);
+                            .transform(new RoundedCornersTransformation(HelperClass.picRadius, 10)).into(holder.ibThumb);
 
                     holder.ibThumb.setOnClickListener(new View.OnClickListener() {
                         @Override

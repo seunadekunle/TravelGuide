@@ -43,7 +43,6 @@ import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.android.material.snackbar.Snackbar;
-import com.parse.FunctionCallback;
 import com.parse.GetCallback;
 import com.parse.ParseCloud;
 import com.parse.ParseException;
@@ -69,11 +68,6 @@ public class ComposeFragment extends Fragment {
 
     public static final String TAG = "ComposeFragment";
 
-    private static final String ARG_LONG = "longitude";
-    private static final String ARG_LAT = "latitude";
-
-    public static final int AUTOCOMPLETE_REQUEST_CODE = 1;
-
     private final String photoFileName = "photo.jpg";
 
     private File audioFile;
@@ -90,8 +84,6 @@ public class ComposeFragment extends Fragment {
     ActivityResultLauncher<Intent> searchActivityLauncher;
 
     // parameters for passing data
-    private Double longParam;
-    private Double latParam;
     private String placeID = HelperClass.defaultPlaceID;
 
     // default location
@@ -159,11 +151,11 @@ public class ComposeFragment extends Fragment {
 
     public void adjustPreviewHeight() {
 
-        ivPreview.getLayoutParams().height = (int) (DeviceDimenHelper.getDisplayHeightPixels(requireContext()) / 4);
-        ivPreview.getLayoutParams().width = (int) (DeviceDimenHelper.getDisplayWidthPixels(requireContext()) / 2);
+        ivPreview.getLayoutParams().height = (DeviceDimenHelper.getDisplayHeightPixels(requireContext()) / 4);
+        ivPreview.getLayoutParams().width = (DeviceDimenHelper.getDisplayWidthPixels(requireContext()) / 2);
 
-        ivPreview.getLayoutParams().width = (int) (DeviceDimenHelper.getDisplayWidthPixels(requireContext()));
-        vvPreview.getLayoutParams().height = (int) (DeviceDimenHelper.getDisplayHeightPixels(requireContext()) / 4);
+        ivPreview.getLayoutParams().width = (DeviceDimenHelper.getDisplayWidthPixels(requireContext()));
+        vvPreview.getLayoutParams().height = (DeviceDimenHelper.getDisplayHeightPixels(requireContext()) / 4);
     }
 
     public void getInfo() {
@@ -205,12 +197,20 @@ public class ComposeFragment extends Fragment {
                     // if result code is ok set the location for the new guide
                     if (result.getResultCode() == requireActivity().RESULT_OK) {
 
-                        Place place = Autocomplete.getPlaceFromIntent(result.getData());
-                        setLocation(place);
+                        Place place;
+                        if (result.getData() != null) {
+                            place = Autocomplete.getPlaceFromIntent(result.getData());
+                            setLocation(place);
+                        }
+
                     } else if (result.getResultCode() == AutocompleteActivity.RESULT_ERROR) {
 
-                        Status status = Autocomplete.getStatusFromIntent(result.getData());
-                        Log.i(TAG, status.getStatusMessage());
+                        Status status;
+                        if (result.getData() != null) {
+                            status = Autocomplete.getStatusFromIntent(result.getData());
+                            Log.i(TAG, status.getStatusMessage());
+                        }
+
                     } else if (result.getResultCode() == requireActivity().RESULT_CANCELED) {
 
                         if (getLocation() == null)
@@ -218,7 +218,6 @@ public class ComposeFragment extends Fragment {
                             // tell the user they didn't select a location
                             Snackbar.make(addBtn, R.string.location_not_selected, Snackbar.LENGTH_SHORT).show();
                     }
-                    return;
 
                 });
 
@@ -520,7 +519,7 @@ public class ComposeFragment extends Fragment {
         final Location[] guideLocation = new Location[1];
         Guide guide = new Guide();
 
-        // saves guide after saving locatoin
+        // saves guide after saving location
         GetCallback<Location> composeCallback = (result, e) -> {
             if (e == null) {
                 // get location from server
@@ -563,7 +562,9 @@ public class ComposeFragment extends Fragment {
                 }
 //                soundBytes = new byte[inputStream.available()];
                 try {
-                    soundBytes = toByteArray(inputStream);
+                    if (inputStream != null) {
+                        soundBytes = toByteArray(inputStream);
+                    }
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 }
@@ -581,11 +582,6 @@ public class ComposeFragment extends Fragment {
                 // clears guide and goes back to main fragment
                 etText.setText("");
                 ivPreview.setImageResource(0);
-                controller = null;
-                vvPreview.setVideoPath("");
-                photoFile = new File("");
-                videoFile = new File("");
-                audioFile = new File("");
                 getInfo();
 
                 sendNotification(guideLocation[0]);
@@ -607,16 +603,13 @@ public class ComposeFragment extends Fragment {
         params.put("userID", ParseUser.getCurrentUser().getObjectId());
 
         // Calling the cloud code function
-        ParseCloud.callFunctionInBackground("sendFollowNotification", params, new FunctionCallback<Object>() {
-            @Override
-            public void done(Object response, ParseException e) {
+        ParseCloud.callFunctionInBackground("sendFollowNotification", params, (response, e) -> {
 
-                Log.i(TAG, "done");
+            Log.i(TAG, "done");
 
-                if (e != null)
-                    Log.i(TAG, e.getMessage());
+            if (e != null)
+                Log.i(TAG, e.getMessage());
 
-            }
         });
     }
 
@@ -633,21 +626,13 @@ public class ComposeFragment extends Fragment {
     // plays video that has been recorded
     public void playbackRecordedVideo(Uri videoUri) {
 
-        vvPreview.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mp) {
-                mp.setOnVideoSizeChangedListener(new MediaPlayer.OnVideoSizeChangedListener() {
-                    @Override
-                    public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
+        vvPreview.setOnPreparedListener(mp -> mp.setOnVideoSizeChangedListener((mp1, width, height) -> {
 
-                        // sets the controller to be anchored to the video view
-                        controller = new MediaController(getContext());
-                        vvPreview.setMediaController(controller);
-                        controller.setAnchorView(vvPreview);
-                    }
-                });
-            }
-        });
+            // sets the controller to be anchored to the video view
+            controller = new MediaController(getContext());
+            vvPreview.setMediaController(controller);
+            controller.setAnchorView(vvPreview);
+        }));
 
         vvPreview.setVideoURI(videoUri);
         vvPreview.requestFocus();
@@ -666,9 +651,6 @@ public class ComposeFragment extends Fragment {
 
     // sets location from LatLNg object
     public void setLocation(LatLng newLocation) {
-
-        longParam = newLocation.longitude;
-        latParam = newLocation.latitude;
         location = newLocation;
     }
 

@@ -627,7 +627,7 @@ public class MapsFragment extends Fragment {
         AutocompleteSessionToken token = AutocompleteSessionToken.newInstance();
 
         // set searchview height
-        searchView.getLayoutParams().height = (int) (DeviceDimenHelper.getDisplayHeightPixels(requireContext()) / 7.5);
+//        searchView.getLayoutParams().height = (int) (DeviceDimenHelper.getDisplayHeightPixels(requireContext()) / 12.55);
         searchView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {

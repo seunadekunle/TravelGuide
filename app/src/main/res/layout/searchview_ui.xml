@@ -11,6 +11,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginEnd="10.5dp"
         android:fitsSystemWindows="true"
+        android:focusable="true"
         android:iconifiedByDefault="true"
         android:layoutDirection="rtl"
         android:padding="0dp"
@@ -18,7 +19,6 @@
         android:queryHint="@string/search"
         android:searchIcon="@drawable/search_icon"
         android:visibility="visible"
-        android:focusable="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
